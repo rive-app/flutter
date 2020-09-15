@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -66,14 +67,16 @@ abstract class WeightBase extends Component {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_values != null && exports(valuesPropertyKey)) {
-      context.uintType.writeRuntimeProperty(valuesPropertyKey, writer, _values);
+      context.uintType.writeRuntimeProperty(
+          valuesPropertyKey, writer, _values, propertyToField);
     }
     if (_indices != null && exports(indicesPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(indicesPropertyKey, writer, _indices);
+      context.uintType.writeRuntimeProperty(
+          indicesPropertyKey, writer, _indices, propertyToField);
     }
   }
 

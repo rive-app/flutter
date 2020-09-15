@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -291,23 +292,24 @@ abstract class TransformComponentBase extends ContainerComponent {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_rotation != null && exports(rotationPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(rotationPropertyKey, writer, _rotation);
+      context.doubleType.writeRuntimeProperty(
+          rotationPropertyKey, writer, _rotation, propertyToField);
     }
     if (_scaleX != null && exports(scaleXPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(scaleXPropertyKey, writer, _scaleX);
+      context.doubleType.writeRuntimeProperty(
+          scaleXPropertyKey, writer, _scaleX, propertyToField);
     }
     if (_scaleY != null && exports(scaleYPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(scaleYPropertyKey, writer, _scaleY);
+      context.doubleType.writeRuntimeProperty(
+          scaleYPropertyKey, writer, _scaleY, propertyToField);
     }
     if (_opacity != null && exports(opacityPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(opacityPropertyKey, writer, _opacity);
+      context.doubleType.writeRuntimeProperty(
+          opacityPropertyKey, writer, _opacity, propertyToField);
     }
   }
 

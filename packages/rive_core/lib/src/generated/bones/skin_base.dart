@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -172,25 +173,32 @@ abstract class SkinBase extends ContainerComponent {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_xx != null && exports(xxPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(xxPropertyKey, writer, _xx);
+      context.doubleType
+          .writeRuntimeProperty(xxPropertyKey, writer, _xx, propertyToField);
     }
     if (_yx != null && exports(yxPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(yxPropertyKey, writer, _yx);
+      context.doubleType
+          .writeRuntimeProperty(yxPropertyKey, writer, _yx, propertyToField);
     }
     if (_xy != null && exports(xyPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(xyPropertyKey, writer, _xy);
+      context.doubleType
+          .writeRuntimeProperty(xyPropertyKey, writer, _xy, propertyToField);
     }
     if (_yy != null && exports(yyPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(yyPropertyKey, writer, _yy);
+      context.doubleType
+          .writeRuntimeProperty(yyPropertyKey, writer, _yy, propertyToField);
     }
     if (_tx != null && exports(txPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(txPropertyKey, writer, _tx);
+      context.doubleType
+          .writeRuntimeProperty(txPropertyKey, writer, _tx, propertyToField);
     }
     if (_ty != null && exports(tyPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(tyPropertyKey, writer, _ty);
+      context.doubleType
+          .writeRuntimeProperty(tyPropertyKey, writer, _ty, propertyToField);
     }
   }
 

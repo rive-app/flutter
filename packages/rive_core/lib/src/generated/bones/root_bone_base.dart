@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/src/generated/bones/bone_base.dart';
@@ -166,13 +167,16 @@ abstract class RootBoneBase extends Bone {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_x != null && exports(xPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(xPropertyKey, writer, _x);
+      context.doubleType
+          .writeRuntimeProperty(xPropertyKey, writer, _x, propertyToField);
     }
     if (_y != null && exports(yPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(yPropertyKey, writer, _y);
+      context.doubleType
+          .writeRuntimeProperty(yPropertyKey, writer, _y, propertyToField);
     }
   }
 

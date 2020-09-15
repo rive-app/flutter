@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -96,22 +97,23 @@ abstract class ClippingShapeBase extends Component {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_shapeId != null && exports(shapeIdPropertyKey)) {
       var value = idLookup[_shapeId];
       if (value != null) {
-        context.uintType
-            .writeRuntimeProperty(shapeIdPropertyKey, writer, value);
+        context.uintType.writeRuntimeProperty(
+            shapeIdPropertyKey, writer, value, propertyToField);
       }
     }
     if (_clipOpValue != null && exports(clipOpValuePropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(clipOpValuePropertyKey, writer, _clipOpValue);
+      context.uintType.writeRuntimeProperty(
+          clipOpValuePropertyKey, writer, _clipOpValue, propertyToField);
     }
     if (_isVisible != null && exports(isVisiblePropertyKey)) {
-      context.boolType
-          .writeRuntimeProperty(isVisiblePropertyKey, writer, _isVisible);
+      context.boolType.writeRuntimeProperty(
+          isVisiblePropertyKey, writer, _isVisible, propertyToField);
     }
   }
 

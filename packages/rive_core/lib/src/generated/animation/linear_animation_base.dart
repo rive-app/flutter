@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/src/generated/animation/animation_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -200,33 +201,36 @@ abstract class LinearAnimationBase extends Animation {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_fps != null && exports(fpsPropertyKey)) {
-      context.uintType.writeRuntimeProperty(fpsPropertyKey, writer, _fps);
+      context.uintType
+          .writeRuntimeProperty(fpsPropertyKey, writer, _fps, propertyToField);
     }
     if (_duration != null && exports(durationPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(durationPropertyKey, writer, _duration);
+      context.uintType.writeRuntimeProperty(
+          durationPropertyKey, writer, _duration, propertyToField);
     }
     if (_speed != null && exports(speedPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(speedPropertyKey, writer, _speed);
+      context.doubleType.writeRuntimeProperty(
+          speedPropertyKey, writer, _speed, propertyToField);
     }
     if (_loopValue != null && exports(loopValuePropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(loopValuePropertyKey, writer, _loopValue);
+      context.uintType.writeRuntimeProperty(
+          loopValuePropertyKey, writer, _loopValue, propertyToField);
     }
     if (_workStart != null && exports(workStartPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(workStartPropertyKey, writer, _workStart);
+      context.uintType.writeRuntimeProperty(
+          workStartPropertyKey, writer, _workStart, propertyToField);
     }
     if (_workEnd != null && exports(workEndPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(workEndPropertyKey, writer, _workEnd);
+      context.uintType.writeRuntimeProperty(
+          workEndPropertyKey, writer, _workEnd, propertyToField);
     }
     if (_enableWorkArea != null && exports(enableWorkAreaPropertyKey)) {
       context.boolType.writeRuntimeProperty(
-          enableWorkAreaPropertyKey, writer, _enableWorkArea);
+          enableWorkAreaPropertyKey, writer, _enableWorkArea, propertyToField);
     }
   }
 

@@ -1,4 +1,5 @@
 // -> editor-only
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:core/core.dart';
@@ -32,8 +33,26 @@ class RuntimeImporter {
     var reader = BinaryReader.fromList(data);
     _header = RuntimeHeader.read(reader);
 
+    // Property fields toc.
+    final propertyToField = HashMap<int, CoreFieldType>();
+
+    final indexToField = <CoreFieldType>[
+      core.uintType,
+      core.stringType,
+      core.doubleType,
+      core.colorType
+    ];
+
+    _header.propertyToFieldIndex.forEach((key, fieldIndex) {
+      if (fieldIndex < 0 || fieldIndex >= indexToField.length) {
+        throw RiveFormatErrorException('unexpected field index $fieldIndex');
+      }
+
+      propertyToField[key] = indexToField[fieldIndex];
+    });
+
     core.batchAdd(() {
-      _backboard = core.readRuntimeObject<Backboard>(reader);
+      _backboard = core.readRuntimeObject<Backboard>(reader, propertyToField);
       if (_backboard == null) {
         throw const RiveFormatErrorException(
             'expected first object to be a Backboard');
@@ -51,7 +70,8 @@ class RuntimeImporter {
         var objects = List<Core<RiveCoreContext>>(numObjects);
         // artboard is always at index 0
         for (int i = 0; i < numObjects; i++) {
-          Core<RiveCoreContext> object = core.readRuntimeObject(reader, remaps);
+          Core<RiveCoreContext> object =
+              core.readRuntimeObject(reader, propertyToField, remaps);
           objects[i] = object;
           if (object != null) {
             core.addObject(object);
@@ -71,7 +91,8 @@ class RuntimeImporter {
         // in before the hierarchy resolves (batch add completes).
         var numAnimations = reader.readVarUint();
         for (int i = 0; i < numAnimations; i++) {
-          var animation = core.readRuntimeObject<Animation>(reader, remaps);
+          var animation = core.readRuntimeObject<Animation>(
+              reader, propertyToField, remaps);
           if (animation == null) {
             continue;
           }
@@ -80,8 +101,8 @@ class RuntimeImporter {
 
           var numKeyedObjects = reader.readVarUint();
           for (int j = 0; j < numKeyedObjects; j++) {
-            var keyedObject =
-                core.readRuntimeObject<KeyedObject>(reader, remaps);
+            var keyedObject = core.readRuntimeObject<KeyedObject>(
+                reader, propertyToField, remaps);
             if (keyedObject == null) {
               continue;
             }
@@ -97,8 +118,8 @@ class RuntimeImporter {
 
             var numKeyedProperties = reader.readVarUint();
             for (int k = 0; k < numKeyedProperties; k++) {
-              var keyedProperty =
-                  core.readRuntimeObject<KeyedProperty>(reader, remaps);
+              var keyedProperty = core.readRuntimeObject<KeyedProperty>(
+                  reader, propertyToField, remaps);
               if (keyedProperty == null) {
                 continue;
               }
@@ -108,7 +129,8 @@ class RuntimeImporter {
               var numKeyframes = reader.readVarUint();
 
               for (int l = 0; l < numKeyframes; l++) {
-                var keyframe = core.readRuntimeObject<KeyFrame>(reader, remaps);
+                var keyframe = core.readRuntimeObject<KeyFrame>(
+                    reader, propertyToField, remaps);
                 core.addObject(keyframe);
                 keyframe.keyedPropertyId = keyedProperty.id;
               }

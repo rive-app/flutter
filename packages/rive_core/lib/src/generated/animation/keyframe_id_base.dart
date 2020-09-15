@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -44,12 +45,14 @@ abstract class KeyFrameIdBase extends KeyFrame {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_value != null && exports(valuePropertyKey)) {
       var value = idLookup[_value];
       if (value != null) {
-        context.uintType.writeRuntimeProperty(valuePropertyKey, writer, value);
+        context.uintType.writeRuntimeProperty(
+            valuePropertyKey, writer, value, propertyToField);
       }
     }
   }

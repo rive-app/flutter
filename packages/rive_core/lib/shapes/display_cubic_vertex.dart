@@ -1,5 +1,6 @@
 // -> editor-only
 import 'dart:collection';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:core/id.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
@@ -20,6 +21,7 @@ class DisplayCubicVertex extends CubicVertex {
   void onAddedDirty() {}
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {}
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {}
 }
 // <- editor-only

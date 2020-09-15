@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
@@ -142,11 +143,13 @@ class LinearAnimation extends LinearAnimationBase {
   void internalKeyFrameValueChanged() => _keyframeValueChanged.notify();
 
   @override
-  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
-    super.writeRuntime(writer, idLookup);
+  void writeRuntime(
+      BinaryWriter writer, HashMap<int, CoreFieldType> propertyToField,
+      [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, propertyToField, idLookup);
     writer.writeVarUint(_keyedObjects.length);
     for (final keyedObject in _keyedObjects.values) {
-      keyedObject.writeRuntime(writer, idLookup);
+      keyedObject.writeRuntime(writer, propertyToField, idLookup);
     }
   }
   // <- editor-only

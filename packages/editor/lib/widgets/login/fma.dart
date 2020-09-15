@@ -33,9 +33,9 @@ class _FMAState extends State<FMA> {
       (data) async {
         var file = RiveFile();
         var success = file.import(data);
-        if (success) {
+        if (success && file.mainArtboard.animations.isNotEmpty) {
           file.mainArtboard.addController(
-            SimpleAnimation('Untitled 1'),
+            SimpleAnimation(file.mainArtboard.animations.first.name),
           );
           setState(() => _rive = file);
         }

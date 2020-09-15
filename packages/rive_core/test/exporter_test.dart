@@ -1,7 +1,10 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
@@ -19,6 +22,7 @@ import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 void main() {
   RiveFile exportFrom;
@@ -215,4 +219,60 @@ void main() {
 
     file.delete();
   });
+
+  test('File with unknown properties loads', () {
+    // Add some nodes.
+    Node a, b, c, d;
+    exportFrom.batchAdd(() {
+      a = Node()..name = 'A';
+      exportFrom.addObject(a);
+      artboard.appendChild(a);
+
+      b = Node()..name = 'B';
+      exportFrom.addObject(b);
+      a.appendChild(b);
+
+      c = Node()..name = 'C';
+      exportFrom.addObject(c);
+      a.appendChild(c);
+
+      d = _CrazyBadNode()..name = 'I\'m bad';
+      exportFrom.addObject(d);
+      b.appendChild(d);
+    });
+
+    var exporter = RuntimeExporter(
+      core: exportFrom,
+      info: RuntimeHeader(ownerId: 1, fileId: 1),
+    );
+    var bytes = exporter.export();
+
+    var importer = RuntimeImporter(core: importTo);
+    expect(importer.import(bytes), true);
+    expect(importer.backboard != null, true);
+
+    var artboards = importTo.objectsOfType<Artboard>();
+    expect(artboards.length, 1);
+    expect(artboards.first.name, 'My Artboard');
+    expect(artboards.first.x, 0);
+    expect(artboards.first.y, 0);
+    expect(artboards.first.width, 1920);
+    expect(artboards.first.height, 1080);
+
+    expect(artboards.first.children[1].name, 'A');
+    expect(artboards.first.children[1] is Node, true);
+    expect((artboards.first.children[1] as Node).children.length, 2);
+    expect((artboards.first.children[1] as Node).children[1].name, 'C');
+  });
+}
+
+/// A node that exports an invalid property key.
+class _CrazyBadNode extends Node {
+  @override
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
+    context.doubleType
+        .writeRuntimeProperty(999999, writer, 3.14, propertyToField);
+  }
 }

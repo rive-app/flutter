@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -166,22 +167,25 @@ abstract class StrokeBase extends ShapePaint {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_thickness != null && exports(thicknessPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(thicknessPropertyKey, writer, _thickness);
+      context.doubleType.writeRuntimeProperty(
+          thicknessPropertyKey, writer, _thickness, propertyToField);
     }
     if (_cap != null && exports(capPropertyKey)) {
-      context.uintType.writeRuntimeProperty(capPropertyKey, writer, _cap);
+      context.uintType
+          .writeRuntimeProperty(capPropertyKey, writer, _cap, propertyToField);
     }
     if (_join != null && exports(joinPropertyKey)) {
-      context.uintType.writeRuntimeProperty(joinPropertyKey, writer, _join);
+      context.uintType.writeRuntimeProperty(
+          joinPropertyKey, writer, _join, propertyToField);
     }
     if (_transformAffectsStroke != null &&
         exports(transformAffectsStrokePropertyKey)) {
-      context.boolType.writeRuntimeProperty(
-          transformAffectsStrokePropertyKey, writer, _transformAffectsStroke);
+      context.boolType.writeRuntimeProperty(transformAffectsStrokePropertyKey,
+          writer, _transformAffectsStroke, propertyToField);
     }
   }
 

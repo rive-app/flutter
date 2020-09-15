@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
@@ -97,11 +98,12 @@ abstract class StraightVertexBase extends PathVertex<Weight> {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_radius != null && exports(radiusPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(radiusPropertyKey, writer, _radius);
+      context.doubleType.writeRuntimeProperty(
+          radiusPropertyKey, writer, _radius, propertyToField);
     }
   }
 

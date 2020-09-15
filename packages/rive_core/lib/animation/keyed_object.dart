@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
@@ -174,7 +175,6 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     animation?.internalKeyFramesChanged();
   }
 
-  // -> editor-only
   // Should be @internal when supported...
   void internalKeyFramesMoved() => _keyframesMoved.notify();
 
@@ -183,23 +183,28 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       animation?.internalKeyFrameValueChanged();
 
   @override
-  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
-    super.writeRuntime(writer, idLookup);
+  void writeRuntime(
+      BinaryWriter writer, HashMap<int, CoreFieldType> propertyToField,
+      [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, propertyToField, idLookup);
     writer.writeVarUint(_keyedProperties.length);
     for (final keyedProperty in _keyedProperties.values) {
-      keyedProperty.writeRuntime(writer, idLookup);
+      keyedProperty.writeRuntime(writer, propertyToField, idLookup);
     }
   }
 
   // Write only a specific set of keyed properties and keyframes for this keyed
   // object (helpful when copy pasting).
   void writeRuntimeSubset(
-      BinaryWriter writer, HashMap<KeyedProperty, HashSet<KeyFrame>> subset,
+      BinaryWriter writer,
+      HashMap<KeyedProperty, HashSet<KeyFrame>> subset,
+      HashMap<int, CoreFieldType> propertyToField,
       [HashMap<Id, int> idLookup]) {
-    super.writeRuntime(writer, idLookup);
+    super.writeRuntime(writer, propertyToField, idLookup);
     writer.writeVarUint(subset.keys.length);
     for (final keyedProperty in subset.keys) {
-      keyedProperty.writeRuntimeSubset(writer, subset[keyedProperty], idLookup);
+      keyedProperty.writeRuntimeSubset(
+          writer, propertyToField, subset[keyedProperty], idLookup);
     }
   }
   // <- editor-only

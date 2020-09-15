@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -301,23 +302,24 @@ abstract class CubicDetachedVertexBase extends CubicVertex {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_inRotation != null && exports(inRotationPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(inRotationPropertyKey, writer, _inRotation);
+      context.doubleType.writeRuntimeProperty(
+          inRotationPropertyKey, writer, _inRotation, propertyToField);
     }
     if (_inDistance != null && exports(inDistancePropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(inDistancePropertyKey, writer, _inDistance);
+      context.doubleType.writeRuntimeProperty(
+          inDistancePropertyKey, writer, _inDistance, propertyToField);
     }
     if (_outRotation != null && exports(outRotationPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(outRotationPropertyKey, writer, _outRotation);
+      context.doubleType.writeRuntimeProperty(
+          outRotationPropertyKey, writer, _outRotation, propertyToField);
     }
     if (_outDistance != null && exports(outDistancePropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(outDistancePropertyKey, writer, _outDistance);
+      context.doubleType.writeRuntimeProperty(
+          outDistancePropertyKey, writer, _outDistance, propertyToField);
     }
   }
 

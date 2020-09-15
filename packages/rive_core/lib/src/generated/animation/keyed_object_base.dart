@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
@@ -70,12 +71,13 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
     if (_objectId != null && exports(objectIdPropertyKey)) {
       var value = idLookup[_objectId];
       if (value != null) {
-        context.uintType
-            .writeRuntimeProperty(objectIdPropertyKey, writer, value);
+        context.uintType.writeRuntimeProperty(
+            objectIdPropertyKey, writer, value, propertyToField);
       }
     }
   }

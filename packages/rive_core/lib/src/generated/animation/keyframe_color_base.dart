@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -44,10 +45,12 @@ abstract class KeyFrameColorBase extends KeyFrame {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_value != null && exports(valuePropertyKey)) {
-      context.colorType.writeRuntimeProperty(valuePropertyKey, writer, _value);
+      context.colorType.writeRuntimeProperty(
+          valuePropertyKey, writer, _value, propertyToField);
     }
   }
 
