@@ -5,8 +5,8 @@ import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'exceptions/rive_format_error_exception.dart';
 
 class RuntimeHeader {
-  static const int majorVersion = 5;
-  static const int minorVersion = 2;
+  static const int majorVersion = 6;
+  static const int minorVersion = 0;
   static const String fingerprint = 'RIVE';
 
   final int ownerId;

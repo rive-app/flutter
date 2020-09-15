@@ -19,7 +19,7 @@ class DrawRules extends DrawRulesBase {
 
   @override
   void drawTargetIdChanged(Id from, Id to) {
-    _activeTarget = context?.resolve(to);
+    _activeTarget = to == null ? null : context?.resolve(to);
     artboard?.markDrawOrderDirty();
     // -> editor-only
     drawRulesChanged?.notify();
@@ -28,10 +28,10 @@ class DrawRules extends DrawRulesBase {
 
   @override
   void onAddedDirty() {
+    super.onAddedDirty();
     if (drawTargetId != null) {
       _activeTarget = context?.resolve(drawTargetId);
-    }
-    else {
+    } else {
       _activeTarget = null;
     }
   }
@@ -47,8 +47,8 @@ class DrawRules extends DrawRulesBase {
     switch (child.coreType) {
       case DrawTargetBase.typeKey:
         _targets.add(child as DrawTarget);
-        artboard?.markNaturalDrawOrderDirty();
         // -> editor-only
+        artboard?.markNaturalDrawOrderDirty();
         context?.dirty(_updateDrawRules);
         // <- editor-only
         break;
@@ -61,11 +61,11 @@ class DrawRules extends DrawRulesBase {
     switch (child.coreType) {
       case DrawTargetBase.typeKey:
         _targets.remove(child as DrawTarget);
-        artboard?.markNaturalDrawOrderDirty();
         if (_targets.isEmpty) {
           remove();
         }
         // -> editor-only
+        artboard?.markNaturalDrawOrderDirty();
         context?.dirty(_updateDrawRules);
         // <- editor-only
         break;

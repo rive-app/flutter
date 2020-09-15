@@ -258,13 +258,16 @@ abstract class TransformComponent extends TransformComponentBase {
     x = components.x;
     y = components.y;
   }
-  // <- editor-only}
+  // <- editor-only
 
   @override
   void buildDrawOrder(
       List<Drawable> drawables, DrawRules rules, List<DrawRules> allRules) {
     if (drawRules != null) {
+      // -> editor-only
       drawRules.parentRules = rules;
+      // <- editor-only
+      
       // ignore: parameter_assignments
       rules = drawRules;
       allRules.add(rules);

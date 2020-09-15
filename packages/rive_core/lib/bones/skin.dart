@@ -144,6 +144,8 @@ class Skin extends SkinBase {
     }
   }
 
+  // -> editor-only
+
   /// Important that this be called at the end of an operation such that  all
   /// the expected tendons have been added removed/added. For example, at the
   /// end of an undo/redo or file load.
@@ -159,7 +161,6 @@ class Skin extends SkinBase {
     (parent as Skinnable)?.validateWeights();
   }
 
-  // -> editor-only
   static Tendon bind(SkeletalComponent bone, Skinnable skinnable) {
     assert(bone != null);
     assert(bone.context != null,
