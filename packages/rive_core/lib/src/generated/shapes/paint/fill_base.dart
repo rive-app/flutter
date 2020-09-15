@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -50,11 +51,12 @@ abstract class FillBase extends ShapePaint {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_fillRule != null && exports(fillRulePropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(fillRulePropertyKey, writer, _fillRule);
+      context.uintType.writeRuntimeProperty(
+          fillRulePropertyKey, writer, _fillRule, propertyToField);
     }
   }
 

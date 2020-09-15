@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/src/generated/bones/weight_base.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -114,23 +115,24 @@ abstract class CubicWeightBase extends Weight {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_inValues != null && exports(inValuesPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(inValuesPropertyKey, writer, _inValues);
+      context.uintType.writeRuntimeProperty(
+          inValuesPropertyKey, writer, _inValues, propertyToField);
     }
     if (_inIndices != null && exports(inIndicesPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(inIndicesPropertyKey, writer, _inIndices);
+      context.uintType.writeRuntimeProperty(
+          inIndicesPropertyKey, writer, _inIndices, propertyToField);
     }
     if (_outValues != null && exports(outValuesPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(outValuesPropertyKey, writer, _outValues);
+      context.uintType.writeRuntimeProperty(
+          outValuesPropertyKey, writer, _outValues, propertyToField);
     }
     if (_outIndices != null && exports(outIndicesPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(outIndicesPropertyKey, writer, _outIndices);
+      context.uintType.writeRuntimeProperty(
+          outIndicesPropertyKey, writer, _outIndices, propertyToField);
     }
   }
 

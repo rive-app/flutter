@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -59,11 +60,12 @@ abstract class RectangleBase extends ParametricPath {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_cornerRadius != null && exports(cornerRadiusPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(cornerRadiusPropertyKey, writer, _cornerRadius);
+      context.doubleType.writeRuntimeProperty(
+          cornerRadiusPropertyKey, writer, _cornerRadius, propertyToField);
     }
   }
 

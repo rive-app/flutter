@@ -60,14 +60,17 @@ abstract class Core<T extends CoreContext> {
 
   bool exports(int propertyKey) => true;
 
-  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
+  void writeRuntime(
+      BinaryWriter writer, HashMap<int, CoreFieldType> propertyToField,
+      [HashMap<Id, int> idLookup]) {
     writer.writeVarUint(coreType);
-    writeRuntimeProperties(writer, idLookup);
+    writeRuntimeProperties(writer, propertyToField, idLookup);
     // Writer Arnold, I mean Termy.
     writer.writeVarUint(0);
   }
 
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup);
 
   /// Generated classes override this to return the value stored in the field
   /// matching the propertyKey.
@@ -204,13 +207,14 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   void debugPrintChanges() {
     print('${_currentChanges.entries.length} changes.');
     _currentChanges.entries.forEach((key, value) {
-        var object = resolve<Core>(key);
-        print('- $object');
-        value.forEach((key, value) {
-            print('  - property $key: ${value.to}');
-        });
+      var object = resolve<Core>(key);
+      print('- $object');
+      value.forEach((key, value) {
+        print('  - property $key: ${value.to}');
+      });
     });
   }
+
   bool get hasRecordedChanges => _currentChanges != null;
 
   int _journalIndex = 0;

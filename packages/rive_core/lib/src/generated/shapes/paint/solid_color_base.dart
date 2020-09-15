@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -88,11 +89,12 @@ abstract class SolidColorBase extends Component {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_colorValue != null && exports(colorValuePropertyKey)) {
-      context.colorType
-          .writeRuntimeProperty(colorValuePropertyKey, writer, _colorValue);
+      context.colorType.writeRuntimeProperty(
+          colorValuePropertyKey, writer, _colorValue, propertyToField);
     }
   }
 

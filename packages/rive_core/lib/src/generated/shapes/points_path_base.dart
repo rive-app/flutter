@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -84,11 +85,12 @@ abstract class PointsPathBase extends Path {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_isClosed != null && exports(isClosedPropertyKey)) {
-      context.boolType
-          .writeRuntimeProperty(isClosedPropertyKey, writer, _isClosed);
+      context.boolType.writeRuntimeProperty(
+          isClosedPropertyKey, writer, _isClosed, propertyToField);
     }
   }
 

@@ -200,7 +200,9 @@ class Definition {
     if (exportsWithContext) {
       imports.add('import \'package:core/export_rules.dart\';');
     }
-
+    if (properties.isNotEmpty && !config.isRuntime) {
+      imports.add('import \'package:core/field_types/core_field_type.dart\';');
+    }
     var importList = imports.toList(growable: false)..sort();
 
     code.writeAll(
@@ -251,9 +253,11 @@ class Definition {
       // Write serializer.
       StringBuffer runtimeRemapDefinition = StringBuffer();
       code.writeln('''@override
-    void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {''');
+    void writeRuntimeProperties(BinaryWriter writer, HashMap<int, CoreFieldType>
+       propertyToField, HashMap<Id, int> idLookup) {''');
       if (_extensionOf != null) {
-        code.writeln('super.writeRuntimeProperties(writer, idLookup);');
+        code.writeln('super.writeRuntimeProperties(writer, propertyToField, '
+            'idLookup);');
       }
       for (final property in properties) {
         if (!property.isRuntime) {
@@ -264,7 +268,7 @@ class Definition {
               '''if(_${property.name} != null && exports(${property.name}PropertyKey)) {
           var value = idLookup[_${property.name}];
           if(value != null) {
-            context.uintType.writeRuntimeProperty(${property.name}PropertyKey, writer, value);
+            context.uintType.writeRuntimeProperty(${property.name}PropertyKey, writer, value, propertyToField);
           }
         }''');
         } else if (property.type != property.typeRuntime &&
@@ -274,12 +278,12 @@ class Definition {
           code.writeln(
               '''if(_${property.name} != null && exports(${property.name}PropertyKey)) {
           var runtimeValue = runtimeValue${property.capitalizedName}(_${property.name});
-          context.${property.typeRuntime.uncapitalizedName}Type.writeRuntimeProperty(${property.name}PropertyKey, writer, runtimeValue);
+          context.${property.typeRuntime.uncapitalizedName}Type.writeRuntimeProperty(${property.name}PropertyKey, writer, runtimeValue, propertyToField);
         }''');
         } else {
           code.writeln(
               '''if(_${property.name} != null && exports(${property.name}PropertyKey)) {
-          context.${property.type.uncapitalizedName}Type.writeRuntimeProperty(${property.name}PropertyKey, writer, _${property.name});
+          context.${property.type.uncapitalizedName}Type.writeRuntimeProperty(${property.name}PropertyKey, writer, _${property.name}, propertyToField);
         }''');
         }
       }

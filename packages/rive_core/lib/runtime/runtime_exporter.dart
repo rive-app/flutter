@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/id.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/animation.dart';
@@ -11,8 +12,7 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/draw_rules.dart';
-import 'package:rive_core/draw_target.dart';
+import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -37,13 +37,13 @@ class RuntimeExporter {
     Set<Animation> animations,
   }) {
     CoreDoubleType.max32Bit = true;
-    var writer = BinaryWriter();
+    var headerWriter = BinaryWriter();
     // Write the header, start with fingerprint.
-    RuntimeHeader.fingerprint.codeUnits.forEach(writer.writeUint8);
-    writer.writeVarUint(RuntimeHeader.majorVersion);
-    writer.writeVarUint(RuntimeHeader.minorVersion);
-    writer.writeVarUint(info.ownerId);
-    writer.writeVarUint(info.fileId);
+    RuntimeHeader.fingerprint.codeUnits.forEach(headerWriter.writeUint8);
+    headerWriter.writeVarUint(RuntimeHeader.majorVersion);
+    headerWriter.writeVarUint(RuntimeHeader.minorVersion);
+    headerWriter.writeVarUint(info.ownerId);
+    headerWriter.writeVarUint(info.fileId);
 
     var backboards = core.objectsOfType<Backboard>();
     if (backboards.isEmpty) {
@@ -51,9 +51,13 @@ class RuntimeExporter {
       return null;
     }
 
+    // Build up a table of contents for the field types.
+    final propertyToField = HashMap<int, CoreFieldType>();
+
     // Find the backboard, this is the first thing we write into the file.
+    var contentsWriter = BinaryWriter();
     var backboard = backboards.first;
-    backboard.writeRuntime(writer);
+    backboard.writeRuntime(contentsWriter, propertyToField);
 
     // We order the artboards such that the main artboards is the first one in
     // the file.
@@ -73,7 +77,7 @@ class RuntimeExporter {
     }
 
     // Write the number of artboards.
-    writer.writeVarUint(exportArtboards.length);
+    contentsWriter.writeVarUint(exportArtboards.length);
     var allComponents = core.objectsOfType<Component>().toList();
     // Export artboards.
     for (final artboard in exportArtboards) {
@@ -171,10 +175,10 @@ class RuntimeExporter {
       }
 
       // Write the number of objects in the artboard.
-      writer.writeVarUint(artboardObjects.length);
+      contentsWriter.writeVarUint(artboardObjects.length);
       // Write each object.
       for (final object in artboardObjects) {
-        object.writeRuntime(writer, idToIndex);
+        object.writeRuntime(contentsWriter, propertyToField, idToIndex);
       }
 
       // Figure out which animations we're exporting.
@@ -186,14 +190,50 @@ class RuntimeExporter {
       }
 
       // Export the number of animations, and the animations themselves.
-      writer.writeVarUint(artboardAnimations.length);
+      contentsWriter.writeVarUint(artboardAnimations.length);
       for (final animation in artboardAnimations) {
-        animation.writeRuntime(writer, idToIndex);
+        animation.writeRuntime(contentsWriter, propertyToField, idToIndex);
       }
     }
     CoreDoubleType.max32Bit = false;
 
-    return writer.uint8Buffer;
+    // Now that we know what's in our contents, complete writing out our header
+    // with it's table of contents for the property keys.
+
+    final fieldToIndex = {
+      RiveUintType: 0,
+      RiveStringType: 1,
+      RiveDoubleType: 2,
+      RiveColorType: 3,
+      RiveBoolType: 0,
+    };
+
+    int currentInt = 0;
+    int currentBit = 0;
+    List<int> bitArray = [];
+    propertyToField.forEach((key, field) {
+      headerWriter.writeVarUint(key);
+      assert(fieldToIndex[field.runtimeType] != null);
+      currentInt |= fieldToIndex[field.runtimeType] << currentBit;
+      currentBit += 2;
+      if (currentBit == 8) {
+        bitArray.add(currentInt);
+        currentBit = 0;
+        currentInt = 0;
+      }
+    });
+    headerWriter.writeVarUint(0);
+    if (currentBit != 0) {
+      bitArray.add(currentInt);
+    }
+    assert(bitArray.length == (propertyToField.length / 4).ceil());
+    bitArray.forEach(headerWriter.writeUint32);
+
+    var fileWriter =
+        BinaryWriter(alignment: headerWriter.size + contentsWriter.size);
+    fileWriter.write(headerWriter.uint8Buffer);
+    fileWriter.write(contentsWriter.uint8Buffer);
+    return fileWriter.uint8Buffer;
   }
 }
 // <- editor-only

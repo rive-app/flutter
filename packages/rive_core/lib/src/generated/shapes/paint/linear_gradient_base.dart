@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -357,25 +358,28 @@ abstract class LinearGradientBase extends ContainerComponent {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_startX != null && exports(startXPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(startXPropertyKey, writer, _startX);
+      context.doubleType.writeRuntimeProperty(
+          startXPropertyKey, writer, _startX, propertyToField);
     }
     if (_startY != null && exports(startYPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(startYPropertyKey, writer, _startY);
+      context.doubleType.writeRuntimeProperty(
+          startYPropertyKey, writer, _startY, propertyToField);
     }
     if (_endX != null && exports(endXPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(endXPropertyKey, writer, _endX);
+      context.doubleType.writeRuntimeProperty(
+          endXPropertyKey, writer, _endX, propertyToField);
     }
     if (_endY != null && exports(endYPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(endYPropertyKey, writer, _endY);
+      context.doubleType.writeRuntimeProperty(
+          endYPropertyKey, writer, _endY, propertyToField);
     }
     if (_opacity != null && exports(opacityPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(opacityPropertyKey, writer, _opacity);
+      context.doubleType.writeRuntimeProperty(
+          opacityPropertyKey, writer, _opacity, propertyToField);
     }
   }
 

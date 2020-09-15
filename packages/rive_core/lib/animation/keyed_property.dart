@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
@@ -288,20 +289,23 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       keyedObject?.internalKeyFrameValueChanged();
 
   @override
-  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
-    super.writeRuntime(writer, idLookup);
+  void writeRuntime(
+      BinaryWriter writer, HashMap<int, CoreFieldType> propertyToField,
+      [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, propertyToField, idLookup);
     writer.writeVarUint(_keyframes.length);
     for (final keyframe in _keyframes) {
-      keyframe.writeRuntime(writer, idLookup);
+      keyframe.writeRuntime(writer, propertyToField, idLookup);
     }
   }
 
-  void writeRuntimeSubset(BinaryWriter writer, HashSet<KeyFrame> keyframes,
+  void writeRuntimeSubset(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashSet<KeyFrame> keyframes,
       [HashMap<Id, int> idLookup]) {
-    super.writeRuntime(writer, idLookup);
+    super.writeRuntime(writer, propertyToField, idLookup);
     writer.writeVarUint(keyframes.length);
     for (final keyframe in keyframes) {
-      keyframe.writeRuntime(writer, idLookup);
+      keyframe.writeRuntime(writer, propertyToField, idLookup);
     }
   }
   // <- editor-only

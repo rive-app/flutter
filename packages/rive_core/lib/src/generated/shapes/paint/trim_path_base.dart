@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -243,21 +244,24 @@ abstract class TrimPathBase extends Component {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    super.writeRuntimeProperties(writer, idLookup);
+  void writeRuntimeProperties(BinaryWriter writer,
+      HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, propertyToField, idLookup);
     if (_start != null && exports(startPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(startPropertyKey, writer, _start);
+      context.doubleType.writeRuntimeProperty(
+          startPropertyKey, writer, _start, propertyToField);
     }
     if (_end != null && exports(endPropertyKey)) {
-      context.doubleType.writeRuntimeProperty(endPropertyKey, writer, _end);
+      context.doubleType
+          .writeRuntimeProperty(endPropertyKey, writer, _end, propertyToField);
     }
     if (_offset != null && exports(offsetPropertyKey)) {
-      context.doubleType
-          .writeRuntimeProperty(offsetPropertyKey, writer, _offset);
+      context.doubleType.writeRuntimeProperty(
+          offsetPropertyKey, writer, _offset, propertyToField);
     }
     if (_modeValue != null && exports(modeValuePropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(modeValuePropertyKey, writer, _modeValue);
+      context.uintType.writeRuntimeProperty(
+          modeValuePropertyKey, writer, _modeValue, propertyToField);
     }
   }
 

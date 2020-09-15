@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'package:core/id.dart';
 import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
@@ -65,16 +66,18 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
       idLookup[interpolator.id] = i;
     }
 
+    final propertyToField = HashMap<int, CoreFieldType>();
     var writer = BinaryWriter();
     writer.writeVarUint(interpolatorList.length);
     for (final interpolator in interpolatorList) {
-      interpolator.writeRuntime(writer);
+      interpolator.writeRuntime(writer, propertyToField);
     }
 
     writer.writeVarUint(export.length);
     for (final keyedObject in export.keys) {
       keyedObjectIds.add(keyedObject.objectId);
-      keyedObject.writeRuntimeSubset(writer, export[keyedObject], idLookup);
+      keyedObject.writeRuntimeSubset(
+          writer, export[keyedObject], propertyToField, idLookup);
     }
 
     bytes = writer.uint8Buffer;
@@ -223,10 +226,13 @@ class _RiveHierarchyClipboard extends RiveClipboard {
       idToIndex[component.id] = index++;
     }
 
+    // Don't actually use this here, but we need to play nice with our
+    // serializer.
+    final propertyToField = HashMap<int, CoreFieldType>();
     var writer = BinaryWriter();
     writer.writeVarUint(copiedComponents.length);
     for (final component in copiedComponents) {
-      component.writeRuntime(writer, idToIndex);
+      component.writeRuntime(writer, propertyToField, idToIndex);
     }
     bytes = writer.uint8Buffer;
   }
