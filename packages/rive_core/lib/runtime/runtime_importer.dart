@@ -38,7 +38,6 @@ class RuntimeImporter {
 
     final indexToField = <CoreFieldType>[
       core.uintType,
-      core.uintType,
       core.stringType,
       core.doubleType,
       core.colorType

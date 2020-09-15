@@ -19,7 +19,7 @@ class RuntimeHeader {
   RuntimeHeader({
     @required this.ownerId,
     @required this.fileId,
-    @required this.propertyToFieldIndex,
+    this.propertyToFieldIndex,
   });
 
   factory RuntimeHeader.read(BinaryReader reader) {

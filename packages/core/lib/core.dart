@@ -914,7 +914,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
           'A new runtime is likely necessary to play this file.');
     }
     // Desrialize but don't do anything with the contents...
-    field.deserialize(reader);
+    field.runtimeDeserialize(reader);
   }
 
   T readRuntimeObject<T extends Core<CoreContext>>(
@@ -935,9 +935,6 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       if (fieldType == null || object == null) {
         _skipProperty(reader, propertyKey, propertyToField);
       } else {
-        // We know what to expect, let's try to read the value. We instance a
-        // new reader here so that we don't overflow the exact length we're
-        // allowed to read.
         bool remapped = false;
         if (remaps != null) {
           for (final remap in remaps) {
