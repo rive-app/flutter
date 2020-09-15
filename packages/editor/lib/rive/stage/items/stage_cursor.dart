@@ -5,7 +5,7 @@ import 'package:rive_api/models/user.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -104,7 +104,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
   }
 
   Future<CachedImage> _fromCache(String filename) async {
-    var cache = stage.file.rive.iconCache;
+    var cache = stage.file.rive.imageCache;
     var cachedImage = cache.image(filename);
     if (cachedImage == null) {
       return cache.load(filename);

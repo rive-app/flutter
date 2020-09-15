@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class TestAssetBundle extends CachingAssetBundle {
@@ -18,8 +18,8 @@ class TestAssetBundle extends CachingAssetBundle {
 
 Widget bootstrapped(Widget child) {
   return RiveTheme(
-      child: IconCache(
-          cache: RiveIconCache(TestAssetBundle()),
+      child: ImageAssetCache(
+          cache: RiveImageCache(TestAssetBundle()),
           child:
               Directionality(textDirection: TextDirection.ltr, child: child)));
 }

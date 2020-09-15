@@ -110,6 +110,7 @@ class _TimelineColorSwatchState extends State<TimelineColorSwatch> {
             valueListenable: _inspectingColor.preview,
             builder: (context, List<Color> colors, child) => ColorPreview(
               colors: colors,
+              imageCache: ImageAssetCache.of(context),
             ),
           ),
         ),

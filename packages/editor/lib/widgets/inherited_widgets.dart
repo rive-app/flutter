@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -38,23 +38,23 @@ class RiveTheme extends InheritedWidget {
 /// Inherited widget that will pass the theme down the tree
 /// To access the theme data anywhere in a Flutter context, use:
 ///
-/// IconCache.of(context).load('tool-add');
+/// ImageAssetCache.of(context).load('tool-add.png');
 ///
-class IconCache extends InheritedWidget {
-  const IconCache({
+class ImageAssetCache extends InheritedWidget {
+  const ImageAssetCache({
     @required this.cache,
     @required Widget child,
     Key key,
   })  : assert(child != null),
         super(key: key, child: child);
 
-  final RiveIconCache cache;
+  final RiveImageCache cache;
 
-  static RiveIconCache of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<IconCache>().cache;
+  static RiveImageCache of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ImageAssetCache>().cache;
 
   @override
-  bool updateShouldNotify(IconCache old) => cache != old.cache;
+  bool updateShouldNotify(ImageAssetCache old) => cache != old.cache;
 }
 
 /// Inherited widget that will pass the shortcut key bindings down the tree

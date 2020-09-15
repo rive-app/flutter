@@ -31,4 +31,8 @@ abstract class ShapePaintMutator {
     _shapePaintContainer?.onPaintMutatorChanged(this);
     syncColor();
   }
+
+  // -> editor-only
+  bool get isTranslucent => renderOpacity != 1;
+  // <- editor-only
 }

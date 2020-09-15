@@ -198,5 +198,11 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   bool validate() {
     return shapePaintContainer != null;
   }
+
+  @override
+  bool get isTranslucent =>
+      super.isTranslucent ||
+      opacity != 1 ||
+      gradientStops.any((stop) => stop.color.alpha != 255);
   // <- editor-only
 }
