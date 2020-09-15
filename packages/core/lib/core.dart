@@ -906,17 +906,23 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
 
   void connectionStateChanged(CoopConnectionState state);
 
-  T readRuntimeObject<T extends Core<CoreContext>>(BinaryReader reader,
+  void _skipProperty(BinaryReader reader, int propertyKey,
+      HashMap<int, CoreFieldType> propertyToField) {
+    var field = propertyToField[propertyKey];
+    if (field == null) {
+      throw UnsupportedError('Unsupported property key $propertyKey. '
+          'A new runtime is likely necessary to play this file.');
+    }
+    // Desrialize but don't do anything with the contents...
+    field.deserialize(reader);
+  }
+
+  T readRuntimeObject<T extends Core<CoreContext>>(
+      BinaryReader reader, HashMap<int, CoreFieldType> propertyToField,
       [Iterable<RuntimeRemap> remaps]) {
     int coreObjectKey = reader.readVarUint();
 
     var object = makeCoreInstance(coreObjectKey);
-    if (object is! T) {
-      // TODO: If this check fails, make sure to read the remaining properties
-      // to avoid an overflow. Basically do what happens below but skip the
-      // setObjectProperty call.
-      return null;
-    }
 
     while (true) {
       int propertyKey = reader.readVarUint();
@@ -924,40 +930,36 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
         // Terminator. https://media.giphy.com/media/7TtvTUMm9mp20/giphy.gif
         break;
       }
-      // int propertyLength = reader.readVarUint();
-      // Uint8List valueBytes = reader.read(propertyLength);
 
       var fieldType = coreType(propertyKey);
-      if (fieldType == null) {
-        throw UnsupportedError('Found unsupported propertyKey $propertyKey. '
-            'File may have been exported from a newer version of Rive.');
-      }
-
-      // We know what to expect, let's try to read the value. We instance a new
-      // reader here so that we don't overflow the exact length we're allowed to
-      // read.
-      // var valueReader = BinaryReader.fromList(valueBytes);
-      bool remapped = false;
-      if (remaps != null) {
-        for (final remap in remaps) {
-          if (fieldType == remap?.fieldType) {
-            // Id fields get remapped so we read them in as integers allowing an
-            // external process to then map those integers to those ids. This
-            // should be done before the batch add wrapping this entire
-            // operation completes.
-            if (remap.add(object, propertyKey, reader)) {
-              remapped = true;
-              break;
+      if (fieldType == null || object == null) {
+        _skipProperty(reader, propertyKey, propertyToField);
+      } else {
+        // We know what to expect, let's try to read the value. We instance a
+        // new reader here so that we don't overflow the exact length we're
+        // allowed to read.
+        bool remapped = false;
+        if (remaps != null) {
+          for (final remap in remaps) {
+            if (fieldType == remap?.fieldType) {
+              // Id fields get remapped so we read them in as integers allowing
+              // an external process to then map those integers to those ids.
+              // This should be done before the batch add wrapping this entire
+              // operation completes.
+              if (remap.add(object, propertyKey, reader)) {
+                remapped = true;
+                break;
+              }
             }
           }
         }
-      }
 
-      if (!remapped) {
-        // This will attempt to set the object property, but failure here is
-        // acceptable.
-        setObjectPropertyCore(
-            object, propertyKey, fieldType.runtimeDeserialize(reader));
+        if (!remapped) {
+          // This will attempt to set the object property, but failure here is
+          // acceptable.
+          setObjectPropertyCore(
+              object, propertyKey, fieldType.runtimeDeserialize(reader));
+        }
       }
     }
     return object as T;

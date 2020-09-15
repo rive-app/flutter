@@ -37,14 +37,6 @@ class RuntimeExporter {
     Set<Animation> animations,
   }) {
     CoreDoubleType.max32Bit = true;
-    var headerWriter = BinaryWriter();
-    // Write the header, start with fingerprint.
-    RuntimeHeader.fingerprint.codeUnits.forEach(headerWriter.writeUint8);
-    headerWriter.writeVarUint(RuntimeHeader.majorVersion);
-    headerWriter.writeVarUint(RuntimeHeader.minorVersion);
-    headerWriter.writeVarUint(info.ownerId);
-    headerWriter.writeVarUint(info.fileId);
-
     var backboards = core.objectsOfType<Backboard>();
     if (backboards.isEmpty) {
       _log.severe('No backboards in file.');
@@ -197,8 +189,15 @@ class RuntimeExporter {
     }
     CoreDoubleType.max32Bit = false;
 
-    // Now that we know what's in our contents, complete writing out our header
-    // with it's table of contents for the property keys.
+    // Now that we know what's in our contents, write out our header with it's
+    // table of contents for the property keys.
+    var headerWriter = BinaryWriter();
+    // Write the header, start with fingerprint.
+    RuntimeHeader.fingerprint.codeUnits.forEach(headerWriter.writeUint8);
+    headerWriter.writeVarUint(RuntimeHeader.majorVersion);
+    headerWriter.writeVarUint(RuntimeHeader.minorVersion);
+    headerWriter.writeVarUint(info.ownerId);
+    headerWriter.writeVarUint(info.fileId);
 
     final fieldToIndex = {
       RiveUintType: 0,
@@ -211,6 +210,7 @@ class RuntimeExporter {
     int currentInt = 0;
     int currentBit = 0;
     List<int> bitArray = [];
+
     propertyToField.forEach((key, field) {
       headerWriter.writeVarUint(key);
       assert(fieldToIndex[field.runtimeType] != null);

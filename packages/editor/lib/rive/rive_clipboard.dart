@@ -86,6 +86,12 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
 
   @override
   bool paste(OpenFileContext file) {
+    // ToC: For now assume that the we're pasting from one valid Rive to
+    // another. If we ever paste across different versions of Rive, we can
+    // consider building this up properly. It just means that if a bad field or
+    // object is encountered, the entire paste is botched.
+    final propertyToField = HashMap<int, CoreFieldType>();
+
     var core = file.core;
     var keyFrameManager = file.keyFrameManager.value;
     var animationManager = file.editingAnimationManager.value;
@@ -100,7 +106,8 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
 
     core.batchAdd(() {
       for (int i = 0; i < interpolatorCount; i++) {
-        var interpolator = interpolators[i] = core.readRuntimeObject(reader);
+        var interpolator =
+            interpolators[i] = core.readRuntimeObject(reader, propertyToField);
         if (interpolator is Interpolator) {
           core.addObject(interpolator);
         }
@@ -114,7 +121,8 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
       var animation = keyFrameManager.animation;
       var keyedObjectCount = reader.readVarUint();
       for (int i = 0; i < keyedObjectCount; i++) {
-        var keyedObject = core.readRuntimeObject<KeyedObject>(reader, remaps);
+        var keyedObject = core.readRuntimeObject<KeyedObject>(
+            reader, propertyToField, remaps);
         if (keyedObject == null) {
           continue;
         }
@@ -132,8 +140,8 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
         }
         var numKeyedProperties = reader.readVarUint();
         for (int k = 0; k < numKeyedProperties; k++) {
-          var keyedProperty =
-              core.readRuntimeObject<KeyedProperty>(reader, remaps);
+          var keyedProperty = core.readRuntimeObject<KeyedProperty>(
+              reader, propertyToField, remaps);
           if (keyedProperty == null) {
             continue;
           }
@@ -154,7 +162,8 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
           var numKeyframes = reader.readVarUint();
 
           for (int l = 0; l < numKeyframes; l++) {
-            var keyframe = core.readRuntimeObject<KeyFrame>(reader, remaps);
+            var keyframe = core.readRuntimeObject<KeyFrame>(
+                reader, propertyToField, remaps);
             if (keyframe.frame < minTime) {
               minTime = keyframe.frame;
             }
@@ -239,6 +248,12 @@ class _RiveHierarchyClipboard extends RiveClipboard {
 
   @override
   bool paste(OpenFileContext file) {
+    // ToC: For now assume that the we're pasting from one valid Rive to
+    // another. If we ever paste across different versions of Rive, we can
+    // consider building this up properly. It just means that if a bad field or
+    // object is encountered, the entire paste is botched.
+    final propertyToField = HashMap<int, CoreFieldType>();
+
     var originalParents = originalParent.values.toSet();
     var topSelectedComponents = _topSelection(file);
 
@@ -278,7 +293,8 @@ class _RiveHierarchyClipboard extends RiveClipboard {
 
     core.batchAdd(() {
       for (int i = 0; i < numObjects; i++) {
-        var component = core.readRuntimeObject<Component>(reader, remaps);
+        var component =
+            core.readRuntimeObject<Component>(reader, propertyToField, remaps);
         if (component != null) {
           // TODO: kill
           if (component.name != null) {
