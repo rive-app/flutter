@@ -198,6 +198,8 @@ class RiveColors {
   Color get inspectorPillDisabledText => buttonDarkDisabledText;
   Color get inspectorPillIcon => lightGrey;
 
+  Color get inspectorWarning => const Color(0xFFFFD76B);
+
   Color get vertexIcon => const Color(0xFF848484);
   Color get vertexIconHover => white;
 
@@ -275,6 +277,9 @@ class TextStyles {
         color: Color(0xFFAAAAAA),
         height: 1,
       );
+
+  TextStyle get inspectorWarning => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: Color(0xFFFFD76B), fontSize: 13);
 
   TextStyle get animationsHeader => const TextStyle(
       fontFamily: 'Roboto-Medium', fontSize: 11, color: lightGrey, height: 1);

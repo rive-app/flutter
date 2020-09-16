@@ -69,6 +69,8 @@ class InspectDrawOrder extends ListenableInspectorBuilder {
                     if (drawables.isNotEmpty) {
                       drawTarget.drawable =
                           drawables.first.component as Drawable;
+                      var file = inspecting.fileContext.core;
+                      file.captureJournalEntry();
                     }
                   },
                 )
