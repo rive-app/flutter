@@ -81,11 +81,7 @@ class RuntimeExporter {
       // Find all the components that belong to this artboard.
       List<Component> artboardComponents = [];
       for (final object in allComponents) {
-        if (object.artboard == artboard &&
-            // Don't add artboards to their own object list.
-            object.coreType != ArtboardBase.typeKey &&
-            // Don't include orphaned objects
-            object.parent != null) {
+        if(object.exportsWith(artboard)) {
           artboardComponents.add(object);
         }
       }

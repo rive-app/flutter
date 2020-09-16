@@ -1,4 +1,5 @@
 import 'package:core/id.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/draw_rules.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/src/generated/draw_target_base.dart';
@@ -78,6 +79,12 @@ class DrawTarget extends DrawTargetBase {
   // -> editor-only
   @override
   bool validate() => super.validate() && parent is DrawRules;
+
+  // DrawTargets only export when their state is valid.
+  @override
+  bool exportsWith(Artboard artboard) {
+    return super.exportsWith(artboard) && _ruleState == DrawRuleState.valid;
+  }
 
   @override
   String get defaultName {
