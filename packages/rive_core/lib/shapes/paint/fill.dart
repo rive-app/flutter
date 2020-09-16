@@ -39,4 +39,8 @@ class Fill extends FillBase {
     path.fillType = fillType;
     canvas.drawPath(path, paint);
   }
+
+  // -> editor-only
+  bool get isTranslucent => paintMutator.isTranslucent;
+  // <- editor-only
 }

@@ -284,6 +284,8 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
       _dirt |= ComponentDirt.naturalDrawOrder;
     }
   }
+
+  bool get isTranslucent => fills.any((fill) => fill.isTranslucent);
   // <- editor-only
 
   /// Draw the drawable components in this artboard.
@@ -291,6 +293,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     for (final fill in fills) {
       fill.draw(canvas, path);
     }
+
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, width, height));
     // Get into artboard's world space. This is because the artboard draws

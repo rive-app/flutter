@@ -15,7 +15,7 @@ import 'package:rive_core/event.dart';
 import 'package:rive_editor/frame_debounce.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/preferences.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive_clipboard.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
@@ -47,7 +47,7 @@ class Rive {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
   RiveClipboard _clipboard;
-  Rive({this.iconCache}) : api = RiveApi() {
+  Rive({this.imageCache}) : api = RiveApi() {
     _focusNode = FocusNode(
         canRequestFocus: true,
         skipTraversal: true,
@@ -74,7 +74,7 @@ class Rive {
   final RiveApi api;
   FileApi _filesApi;
 
-  final RiveIconCache iconCache;
+  final RiveImageCache imageCache;
   FocusNode _focusNode;
 
   /// Immediately return focus to the root level.
@@ -250,7 +250,9 @@ class Rive {
     }
     selectionMode.value = key == ShortcutKey.shift && isPress
         ? SelectionMode.range
-        : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
+        : _isSystemCmdPressed
+            ? SelectionMode.multi
+            : SelectionMode.single;
 
     // If something else has focus, don't process actions (usually when a text
     // field is focused somewhere).

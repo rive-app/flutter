@@ -2,7 +2,7 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -33,13 +33,13 @@ class TestInspector extends StatefulWidget {
 }
 
 class _TestInspectorState extends State<TestInspector> {
-  RiveIconCache _iconCache;
+  RiveImageCache _iconCache;
   Rive _rive;
   @override
   void initState() {
-    _iconCache = RiveIconCache(rootBundle);
+    _iconCache = RiveImageCache(rootBundle);
     _rive = Rive(
-      iconCache: _iconCache,
+      imageCache: _iconCache,
     );
     super.initState();
   }
@@ -54,7 +54,7 @@ class _TestInspectorState extends State<TestInspector> {
             context: TipContext(),
             child: ImageCacheProvider(
               manager: ImageManager(),
-              child: IconCache(
+              child: ImageAssetCache(
                 cache: _iconCache,
                 child: PropagatingListenerRoot(
                   child: ActiveFile(

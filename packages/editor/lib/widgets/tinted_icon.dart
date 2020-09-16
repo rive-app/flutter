@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// How to position the icon when actually rendered to layer pixels.
@@ -28,7 +28,7 @@ class TintedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var cache = IconCache.of(context);
+    var cache = ImageAssetCache.of(context);
     return TintedIconRenderer(
       cache: cache,
       icon: icon,
@@ -41,7 +41,7 @@ class TintedIcon extends StatelessWidget {
 /// Draws an image with custom paint.
 class TintedIconRenderer extends LeafRenderObjectWidget {
   final Iterable<PackedIcon> icon;
-  final RiveIconCache cache;
+  final RiveImageCache cache;
   final Color color;
   final TintedIconPosition position;
 
@@ -81,7 +81,7 @@ class TintedIconRenderer extends LeafRenderObjectWidget {
 class _TintedIconRendererObject extends RenderBox {
   TintedIconPosition _position;
   Iterable<PackedIcon> _icon;
-  RiveIconCache _cache;
+  RiveImageCache _cache;
   Color _color;
   final Paint _paint = Paint()..isAntiAlias = false;
 
@@ -95,9 +95,9 @@ class _TintedIconRendererObject extends RenderBox {
   }
 
   CachedImage _cachedImage;
-  RiveIconCache get cache => _cache;
+  RiveImageCache get cache => _cache;
 
-  set cache(RiveIconCache value) {
+  set cache(RiveImageCache value) {
     if (_cache == value) {
       return;
     }

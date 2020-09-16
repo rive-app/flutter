@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// An image stored in the cache and a completer to await its loading.
@@ -12,11 +13,11 @@ class CachedImage {
 
 /// The cache holder which should be stored somewhere long lived for the
 /// duration of the app.
-class RiveIconCache {
+class RiveImageCache {
   final Map<String, CachedImage> _cache = {};
   final AssetBundle assetBundle;
 
-  RiveIconCache(this.assetBundle);
+  RiveImageCache(this.assetBundle);
 
   Future<CachedImage> load(String filename) async {
     if (filename == null) {
@@ -25,27 +26,6 @@ class RiveIconCache {
     assert(!_cache.keys.contains(filename));
     var cachedImage = CachedImage();
     _cache[filename] = cachedImage;
-
-    // String path = '';
-    // String file = filename;
-    // int lastSlash = filename.lastIndexOf('/');
-    // if (lastSlash != -1) {
-    //   path = filename.substring(0, lastSlash);
-    //   file = filename.substring(lastSlash + 1);
-    // }
-
-    // int desiredResolution = ui.window.devicePixelRatio.ceil();
-    // int foundResolution;
-    // ByteData data;
-    // for (int i = desiredResolution; i > 1; i--) {
-    //   try {
-    //     data = await assetBundle.load('$path/$i.0x/$file');
-    //   } catch (_) {
-    //     continue;
-    //   }
-    //   foundResolution = i;
-    //   break;
-    // }
 
     ByteData data = await assetBundle.load(filename);
 
@@ -63,4 +43,40 @@ class RiveIconCache {
   }
 
   CachedImage image(String filename) => _cache[filename];
+}
+
+class DpiImage {
+  CachedImage result;
+  double devicePixelRatio;
+  final void Function() loaded;
+  final String Function(double dpi) filenameFor;
+  final RiveImageCache cache;
+
+  ui.Image get image {
+    var dpr = ui.window.devicePixelRatio;
+    if (ui.window.devicePixelRatio == devicePixelRatio) {
+      return result?.image;
+    }
+    devicePixelRatio = dpr;
+    String filename = filenameFor(ui.window.devicePixelRatio);
+    result = cache.image(filename);
+    if (result != null) {
+      result.completer.future.then((image) {
+        loaded();
+      });
+      return result.image;
+    } else {
+      cache.load(filename).then((cachedImage) {
+        result = cachedImage;
+        loaded();
+      });
+      return null;
+    }
+  }
+
+  DpiImage({
+    @required this.loaded,
+    @required this.cache,
+    @required this.filenameFor,
+  });
 }

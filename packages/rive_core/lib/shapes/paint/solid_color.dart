@@ -57,5 +57,8 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
   bool validate() {
     return super.validate() && parent is ShapePaint;
   }
+
+  @override
+  bool get isTranslucent => super.isTranslucent || color.alpha != 255;
   // <- editor-only
 }

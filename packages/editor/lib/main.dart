@@ -35,7 +35,7 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/constants.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -67,9 +67,9 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  final iconCache = RiveIconCache(rootBundle);
+  final imageCache = RiveImageCache(rootBundle);
   final rive = Rive(
-    iconCache: iconCache,
+    imageCache: imageCache,
   );
 
   unawaited(rive.initialize());
@@ -104,7 +104,7 @@ Future<void> main() async {
         InitWindowWidget(
           child: RiveEditorShell(
             rive: rive,
-            iconCache: iconCache,
+            imageCache: imageCache,
           ),
         ),
       );
@@ -151,19 +151,19 @@ GlobalKey loadingScreenKey = GlobalKey();
 
 class RiveEditorShell extends StatelessWidget {
   final Rive rive;
-  final RiveIconCache iconCache;
+  final RiveImageCache imageCache;
 
   const RiveEditorShell({
     Key key,
     this.rive,
-    this.iconCache,
+    this.imageCache,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return InsertInheritedWidgets(
       rive: rive,
-      iconCache: iconCache,
+      imageCache: imageCache,
       child: CursorView(
         onPointerDown: (details) {
           // If we click anywhere, suppress any ShortcutAction.togglePlay that
@@ -232,9 +232,9 @@ class RiveEditorApp extends StatelessWidget {
 /// top of the widget tree. Any new inherited widgets should go
 /// in here.
 class InsertInheritedWidgets extends StatelessWidget {
-  const InsertInheritedWidgets({this.rive, this.iconCache, this.child});
+  const InsertInheritedWidgets({this.rive, this.imageCache, this.child});
   final Rive rive;
-  final RiveIconCache iconCache;
+  final RiveImageCache imageCache;
   final Widget child;
 
   @override
@@ -248,8 +248,8 @@ class InsertInheritedWidgets extends StatelessWidget {
               context: TipContext(),
               child: ImageCacheProvider(
                 manager: ImageManager(),
-                child: IconCache(
-                  cache: iconCache,
+                child: ImageAssetCache(
+                  cache: imageCache,
                   // TODO: This should probably get refactored too. It's really
                   // important that it's provided at this level so that popups
                   // shown by the Overlay (which I think is currently generated

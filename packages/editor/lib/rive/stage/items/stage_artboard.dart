@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard_title.dart';
@@ -11,6 +13,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   StageArtboardTitle _title;
+  DpiImage _gridImage;
 
   @override
   bool initialize(Artboard object) {
@@ -65,6 +68,16 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
       _title = title;
       stage.addItem(title);
     }
+
+    _gridImage = DpiImage(
+        cache: stage.file.rive.imageCache,
+        loaded: () {
+          stage?.markNeedsRedraw();
+        },
+        filenameFor: (dpi) {
+          var size = dpi == 1 ? 1 : 2;
+          return 'assets/images/artboard_bg_${size}x.png';
+        });
   }
 
   @override
@@ -89,10 +102,22 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
         StageItem.selectedPaint,
       );
     }
-    
+
     canvas.save();
 
     canvas.translate(component.x, component.y);
+
+    // Draw the artboard backround.
+    if (component.isTranslucent) {
+      Image image = _gridImage.image;
+      if (image != null) {
+        var identity = Mat2D();
+        var gridPaint = Paint()
+          ..shader = ImageShader(
+              image, TileMode.repeated, TileMode.repeated, identity.mat4);
+        canvas.drawPath(component.path, gridPaint);
+      }
+    }
 
     // To mitigate Flutter race conditions between advance and paint, we force a
     // component update here (usually this results in a no-op unless advance

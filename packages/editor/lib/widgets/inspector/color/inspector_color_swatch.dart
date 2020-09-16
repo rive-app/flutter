@@ -75,6 +75,7 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
         valueListenable: widget.inspectingColor.preview,
         builder: (context, List<Color> colors, child) => ColorPreview(
           colors: colors,
+          imageCache: ImageAssetCache.of(context),
         ),
       ),
     );
