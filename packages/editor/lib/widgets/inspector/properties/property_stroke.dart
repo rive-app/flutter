@@ -22,7 +22,7 @@ import 'package:rive_editor/widgets/ui_strings.dart';
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.
 class PropertyStroke extends StatelessWidget {
-  static const double inputWidth = 70;
+  static const double inputWidth = 80;
   final Iterable<Stroke> strokes;
   final InspectingColor inspectingColor;
 
@@ -174,7 +174,7 @@ class PropertyStroke extends StatelessWidget {
                     style:
                         RiveTheme.of(context).textStyles.inspectorPropertyLabel,
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 57),
                   ComboBox(
                     value: trimPathMode,
                     options: TrimPathMode.values,

@@ -15,6 +15,7 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.
 class PropertyFill extends StatelessWidget {
+  static const double inputWidth = 80;
   final Iterable<ShapePaint> fills;
   final InspectingColor inspectingColor;
 
@@ -44,12 +45,15 @@ class PropertyFill extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Text(
-                'Name',
-                style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+              Expanded(
+                child: Text(
+                  'Name',
+                  style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+                ),
               ),
               const SizedBox(width: 20),
-              Expanded(
+              SizedBox(
+                width: inputWidth,
                 child: CoreTextField(
                   objects: fills,
                   propertyKey: ComponentBase.namePropertyKey,
@@ -66,7 +70,7 @@ class PropertyFill extends StatelessWidget {
                 'Fill Rule',
                 style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 68),
               CoreComboBox(
                 sizing: ComboSizing.expanded,
                 objects: fills,

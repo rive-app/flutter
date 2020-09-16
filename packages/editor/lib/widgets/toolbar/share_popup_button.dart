@@ -9,6 +9,7 @@ import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/external_url.dart';
 
 /// The popup button showed in the toolbar allowing the user access other
 /// options for the current file, such as Downloading a Rive file for runtime
@@ -28,8 +29,8 @@ class SharePopupButton extends StatelessWidget {
       width: 206,
       contextItemsBuilder: (context) => [
         PopupContextItem(
-          'Download for Runtime',
-          icon: PackedIcon.download,
+          'Download',
+          //icon: PackedIcon.download,
           select: () async {
             // Get the active file.
             var activeFile = ActiveFile.find(context);
@@ -58,6 +59,11 @@ class SharePopupButton extends StatelessWidget {
             }
           },
         ),
+        PopupContextItem(
+          'Get the Runtimes',
+          select: launchRuntimesUrl,
+        ),
+        //PopupContextItem.separator(),
         // PopupContextItem(
         //   'Publish to Community',
         //   icon: 'popup-community',
