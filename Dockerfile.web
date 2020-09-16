@@ -11,6 +11,7 @@ ENV PATH "$PATH:/flutter/bin"
 WORKDIR /app/packages/editor
 ADD packages /app/packages
 ADD dev /app/dev
+ADD submodules /app/submodules
 ADD .flutter_version /app/.flutter_version
 
 RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
