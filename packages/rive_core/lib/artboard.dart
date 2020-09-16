@@ -212,6 +212,13 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   bool validate() => parent == null;
 
+  /// Artboards are exported as a base object in the file, so they never export
+  /// in context of another artboard.
+  @override
+  bool exportsWith(Artboard artboard) {
+    return false;
+  }
+
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is ArtboardDelegate) {

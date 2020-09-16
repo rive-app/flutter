@@ -390,5 +390,9 @@ abstract class Component extends ComponentBase<RiveFile>
     }
     return depth;
   }
+
+  bool exportsWith(Artboard artboard) {
+    return parent != null && this.artboard == artboard;
+  }
   // <- editor-only
 }
