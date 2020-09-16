@@ -96,7 +96,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                         builder: (context, snapshot) {
                           return IconTile(
                             icon: PackedIcon.rocket,
-                            label: 'Get Started',
+                            label: 'Learn',
                             highlight: snapshot.data == HomeSection.getStarted,
                             onTap: () async =>
                                 Plumber().message(HomeSection.getStarted),
