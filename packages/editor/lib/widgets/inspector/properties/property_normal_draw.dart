@@ -9,6 +9,7 @@ import 'package:rive_editor/widgets/ui_strings.dart';
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a clip on a shape.
 class PropertyNormalDraw extends StatelessWidget {
+  static const double inputWidth = 92;
   final bool isActive;
   final VoidCallback activate;
   const PropertyNormalDraw({
@@ -48,12 +49,15 @@ class PropertyNormalDraw extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Name',
-                  style: theme.textStyles.inspectorPropertyLabel,
+                Expanded(
+                    child: Text(
+                    'Name',
+                    style: theme.textStyles.inspectorPropertyLabel,
+                  ),
                 ),
                 const SizedBox(width: 20),
-                Expanded(
+                SizedBox(
+                  width: inputWidth,
                   child: InspectorTextField(
                     value: null,
                     converter: null,

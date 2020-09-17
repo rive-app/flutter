@@ -19,6 +19,7 @@ import 'package:rive_core/draw_target.dart';
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a clip on a shape.
 class PropertyDrawTarget extends StatelessWidget {
+  static const double inputWidth = 92;
   final DrawTarget target;
   final bool isActive;
   final VoidCallback activate;
@@ -120,12 +121,15 @@ class PropertyDrawTarget extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Name',
-                  style: theme.textStyles.inspectorPropertyLabel,
+                Expanded(
+                    child: Text(
+                    'Name',
+                    style: theme.textStyles.inspectorPropertyLabel,
+                  ),
                 ),
                 const SizedBox(width: 20),
-                Expanded(
+                SizedBox(
+                  width: inputWidth,
                   child: CoreTextField(
                     objects: [target],
                     propertyKey: ComponentBase.namePropertyKey,
@@ -143,7 +147,7 @@ class PropertyDrawTarget extends StatelessWidget {
                   style:
                       RiveTheme.of(context).textStyles.inspectorPropertyLabel,
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(width: 38),
                 CoreComboBox(
                   sizing: ComboSizing.expanded,
                   objects: [target],
