@@ -133,7 +133,7 @@ class _ResizePanelState extends State<ResizePanel> {
       width: widget.direction == ResizeDirection.horizontal ? _size : null,
       height: widget.direction == ResizeDirection.vertical ? _size : null,
       child: Stack(
-        overflow: Overflow.visible,
+        clipBehavior: Clip.none,
         children: <Widget>[
           Positioned.fill(
             child: IgnoreMouse(
@@ -184,7 +184,7 @@ class _ResizePanelState extends State<ResizePanel> {
                 _updateDragEdge(context);
               },
               child: Stack(
-                overflow: Overflow.visible,
+                clipBehavior: Clip.none,
                 children: [
                   position(
                     2,

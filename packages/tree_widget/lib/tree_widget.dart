@@ -338,13 +338,13 @@ class TreeView<T> extends StatelessWidget {
                   child: SizedBox(
                     height: itemHeight,
                     child: Stack(
-                      overflow: Overflow.visible,
+                      clipBehavior: Clip.none,
                       children: <Widget>[
                         Positioned.fill(
                           top: 0,
                           child: Stack(
                             children: lines,
-                            overflow: Overflow.visible,
+                            clipBehavior: Clip.none,
                           ),
                         ),
                         if (backgroundBuilder != null)
