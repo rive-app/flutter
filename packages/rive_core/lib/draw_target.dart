@@ -1,4 +1,5 @@
 import 'package:core/id.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/draw_rules.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/src/generated/draw_target_base.dart';
@@ -7,15 +8,25 @@ export 'package:rive_core/src/generated/draw_target_base.dart';
 
 enum DrawTargetPlacement { before, after }
 
+// -> editor-only
+enum DrawRuleState { valid, noTarget, cycle }
+// <- editor-only
+
 class DrawTarget extends DrawTargetBase {
   // Store first and last drawables that are affected by this target.
   Drawable first;
   Drawable last;
 
   // -> editor-only
-  /// TODO: hook this up so we show it in the inspector when the draw rule
-  /// causes a cyclic dependency.
-  bool isValid = true;
+  DrawRuleState _ruleState = DrawRuleState.valid;
+  DrawRuleState get ruleState => _ruleState;
+  set ruleState(DrawRuleState value) {
+    if (_ruleState == value) {
+      return;
+    }
+    _ruleState = value;
+    (parent as DrawRules).drawRulesChanged.notify();
+  }
   // <- editor-only
 
   Drawable _drawable;
@@ -69,10 +80,21 @@ class DrawTarget extends DrawTargetBase {
   @override
   bool validate() => super.validate() && parent is DrawRules;
 
+  // DrawTargets only export when their state is valid.
+  @override
+  bool exportsWith(Artboard artboard) {
+    return super.exportsWith(artboard) && _ruleState == DrawRuleState.valid;
+  }
+
   @override
   String get defaultName {
     var index = (parent as DrawRules)?.targets?.toList()?.indexOf(this) ?? 0;
     return 'Draw Rule ${index + 1}';
+  }
+
+  @override
+  String toString() {
+    return '$name ${super.toString()}';
   }
   // <- editor-only
 }

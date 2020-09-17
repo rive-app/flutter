@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
@@ -11,6 +12,7 @@ import 'package:rive_editor/widgets/inspector/inspector_pill_button.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_radio_button.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:rive_core/draw_target.dart';
 
@@ -44,6 +46,12 @@ class PropertyDrawTarget extends StatelessWidget {
       padding: InspectorPopout.defaultPadding.copyWith(bottom: 2),
       contentBuilder: (_) => Row(
         children: [
+          if (target.ruleState == DrawRuleState.cycle)
+            TintedIcon(
+              icon: PackedIcon.alertSmall,
+              color: theme.colors.inspectorWarning,
+            ),
+          const SizedBox(width: 5),
           Expanded(
             child: CoreTextField(
               objects: [target],
@@ -70,6 +78,45 @@ class PropertyDrawTarget extends StatelessWidget {
           children: [
             const InspectorPopoutTitle(titleKey: 'draw_order_rule'),
             const SizedBox(height: 20),
+            if (target.ruleState == DrawRuleState.cycle)
+              GestureDetector(
+                onTap: () {
+                  launchUrl(
+                      'https://help.rive.app/editor/animate-mode/animating-draw-order');
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TintedIcon(
+                      icon: PackedIcon.alertSmall,
+                      color: theme.colors.inspectorWarning,
+                    ),
+                    const SizedBox(width: 5),
+                    Text.rich(
+                      TextSpan(
+                        text: 'This rule ',
+                        style: theme.textStyles.inspectorWarning,
+                        children: const <TextSpan>[
+                          TextSpan(
+                              text: 'creates a cycle',
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                              )),
+                          TextSpan(
+                            text: '.',
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (target.ruleState == DrawRuleState.cycle)
+              const SizedBox(height: 20),
             Row(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,

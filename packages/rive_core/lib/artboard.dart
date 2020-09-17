@@ -212,6 +212,13 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   bool validate() => parent == null;
 
+  /// Artboards are exported as a base object in the file, so they never export
+  /// in context of another artboard.
+  @override
+  bool exportsWith(Artboard artboard) {
+    return false;
+  }
+
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is ArtboardDelegate) {
@@ -473,19 +480,28 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     buildDrawOrder(_drawables, null, _rules);
     // Build rule dependencies. In practice this'll need to happen anytime a
     // target drawable is changed or rule is added/removed.
-    Set<DrawTarget> rootRules = {};
+    var root = DrawTarget();
+    // Make sure all dependents are empty.
+    for (final nodeRules in _rules) {
+      for (final target in nodeRules.targets) {
+        target.dependents.clear();
+      }
+    }
+
+    // Now build up the dependencies.
     for (final nodeRules in _rules) {
       for (final target in nodeRules.targets) {
         // -> editor-only
-        target.isValid = target.drawable != null;
+        target.ruleState = target.drawable != null
+            ? DrawRuleState.valid
+            : DrawRuleState.noTarget;
         // <- editor-only
+        root.dependents.add(target);
         var dependentRules = target.drawable?.flattenedDrawRules;
         if (dependentRules != null) {
           for (final dependentRule in dependentRules.targets) {
             dependentRule.dependents.add(target);
           }
-        } else {
-          rootRules.add(target);
         }
       }
     }
@@ -495,20 +511,15 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     // -> runtime-only
     // var sorter = DependencySorter<Component>();
     // <- runtime-only
-    sorter.reset();
-    if (rootRules.isNotEmpty) {
-      rootRules.forEach(sorter.visit);
-    }
+
+    _sortedDrawRules = sorter.sort(root).cast<DrawTarget>().skip(1).toList();
     // -> editor-only
     if (sorter.cycleNodes.isNotEmpty) {
       for (final invalidRule in sorter.cycleNodes) {
-        (invalidRule as DrawTarget).isValid = false;
-        // TODO: Show an alert of dependency cycle?;
+        (invalidRule as DrawTarget).ruleState = DrawRuleState.cycle;
       }
     }
     // <- editor-only
-
-    _sortedDrawRules = sorter.order.cast<DrawTarget>();
 
     sortDrawOrder();
   }
@@ -526,7 +537,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
       // -> editor-only
       while (rules != null &&
           rules.activeTarget != null &&
-          !rules.activeTarget.isValid) {
+          rules.activeTarget.ruleState != DrawRuleState.valid) {
         rules = rules.parentRules;
       }
       // <- editor-only
