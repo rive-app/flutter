@@ -23,6 +23,7 @@ abstract class Drawable extends DrawableBase {
   void buildDrawOrder(
       List<Drawable> drawables, DrawRules rules, List<DrawRules> allRules) {
     flattenedDrawRules = drawRules ?? rules;
+    _naturalDrawOrder = drawables.length;
     drawables.add(this);
 
     super.buildDrawOrder(drawables, rules, allRules);
@@ -30,6 +31,8 @@ abstract class Drawable extends DrawableBase {
 
   // -> editor-only
   int drawOrder = 0;
+  int _naturalDrawOrder = 0;
+  int get naturalDrawOrder => _naturalDrawOrder;
   // <- editor-only
 
   /// Draw the contents of this drawable component in world transform space.
