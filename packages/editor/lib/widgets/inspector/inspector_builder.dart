@@ -32,9 +32,10 @@ abstract class InspectorBuilder {
       );
 
   /// Builder for the top padding
+  /// decreasing top padding from 20 to 10 while align buttons are hidden
   static Widget padding(BuildContext context) => const Padding(
         padding: EdgeInsets.only(
-          top: 20,
+          top: 10,
         ),
       );
 }
