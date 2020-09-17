@@ -327,7 +327,7 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
             controller: _controller,
             scrollDirection: Axis.horizontal,
             drawOrder: DrawOrder.lifo,
-            overflow: Overflow.visible,
+            clipBehavior: Clip.none,
             slivers: [
               SliverList(
                 delegate: SliverChildBuilderDelegate(

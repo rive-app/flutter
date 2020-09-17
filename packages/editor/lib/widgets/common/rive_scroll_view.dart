@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 /// to bottom). This allows items that come after to also draw after, so footers
 /// can draw over the content that comes before them.
 class RiveScrollView extends CustomScrollView {
-  final Overflow overflow;
   final DrawOrder drawOrder;
 
   const RiveScrollView({
@@ -22,7 +21,7 @@ class RiveScrollView extends CustomScrollView {
     List<Widget> slivers,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    this.overflow = Overflow.clip,
+    Clip clipBehavior = Clip.hardEdge,
     this.drawOrder = DrawOrder.lifo,
   }) : super(
           key: key,
@@ -38,6 +37,7 @@ class RiveScrollView extends CustomScrollView {
           semanticChildCount: semanticChildCount,
           dragStartBehavior: dragStartBehavior,
           slivers: slivers,
+          clipBehavior: clipBehavior,
         );
 
   @override
@@ -54,14 +54,13 @@ class RiveScrollView extends CustomScrollView {
       cacheExtent: cacheExtent,
       center: center,
       anchor: anchor,
-      overflow: overflow,
+      clipBehavior: clipBehavior,
       drawOrder: drawOrder,
     );
   }
 }
 
 class _RiveViewPort extends Viewport {
-  final Overflow overflow;
   final DrawOrder drawOrder;
 
   _RiveViewPort({
@@ -74,7 +73,7 @@ class _RiveViewPort extends Viewport {
     double cacheExtent,
     CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
     List<Widget> slivers = const <Widget>[],
-    this.overflow = Overflow.clip,
+    Clip clipBehavior = Clip.hardEdge,
     this.drawOrder = DrawOrder.lifo,
   }) : super(
           key: key,
@@ -86,6 +85,7 @@ class _RiveViewPort extends Viewport {
           cacheExtent: cacheExtent,
           cacheExtentStyle: cacheExtentStyle,
           slivers: slivers,
+          clipBehavior: clipBehavior,
         );
 
   @override
@@ -98,7 +98,7 @@ class _RiveViewPort extends Viewport {
       offset: offset,
       cacheExtent: cacheExtent,
       cacheExtentStyle: cacheExtentStyle,
-      overflow: overflow,
+      clipBehavior: clipBehavior,
       drawOrder: drawOrder,
     );
   }
@@ -114,7 +114,7 @@ class _RiveViewPort extends Viewport {
       ..offset = offset
       ..cacheExtent = cacheExtent
       ..cacheExtentStyle = cacheExtentStyle
-      ..overflow = overflow
+      ..clipBehavior = clipBehavior
       ..drawOrder = drawOrder;
   }
 }
@@ -122,16 +122,6 @@ class _RiveViewPort extends Viewport {
 enum DrawOrder { fifo, lifo }
 
 class _RiveRenderViewport extends RenderViewport {
-  Overflow _overflow;
-  Overflow get overflow => _overflow;
-  set overflow(Overflow value) {
-    if (_overflow == value) {
-      return;
-    }
-    _overflow = value;
-    markNeedsPaint();
-  }
-
   DrawOrder _drawOrder;
   DrawOrder get drawOrder => _drawOrder;
   set drawOrder(DrawOrder value) {
@@ -151,10 +141,9 @@ class _RiveRenderViewport extends RenderViewport {
     RenderSliver center,
     double cacheExtent,
     CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
-    Overflow overflow = Overflow.clip,
+    Clip clipBehavior = Clip.hardEdge,
     DrawOrder drawOrder = DrawOrder.lifo,
-  })  : _overflow = overflow,
-        _drawOrder = drawOrder,
+  })  : _drawOrder = drawOrder,
         super(
           axisDirection: axisDirection,
           crossAxisDirection: crossAxisDirection,
@@ -164,11 +153,12 @@ class _RiveRenderViewport extends RenderViewport {
           center: center,
           cacheExtent: cacheExtent,
           cacheExtentStyle: cacheExtentStyle,
+          clipBehavior: clipBehavior,
         );
 
   @override
   bool get hasVisualOverflow =>
-      overflow == Overflow.clip && super.hasVisualOverflow;
+      clipBehavior == Clip.none || super.hasVisualOverflow;
 
   @override
   Iterable<RenderSliver> get childrenInHitTestOrder =>

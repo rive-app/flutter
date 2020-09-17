@@ -64,7 +64,7 @@ class ColorSlider extends StatelessWidget {
       child: SizedBox(
         height: height,
         child: Stack(
-          overflow: Overflow.visible,
+          clipBehavior: Clip.none,
           children: [
             Positioned.fill(
               child: background(context),
@@ -158,7 +158,7 @@ class MultiColorSlider extends StatelessWidget {
       child: SizedBox(
         height: ColorSlider.height,
         child: Stack(
-          overflow: Overflow.visible,
+          clipBehavior: Clip.none,
           children: [
             Positioned.fill(
               child: background(context),
