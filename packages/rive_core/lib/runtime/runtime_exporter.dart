@@ -12,6 +12,7 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
@@ -80,9 +81,15 @@ class RuntimeExporter {
       HashMap<Id, int> idToIndex = HashMap<Id, int>();
       // Find all the components that belong to this artboard.
       List<Component> artboardComponents = [];
+      // Drawables need to export in natural draw order.
+      List<Drawable> drawables = [];
       for (final object in allComponents) {
-        if(object.exportsWith(artboard)) {
-          artboardComponents.add(object);
+        if (object.exportsWith(artboard)) {
+          if (object is Drawable) {
+            drawables.add(object);
+          } else {
+            artboardComponents.add(object);
+          }
         }
       }
       // Components are exported in hierarchy order. This makes it so we don't
@@ -92,6 +99,12 @@ class RuntimeExporter {
       // parent/child relationships they will still be in order.
       artboardComponents.sort((a, b) => a.childOrder.compareTo(b.childOrder));
 
+      // Sort the drawables in natural order and add them to the artboard
+      // components.
+      drawables
+          .sort((a, b) => a.naturalDrawOrder.compareTo(b.naturalDrawOrder));
+      artboardComponents.addAll(drawables);
+      
       // The artboard is always at the start of the components list. We add it
       // after building up the ordered components as the artboard itself may not
       // have a fractional index for order.
