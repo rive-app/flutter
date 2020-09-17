@@ -2,6 +2,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/interpolation_value_converter.dart';
 import 'package:rive_editor/widgets/common/editor_text_field.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -51,7 +52,9 @@ class _ConvertingTextEditingController<T> extends TextEditingController {
     // return super.buildTextSpan(style: style, withComposing: withComposing);
 
     if (!value.composing.isValid || !withComposing) {
-      return TextSpan(style: style, text: displayText);
+      return _converter is InterpolationValueConverter
+        ? _interpolationStyledText(displayText)
+        : TextSpan(style: style, text: displayText);
     }
     final TextStyle composingStyle = style.merge(
       const TextStyle(decoration: TextDecoration.underline),
@@ -67,6 +70,27 @@ class _ConvertingTextEditingController<T> extends TextEditingController {
         TextSpan(text: value.composing.textAfter(displayText)),
       ],
     );
+  }
+
+  TextSpan _interpolationStyledText(String text) {
+    List<TextSpan> children = [];
+    final stringValues = text.contains(',')
+      ? text.split(',')
+      : text.split(' ');
+    for (var i = 0; i < stringValues.length; i++) {
+      children.add(
+        TextSpan(
+          text: stringValues[i],
+          style: i < 2
+            ? const TextStyle(color: Color(0xFF29BB9C))
+            : const TextStyle(color: Color(0xFF33A7FF))));
+
+      if (i < stringValues.length - 1) {
+        children.add(const TextSpan(text: ',', 
+          style: TextStyle(color: Color(0xFF8C8C8C))));
+      }
+    }
+    return TextSpan(children: children);
   }
 }
 

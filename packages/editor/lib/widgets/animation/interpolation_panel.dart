@@ -2,13 +2,16 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/animation/cubic_interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/converters/interpolation_value_converter.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
+import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 
 import 'interpolation_preview.dart';
@@ -70,9 +73,8 @@ class InterpolationPanel extends StatelessWidget {
                   sizing: ComboSizing.content,
                   options: KeyFrameInterpolation.values,
                   value: interpolation.type,
-                  change: (KeyFrameInterpolation interpolation) {
-                    manager.changeInterpolation.add(interpolation);
-                  },
+                  change: (KeyFrameInterpolation interpolation) =>
+                    manager.changeInterpolation.add(interpolation),
                   toLabel: (KeyFrameInterpolation interpolation) =>
                       interpolation == null
                           ? ''
@@ -85,13 +87,51 @@ class InterpolationPanel extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: ActiveFile.of(context).editingAnimationManager,
             builder: (context, EditingAnimationManager animationManager, _) =>
-                InterpolationPreview(
-              interpolation: interpolation,
-              selection: selection,
-              manager: manager,
-              timeManager: animationManager,
-            ),
+              InterpolationPreview(
+                interpolation: interpolation,
+                selection: selection,
+                manager: manager,
+                timeManager: animationManager,
+              ),
           ),
+          const SizedBox(height: 13),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Points',
+                style: theme.textStyles.inspectorPropertyLabel),
+              const SizedBox(width: 6),
+              Expanded(
+                child: InspectorTextField(
+                  value: interpolation,
+                  converter: InterpolationValueConverter.instance,
+                  underlineColor: theme.colors.interpolationUnderline,
+                  change: (InterpolationViewModel _) {},
+                  completeChange: (InterpolationViewModel newInterpolation) {
+                    switch (newInterpolation.type) {
+                      case KeyFrameInterpolation.cubic:
+                        final interpolator =  newInterpolation.interpolator;
+                        if (interpolator is CubicInterpolator) {
+                          final cubic = CubicInterpolationViewModel(
+                            interpolator.x1, interpolator.y1,
+                            interpolator.x2, interpolator.y2);
+                            if (interpolation.type != 
+                              KeyFrameInterpolation.cubic) {
+                              manager.changeInterpolation.add(
+                                newInterpolation.type);
+                            }
+                            manager.changeCubic.add(cubic);
+                        }
+                        break;
+                      default:
+                        manager.changeInterpolation.add(newInterpolation.type);
+                        break;
+                    }
+                  }
+                ),
+              )
+            ]
+          )
         ],
       ),
     );
