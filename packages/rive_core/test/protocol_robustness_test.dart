@@ -332,13 +332,11 @@ void main() {
 
       unawaited(privateApi.startServing());
 
-      print("CLIENT 1 CONNECTING");
       expect(
         (await client1.connect('ws://localhost:$coopPort', filePath, 'fake'))
             .state,
         ConnectState.connected,
       );
-      print("CLIENT 1 CONNECTED");
 
       // Make a somewhat sane file.
       Artboard artboardOnClient1;
@@ -358,14 +356,11 @@ void main() {
         artboardOnClient1.appendChild(friendlyNode);
       });
 
-      print("CLIENT 1 SENDING CHANGES");
       client1.captureJournalEntry();
-      print("CLIENT 1 SENT CHANGES");
 
       // Wait for the first connection to settle (perform any initialization
       // changes that could've been queued up during connect).
       await client1.settle();
-      print("CLIENT 1 SETTLED");
 
       // make sure server has one connected client and file.
       expect(server.editingFileCount, 1,
@@ -373,7 +368,6 @@ void main() {
       expect(server.clientCount, 1,
           reason: 'Server should have one client connected.');
 
-  print("MANUAL DRIVE");
       // Manually drive the server to make sure we control when changes are
       // processed.
       var serverFileContext = server.isolates.first as TestCoopIsolate;
@@ -388,23 +382,18 @@ void main() {
         artboardOnClient1.appendChild(node);
       });
 
-      print("CLIENT 1 SENDING MORE CHANGES");
       var changes = client1.captureTestChanges();
 
       // Wait for the server to receive the changes from the client.
       await serverFileContext.processNextChange();
 
-      print("SERVER PROCESSED CHANGES");
       // The changes should've been denied by the server because they attempted
       // to create an object with a duplicate id.
       expect(await changes.accept(), false);
 
-      print("CLIENT GOT ACCEPTED CHANGES");
-
       expect(await client1.disconnect(), true);
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
-      print("DISCONNECTING");
     },
     timeout: const Timeout(
       Duration(seconds: 60),
