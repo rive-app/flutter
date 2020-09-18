@@ -1,5 +1,6 @@
 // -> editor-only
 import 'package:core/coop/change.dart';
+import 'package:core/coop/connect_result.dart';
 import 'package:core/coop/coop_client.dart' as core;
 import 'package:core/coop/player.dart';
 import 'package:core/core.dart';
@@ -205,7 +206,8 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  Future<List<ChangeSet>> getOfflineChanges() => _persist?.changes();
+  Future<List<ChangeSet>> getOfflineChanges() async =>
+      await _persist?.changes() ?? <ChangeSet>[];
 
   @override
   Future<String> getStringSetting(String key) async {
@@ -376,6 +378,13 @@ class RiveFile extends RiveCoreContext {
     // happening (like loading assets or content for the file) so we debounce it
     // pretty heavily.
     debounce(_loadDirtyPlayers, duration: const Duration(milliseconds: 300));
+  }
+
+  @override
+  Future<ConnectResult> connect(String host, String path,
+      [String token]) async {
+    _patched = false;
+    return super.connect(host, path, token);
   }
 
   @override

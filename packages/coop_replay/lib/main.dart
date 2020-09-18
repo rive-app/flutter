@@ -189,6 +189,8 @@ class ReplayFile {
             break;
 
           default:
+            // A property changed.
+            print('  Property: ${keyToProperty[change.op]}');
             break;
         }
       }

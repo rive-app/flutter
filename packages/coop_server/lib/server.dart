@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:core/debounce.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
@@ -61,6 +63,9 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
       ..id = serverChangeId
       ..objects = [];
     bool validateDependencies = false;
+    bool isChangeValid = true;
+
+    objectChangesLoop:
     for (final clientObjectChanges in changeSet.objects) {
       // print("CHANGING ${objectChanges.objectId}");
 
@@ -91,7 +96,9 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
 
             // Does an object with this id already exist? Abort!
             if (modifiedFile.objects.containsKey(objectId)) {
-              return false;
+              serverLog('reject due to duplicate objectId: $objectId');
+              isChangeValid = false;
+              break objectChangesLoop;
             }
             modifiedFile.objects[objectId] = object = CoopFileObject()
               ..objectId = objectId
@@ -133,10 +140,11 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
         }
       }
     }
-
-    bool isChangeValid = true;
-    if (validateDependencies) {
-      isChangeValid = !modifiedFile.hasCyclicDependencies();
+    if (isChangeValid && validateDependencies) {
+      if (modifiedFile.hasCyclicDependencies()) {
+        serverLog('reject due to dependency cycle');
+        isChangeValid = false;
+      }
     }
 
     // Decide if we want to save the changeset (in the future we could make this
@@ -148,7 +156,6 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     if (isChangeValid) {
       // Changes were good, modify file and propagate them to other clients.
       file = modifiedFile;
-      // print("CHANGE ID ${serverChangeSet.id}");
       propagateChanges(client, serverChangeSet);
       return true;
     } else {
@@ -160,6 +167,10 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
   @override
   ChangeSet buildFileChangeSet() {
     return file.toChangeSet();
+  }
+
+  void serverLog(String message) {
+    print('coop file: ${file?.ownerId}-${file?.fileId} - $message');
   }
 
   @override
@@ -175,10 +186,10 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
       return false;
     }
 
-    print('revision data is ${data.length} $ownerId-$fileId');
+    print('revision data is ${data.length} bytes $ownerId-$fileId');
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {
-      print('bad data in revision for $ownerId-$fileId');
+      print('bad data in revision for $ownerId-$fileId, making empty file');
       file = CoopFile()
         ..ownerId = ownerId
         ..fileId = fileId
@@ -228,18 +239,25 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     }
   }
 
+  Completer _persistCompleter;
   @override
   Future<void> persist() async {
+    _persistCompleter = Completer<void>();
     var writer = BinaryWriter(alignment: max(1, file.objects.length) * 256);
     file.serialize(writer);
-    var result =
-        await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
-    // print("GOT REVISION ID ${result.revisionId}");
+    await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
+    _persistCompleter.complete();
   }
 
   @override
   Future<bool> shutdown() async {
-    // TODO: Make sure debounced save has completed.
+    // If a persist call was debounced, force it to happen now and await its
+    // completer.
+    if (debounceAccelerate(persist)) {
+      if (_persistCompleter?.future != null) {
+        await _persistCompleter.future;
+      }
+    }
     return true;
   }
 
