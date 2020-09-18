@@ -212,7 +212,6 @@ class CoopClient extends CoopReader {
   /// changeId.
   @override
   Future<void> recvAccept(int changeId) async {
-    print("GOT ACCEPT $changeId");
     // Kind of odd to assert a network requirement (this is something the server
     // would mess up) but it helps track things down if they go wrong.
     assert(_unacknowledged != null,
@@ -265,7 +264,6 @@ class CoopClient extends CoopReader {
   final List<ChangeSet> _fresh = [];
   ChangeSet _unacknowledged;
   void queueChanges(ChangeSet changes) {
-    print("QUEUE CHANGES");
     // For now we send and save changes locally directly. Eventually we should
     // flatten them until they've been sent to a server as an atomic set.
 
@@ -281,11 +279,10 @@ class CoopClient extends CoopReader {
         _channel.sink == null) {
       return;
     }
-    print("SEND CHANGES ${_fresh.first.id}");
     var writer = BinaryWriter();
     _fresh.first.serialize(writer);
-    _channel.sink.add(writer.uint8Buffer);
     _unacknowledged = _fresh.removeAt(0);
+    _channel.sink.add(writer.uint8Buffer);
     // _fresh.clear();
   }
 
