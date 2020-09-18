@@ -301,6 +301,7 @@ void main() {
           reason: 'Editing file count should be 0');
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
+      await Future<void>.delayed(const Duration(seconds:1));
     },
     timeout: const Timeout(
       Duration(seconds: 60),
@@ -394,6 +395,7 @@ void main() {
       expect(await client1.disconnect(), true);
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
+      await Future<void>.delayed(const Duration(seconds:1));
     },
     timeout: const Timeout(
       Duration(seconds: 60),
@@ -485,6 +487,7 @@ void main() {
       expect(await client1.disconnect(), true);
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
+      await Future<void>.delayed(const Duration(seconds:1));
     },
     timeout: const Timeout(
       Duration(seconds: 60),
@@ -567,6 +570,7 @@ void main() {
       expect(await client1.disconnect(), true);
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
+      await Future<void>.delayed(const Duration(seconds:1));
     },
     timeout: const Timeout(
       Duration(seconds: 60),
