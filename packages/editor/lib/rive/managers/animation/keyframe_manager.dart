@@ -130,22 +130,23 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
     }
   }
 
-  void _changeCubicInterpolation(CubicInterpolationViewModel viewmodel) {
+  void _changeCubicInterpolation(CubicInterpolationViewModel viewModel) {
     for (final keyFrame in _selection.value) {
       switch (keyFrame.interpolation) {
         case KeyFrameInterpolation.cubic:
           var interpolator = keyFrame.interpolator;
           if (interpolator is CubicInterpolator) {
-            interpolator.x1 = viewmodel.x1;
-            interpolator.y1 = viewmodel.y1;
-            interpolator.x2 = viewmodel.x2;
-            interpolator.y2 = viewmodel.y2;
+            interpolator.x1 = viewModel.x1;
+            interpolator.y1 = viewModel.y1;
+            interpolator.x2 = viewModel.x2;
+            interpolator.y2 = viewModel.y2;
           }
           break;
         default:
           break;
       }
     }
+    _updateCommonInterpolation();
   }
 
   void _changeInterpolation(KeyFrameInterpolation interpolation) {

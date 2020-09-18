@@ -247,7 +247,11 @@ abstract class _InterpolationRenderBox extends RenderBox {
       return;
     }
     _theme = value;
-    interpolationPaint.color = value.colors.interpolationPreviewLine;
+    interpolationPaint.shader = LinearGradient(
+      colors: [
+        value.colors.interpolationControlHandleIn, 
+        value.colors.interpolationControlHandleOut]
+    ).createShader(const Rect.fromLTWH(0, 0, 160, 160));
     separatorPaint.color = value.colors.interpolationPreviewSeparator;
     background.color = value.colors.interpolationCurveBackground;
     timePaint.color = value.colors.key;
@@ -370,11 +374,16 @@ class _CubicPreviewRenderBox extends _InterpolationRenderBox {
   Offset _renderIn;
   Offset _renderOut;
 
-  final Paint controlLine = Paint()
+  final Paint controlLineIn = Paint()
     ..strokeWidth = 1
     ..style = PaintingStyle.stroke;
 
-  final Paint controlHandle = Paint();
+  final Paint controlLineOut = Paint()
+    ..strokeWidth = 1
+    ..style = PaintingStyle.stroke;
+
+  final Paint controlHandleIn = Paint();
+  final Paint controlHandleOut = Paint();
 
   final Path cubic = Path();
   Offset _controlIn;
@@ -399,8 +408,10 @@ class _CubicPreviewRenderBox extends _InterpolationRenderBox {
 
   @override
   void onThemeChanged() {
-    controlLine.color = theme.colors.keyMarqueeStroke;
-    controlHandle.color = theme.colors.keyMarqueeStroke;
+    controlLineIn.color = theme.colors.interpolationControlHandleIn;
+    controlLineOut.color = theme.colors.interpolationControlHandleOut;
+    controlHandleIn.color = theme.colors.interpolationControlHandleIn;
+    controlHandleOut.color = theme.colors.interpolationControlHandleOut;
   }
 
   @override
@@ -432,13 +443,13 @@ class _CubicPreviewRenderBox extends _InterpolationRenderBox {
     canvas.drawPath(cubic, interpolationPaint);
 
     canvas.drawLine(
-        Offset(0, size.height - _renderPadding), _renderIn, controlLine);
+        Offset(0, size.height - _renderPadding), _renderIn, controlLineIn);
 
     canvas.drawLine(
-        Offset(size.width, _renderPadding), _renderOut, controlLine);
+        Offset(size.width, _renderPadding), _renderOut, controlLineOut);
 
-    canvas.drawCircle(_renderIn, 3.5, controlHandle);
-    canvas.drawCircle(_renderOut, 3.5, controlHandle);
+    canvas.drawCircle(_renderIn, 3.5, controlHandleIn);
+    canvas.drawCircle(_renderOut, 3.5, controlHandleOut);
   }
 }
 

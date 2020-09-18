@@ -187,8 +187,9 @@ class RiveColors {
   Color get timelineButtonBackGroundHover => const Color(0xFF323232);
   Color get interpolationUnderline => const Color(0xFF181818);
   Color get interpolationCurveBackground => const Color(0xFF303030);
-  Color get interpolationPreviewLine => const Color(0x8033A7FF);
   Color get interpolationPreviewSeparator => const Color(0xFF3C3C3C);
+  Color get interpolationControlHandleIn => const Color(0xFF29BB9C);
+  Color get interpolationControlHandleOut => const Color(0xFF33A7FF);
 
   // Inspector panel pill button
   Color get inspectorPillBackground => buttonDark;
