@@ -390,6 +390,7 @@ void main() {
       // to create an object with a duplicate id.
       expect(await changes.accept(), false);
 
+      expect(await client1.disconnect(), true);
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
     },
@@ -479,6 +480,8 @@ void main() {
       expect(client1.patched, false,
           reason: 'no patching was necessary as previous connection cleaned '
               'the file up');
+
+      expect(await client1.disconnect(), true);
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
     },
@@ -560,6 +563,7 @@ void main() {
       expect(client1.nextObjectId.object, crazyId.object + 1,
           reason: 'our monotonic id should now have reset to the crazy+1');
 
+      expect(await client1.disconnect(), true);
       expect(await server.close(), true);
       expect(await privateApi.close(), true);
     },
