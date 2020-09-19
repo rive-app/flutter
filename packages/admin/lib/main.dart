@@ -32,7 +32,7 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
-  static const defaultHost = 'https://homelander.rive.app';
+  static const defaultHost = 'https://preview.rive.app';
 
   @override
   void initState() {
