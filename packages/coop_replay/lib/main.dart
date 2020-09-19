@@ -191,6 +191,13 @@ class ReplayFile {
           default:
             // A property changed.
             print('  Property: ${keyToProperty[change.op]}');
+            if (keyToProperty[change.op] != null) {
+              var type = keyToProperty[change.op].type;
+              var reader = BinaryReader.fromList(change.value);
+              if (type.name == 'String') {
+                print("    value: ${reader.readString(explicitLength: false)}");
+              }
+            }
             break;
         }
       }
