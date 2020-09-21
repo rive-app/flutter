@@ -71,7 +71,7 @@ class RuntimeExporter {
 
     // Write the number of artboards.
     contentsWriter.writeVarUint(exportArtboards.length);
-    var allComponents = core.objectsOfType<Component>().toList();
+
     // Export artboards.
     for (final artboard in exportArtboards) {
       // Make sure everything is updated (ensures drawables are in order) before
@@ -81,30 +81,13 @@ class RuntimeExporter {
       HashMap<Id, int> idToIndex = HashMap<Id, int>();
       // Find all the components that belong to this artboard.
       List<Component> artboardComponents = [];
-      // Drawables need to export in natural draw order.
-      List<Drawable> drawables = [];
-      for (final object in allComponents) {
+      artboard.forEachChild((object) {
         if (object.exportsWith(artboard)) {
-          if (object is Drawable) {
-            drawables.add(object);
-          } else {
-            artboardComponents.add(object);
-          }
+          artboardComponents.add(object);
         }
-      }
-      // Components are exported in hierarchy order. This makes it so we don't
-      // have to export the childOrder FractionalIndex. Note that it's ok to
-      // sort them in a flat list like this as items with the same values are
-      // presumably parented to something different, so in their individual
-      // parent/child relationships they will still be in order.
-      artboardComponents.sort((a, b) => a.childOrder.compareTo(b.childOrder));
+        return true;
+      });
 
-      // Sort the drawables in natural order and add them to the artboard
-      // components.
-      drawables
-          .sort((a, b) => a.naturalDrawOrder.compareTo(b.naturalDrawOrder));
-      artboardComponents.addAll(drawables);
-      
       // The artboard is always at the start of the components list. We add it
       // after building up the ordered components as the artboard itself may not
       // have a fractional index for order.
