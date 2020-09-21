@@ -195,6 +195,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
         ..fileId = fileId
         ..objects = {};
     } else {
+      print('attempting to deserialize');
       file = CoopFile();
       if (!file.deserialize(
         BinaryReader(
@@ -216,9 +217,12 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
           ..ownerId = ownerId
           ..fileId = fileId
           ..objects = {};
+      } else {
+      print('deserialized');
       }
     }
     _nextChangeId = max(file.serverChangeId, CoopCommand.minChangeId) + 1;
+    print('next change id is $_nextChangeId');
     return true;
   }
 

@@ -68,6 +68,7 @@ class CoopWriter {
   }
 
   void writeAccept(int changeId) {
+    print('writing accept $changeId');
     var writer = BinaryWriter(alignment: 8);
     writer.writeVarUint(CoopCommand.accept);
     writer.writeVarUint(changeId);
