@@ -21,6 +21,7 @@ class CoopIsolate {
   SendPort _sendToIsolatePort;
   Isolate _isolate;
   final Map<int, WebSocket> _clients = {};
+  int nextClientId = 0;
 
   /// Sockets queue during concurrent open request.
   final List<_WebSocketDelayedAdd> _queuedSockets = [];
@@ -63,8 +64,7 @@ class CoopIsolate {
     }
 
     // Make sure the chosen id is available.
-    var ids = List<int>.from(_clients.keys)..sort();
-    var id = ids.isEmpty ? 0 : ids.reduce(max) + 1;
+    var id = nextClientId++;
     _clients[id] = socket;
 
     sendToIsolate(CoopServerAddClient(id, userOwnerId, desiredClientId));
