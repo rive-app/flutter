@@ -377,9 +377,8 @@ void addArtboard(RiveFile file, DrawableRoot root) {
   });
 
   // root.definitions.
-
   file.batchAdd(() {
-    for (var i = 0; i < root.children.length; i++) {
+    for (var i = root.children.length - 1; i >= 0; i--) {
       addChild(root, file, artboard, root.children[i], clippingRefs);
     }
   });
@@ -522,7 +521,7 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
         node.appendChild(clipper);
       }
 
-      for (var i = 0; i < drawableGroup.children.length; i++) {
+      for (var i = drawableGroup.children.length - 1; i >= 0; i--) {
         addChild(root, file, node, drawableGroup.children[i], clippingRefs);
       }
 
