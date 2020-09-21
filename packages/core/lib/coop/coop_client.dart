@@ -281,8 +281,8 @@ class CoopClient extends CoopReader {
     }
     var writer = BinaryWriter();
     _fresh.first.serialize(writer);
-    _channel.sink.add(writer.uint8Buffer);
     _unacknowledged = _fresh.removeAt(0);
+    _channel.sink.add(writer.uint8Buffer);
     // _fresh.clear();
   }
 

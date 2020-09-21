@@ -12,6 +12,15 @@ DebounceCallback debounce(DebounceCallback callback,
   return callback;
 }
 
+bool debounceAccelerate(DebounceCallback call) {
+  if (_debounce.containsKey(call)) {
+    _debounce.remove(call);
+    call();
+    return true;
+  }
+  return false;
+}
+
 void cancelDebounce(DebounceCallback callback) {
   _debounce[callback]?.cancel();
 }

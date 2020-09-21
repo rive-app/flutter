@@ -5,6 +5,7 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_role.dart';
@@ -446,7 +447,23 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                   select: () => FolderContentsManager().delete(),
                   leftMargin: 15,
                   height: 35,
-                )
+                ),
+                if (selection.files.length == 1) PopupContextItem.separator(),
+                if (selection.files.length == 1)
+                  PopupContextItem(
+                    'ID: ${selection.files.first.fileOwnerId}-${selection.files.first.id}',
+                    select: () {
+                      Clipboard.setData(ClipboardData(
+                          text: '${selection.files.first.fileOwnerId}-'
+                              '${selection.files.first.id}'));
+
+                      // makes it easy for devs to copy from terminal...
+                      print(
+                          'ID: ${selection.files.first.fileOwnerId}-${selection.files.first.id}');
+                    },
+                    leftMargin: 15,
+                    height: 35,
+                  ),
               ],
               position: event.pointerEvent.position);
         }

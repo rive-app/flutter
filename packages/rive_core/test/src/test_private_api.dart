@@ -6,6 +6,12 @@ class TestPrivateApi {
   HttpServer _server;
   int _monotonicID = 1;
   Map<String, Uint8List> filesData = {};
+
+  Future<bool> close() async {
+    await _server.close(force: true);
+    return true;
+  }
+  
   Future<bool> listen(int port) async {
     _server = await HttpServer.bind(
       InternetAddress.loopbackIPv4,

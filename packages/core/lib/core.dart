@@ -199,6 +199,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   // _nextObjectId has a default value that will be
   // overridden when a client is connected
   Id _nextObjectId = const Id(0, 0);
+  Id get nextObjectId => _nextObjectId;
   // Map<int, Core> get objects => _objects;
 
   final List<CorePropertyChanges> journal = [];
