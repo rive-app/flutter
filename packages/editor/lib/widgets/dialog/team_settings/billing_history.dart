@@ -62,17 +62,19 @@ class _BillingHistoryState extends State<BillingHistory> {
     String header,
     List<Widget> rows, {
     CrossAxisAlignment columnAlignemnt = CrossAxisAlignment.start,
+    int flex = 2,
   }) {
     final styles = RiveTheme.of(context).textStyles;
     final headerStyle = styles.receiptHeader;
 
     return Expanded(
+      flex: flex,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: columnAlignemnt,
         children: [
           Text(header, style: headerStyle),
-          ...rows
+          ...rows.reversed
               .map<Widget>((row) => Padding(
                     padding: const EdgeInsets.only(top: 24),
                     child: row,
@@ -103,8 +105,18 @@ class _BillingHistoryState extends State<BillingHistory> {
     for (final receipt in details.receipts) {
       final isPaid = receipt.successful;
       final rowStyle = isPaid ? successStyle : failedStyle;
-      dates.add(Text(receipt.created.description, style: rowStyle));
-      amounts.add(Text(asDollars(receipt.amount), style: rowStyle));
+      dates.add(Text(
+        receipt.created.description,
+        style: rowStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ));
+      amounts.add(Text(
+        asDollars(receipt.amount),
+        style: rowStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ));
       statuses.add(
         Text(isPaid ? 'Success' : 'Failed', style: rowStyle),
       );
@@ -112,6 +124,8 @@ class _BillingHistoryState extends State<BillingHistory> {
         Text(
           receipt.description.isNotEmpty ? receipt.description : 'n/a',
           style: rowStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       );
       urls.add(
@@ -144,11 +158,16 @@ class _BillingHistoryState extends State<BillingHistory> {
         _receiptColumn('Date', dates),
         _receiptColumn('Amount', amounts),
         _receiptColumn('Status', statuses),
-        _receiptColumn('Description', descriptions),
+        _receiptColumn(
+          'Description',
+          descriptions,
+          flex: 3,
+        ),
         _receiptColumn(
           'Receipts',
           urls,
           columnAlignemnt: CrossAxisAlignment.end,
+          flex: 1,
         ),
       ],
     );
