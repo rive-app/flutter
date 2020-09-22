@@ -6,7 +6,7 @@ import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 
 import 'package:coop_server_library/server.dart';
-import 'package:coop_server_process/logger.dart';
+import 'package:utilities/logger.dart';
 
 const dataFolder = 'data-folder';
 

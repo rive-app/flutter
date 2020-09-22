@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:core/debounce.dart';
 import 'package:meta/meta.dart';
+import 'package:utilities/logger.dart';
 
 import 'change.dart';
 import 'coop_server.dart';
@@ -201,6 +201,7 @@ abstract class CoopIsolateProcess {
 
   Future<bool> initProcess(SendPort sendToMainPort, Map<String, String> options,
       int ownerId, int fileId) async {
+    configureLogger();
     _sendToMainPort = sendToMainPort;
     if (await initialize(ownerId, fileId, options)) {
       _sendToMainPort.send(_receiveFromMainPort.sendPort);

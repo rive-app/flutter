@@ -13,7 +13,6 @@ dependencies:
     path: ../utilities
   fractional:
     path: ../fractional
-  sentry: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
   test: ^1.9.4

@@ -371,7 +371,7 @@ packages:
     source: hosted
     version: "0.24.1"
   sentry:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: sentry
       url: "https://pub.dartlang.org"
