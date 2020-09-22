@@ -81,12 +81,12 @@ class SvgToRiveTask extends PeonTask {
         var outFile = File(outPath);
         cleaned = await outFile.readAsString();
       } else {
-        _log.severe('Problem running svgcleaner for ${this.taskId}'
+        _log.severe('Problem running svgcleaner for $taskId'
             '\nstdout:\n${output.stdout.toString().split('\n')}'
             '\nstderr:\n${output.stderr.toString().split('\n')}');
       }
-    } on ProcessException {
-      _log.severe('Problem running svgcleaner for ${this.taskId}');
+    } on ProcessException catch (e, s) {
+      _log.severe('Problem running svgcleaner for $taskId', e, s);
     } finally {
       await tempDir?.delete(recursive: true);
     }

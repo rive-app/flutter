@@ -65,8 +65,8 @@ class PrivateApi {
         );
         return false;
       }
-    } on Exception catch (e) {
-      log.severe('Exception registering co-op server with 2D service', e);
+    } on Exception catch (e, s) {
+      log.severe('Exception registering co-op server with 2D service', e, s);
       return false;
     }
     return true;
@@ -88,8 +88,8 @@ class PrivateApi {
         );
         return false;
       }
-    } on Exception catch (e) {
-      log.severe('Error deregistering co-op server with 2D service: $e');
+    } on Exception catch (e, s) {
+      log.severe('Error deregistering co-op server with 2D service:', e, s);
       return false;
     }
     return true;
@@ -112,7 +112,13 @@ class PrivateApi {
         Map<String, dynamic> data;
         try {
           data = json.decode(response.body) as Map<String, dynamic>;
-        } on FormatException catch (_) {
+        } on FormatException catch (e, s) {
+          log.severe(
+              'Error parsing json saving a revision update for '
+              'owner: $ownerId, '
+              'file: $fileId ',
+              e,
+              s);
           return null;
         }
 
@@ -123,7 +129,13 @@ class PrivateApi {
         );
       }
       return null;
-    } on Exception catch (_) {
+    } on Exception catch (e, s) {
+      log.severe(
+          'Error saving a revision update for '
+          'owner: $ownerId, '
+          'file: $fileId ',
+          e,
+          s);
       return null;
     }
   }
@@ -139,8 +151,13 @@ class PrivateApi {
       }
       print('got ${response.statusCode}');
       return null;
-    } on Exception catch (error) {
-      print('got $error');
+    } on Exception catch (e, s) {
+      log.severe(
+          'Error loading a revision '
+          'owner: $ownerId, '
+          'file: $fileId, ',
+          e,
+          s);
       return null;
     }
   }
@@ -157,7 +174,14 @@ class PrivateApi {
         return response.bodyBytes;
       }
       return null;
-    } on Exception catch (_) {
+    } on Exception catch (e, s) {
+      log.severe(
+          'Error restoring a revision for '
+          'owner: $ownerId, '
+          'file: $fileId, '
+          'revision: $revisionId ',
+          e,
+          s);
       return null;
     }
   }
@@ -180,6 +204,15 @@ class PrivateApi {
       if (response.statusCode == 200) {
         return response.bodyBytes;
       }
-    } on Exception catch (_) {}
+    } on Exception catch (e, s) {
+      log.severe(
+          'Error persisting change set for '
+          'owner: ${file.ownerId}, '
+          'file: ${file.fileId}, '
+          'serverChangeId: $serverChangeId '
+          'minChangeId: ${CoopCommand.minChangeId} ',
+          e,
+          s);
+    }
   }
 }

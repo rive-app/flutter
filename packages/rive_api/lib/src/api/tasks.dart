@@ -34,7 +34,7 @@ class TasksApi {
       final data = json.decodeMap(res.body);
       return TaskResult.fromData(data);
     } on FormatException catch (e) {
-      _log.severe('Error reading task response: $e');
+      _log.severe('Error reading task response', e);
       rethrow;
     }
   }
@@ -61,7 +61,7 @@ class TasksApi {
       final data = json.decodeMap(res.body);
       return TaskResult.fromData(data);
     } on FormatException catch (e) {
-      _log.severe('Error reading task response: $e');
+      _log.severe('Error reading task response', e);
       rethrow;
     }
   }

@@ -31,7 +31,7 @@ class FileApi {
       final data = json.decodeList<String>(res.body);
       return FileDM.fromHashedIdList(data);
     } on FormatException catch (e) {
-      _log.severe('Error formatting recent files api response: $e');
+      _log.severe('Error formatting recent files api response', e);
       rethrow;
     }
   }
@@ -48,7 +48,7 @@ class FileApi {
 
       return FileDM.fromHashedIdDataList(data.getList('files'), cdns);
     } on FormatException catch (e) {
-      _log.severe('Error formatting recent files details api response: $e');
+      _log.severe('Error formatting recent files details api response', e);
       rethrow;
     }
   }
@@ -79,7 +79,7 @@ class FileApi {
       final data = json.decodeList<int>(res.body);
       return FileDM.fromIdList(data, ownerId);
     } on FormatException catch (e) {
-      _log.severe('Error formatting teams api response: $e');
+      _log.severe('Error formatting teams api response', e);
       rethrow;
     }
   }
@@ -102,7 +102,7 @@ class FileApi {
       final cdn = CdnDM.fromData(data.getMap<String, dynamic>('cdn'));
       return FileDM.fromDataList(data.getList('files'), cdn);
     } on FormatException catch (e) {
-      _log.severe('Error formatting teams api response: $e');
+      _log.severe('Error formatting teams api response', e);
       rethrow;
     }
   }

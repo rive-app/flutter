@@ -29,7 +29,7 @@ class MeApi {
       }
       return MeDM.fromData(data);
     } on FormatException catch (e) {
-      _log.severe('Error formatting whoami api response: $e');
+      _log.severe('Error formatting whoami api response', e);
       rethrow;
     }
   }
@@ -67,7 +67,7 @@ class MeApi {
       }
       return MeDM.fromData(data);
     } on FormatException catch (e) {
-      _log.severe("Error from '/api/linkAccounts': $e");
+      _log.severe("Error from '/api/linkAccounts'", e);
       rethrow;
     }
   }
@@ -76,7 +76,7 @@ class MeApi {
     try {
       await api.getFromPath('/api/cancelLink');
     } on FormatException catch (e) {
-      _log.severe("Error from '/api/linkAccounts': $e");
+      _log.severe("Error from '/api/linkAccounts'", e);
       rethrow;
     }
   }

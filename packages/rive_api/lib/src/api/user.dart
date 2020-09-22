@@ -20,7 +20,7 @@ class UserApi {
       final data = json.decodeList<Map<String, dynamic>>(res.body);
       return UserDM.fromSearchDataList(data);
     } on FormatException catch (e) {
-      _log.severe('Error formatting whoami api response: $e');
+      _log.severe('Error formatting whoami api response', e);
       rethrow;
     }
   }

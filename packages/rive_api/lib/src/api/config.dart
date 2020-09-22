@@ -20,7 +20,7 @@ class ConfigApi {
       final data = json.decodeMap(res.body);
       return Config.fromDM(ConfigDM.fromData(data));
     } on FormatException catch (e) {
-      _log.severe('Error formatting app config api response: $e');
+      _log.severe('Error formatting app config api response', e);
       rethrow;
     }
   }

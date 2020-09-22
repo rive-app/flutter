@@ -41,7 +41,7 @@ class FolderApi {
       }
       return FolderDM.fromDataList(data.getList('folders'), ownerId);
     } on FormatException catch (e) {
-      _log.severe('Error formatting folder api response: $e');
+      _log.severe('Error formatting folder api response', e);
       rethrow;
     }
   }
