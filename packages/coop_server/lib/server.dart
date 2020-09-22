@@ -218,7 +218,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
           ..fileId = fileId
           ..objects = {};
       } else {
-      print('deserialized');
+        print('deserialized');
       }
     }
     _nextChangeId = max(file.serverChangeId, CoopCommand.minChangeId) + 1;

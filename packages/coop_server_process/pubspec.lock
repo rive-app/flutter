@@ -135,7 +135,7 @@ packages:
     source: hosted
     version: "3.0.1"
   sentry:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: sentry
       url: "https://pub.dartlang.org"
@@ -191,7 +191,7 @@ packages:
     source: hosted
     version: "3.4.1"
   utilities:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "../utilities"
       relative: true

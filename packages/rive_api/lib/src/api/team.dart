@@ -22,7 +22,7 @@ class TeamApi {
       final data = json.decodeList<Map<String, dynamic>>(res.body);
       return TeamDM.fromDataList(data);
     } on FormatException catch (e) {
-      _log.severe('Error formatting teams api response: $e');
+      _log.severe('Error formatting teams api response', e);
       rethrow;
     }
   }
@@ -53,7 +53,7 @@ class TeamApi {
       final data = json.decodeList<Map<String, Object>>(res.body);
       return TeamMemberDM.formDataList(data);
     } on FormatException catch (e) {
-      _log.severe('Error formatting teams api response: $e');
+      _log.severe('Error formatting teams api response', e);
       rethrow;
     }
   }

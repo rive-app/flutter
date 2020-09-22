@@ -50,8 +50,8 @@ abstract class CoopServer {
   Future<bool> listen({int port = 8000, Map<String, String> options}) async {
     try {
       _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
-    } on Exception catch (e) {
-      _log.severe('Unable to bind port to http server', e);
+    } on Exception catch (e, s) {
+      _log.severe('Unable to bind port to http server', e, s);
       return false;
     }
     _log.info('Listening on ${InternetAddress.anyIPv4}:$port');
@@ -104,10 +104,10 @@ abstract class CoopServer {
               'for indication of shutdown prior to this.');
           await ws.close();
         }
-      } on WebSocketException catch (e) {
-        _log.severe('Failed to upgrade to web socket', e);
-      } on FormatException catch (e) {
-        _log.severe('Error parsing web socket request', e);
+      } on WebSocketException catch (e, s) {
+        _log.severe('Failed to upgrade to web socket', e, s);
+      } on FormatException catch (e, s) {
+        _log.severe('Error parsing web socket request', e, s);
         request.response.statusCode = 422;
         await request.response.close();
       }
@@ -151,13 +151,13 @@ class WebSocketData {
       userOwnerId = int.parse(segments[3]);
       try {
         clientId = int.parse(segments[4]);
-      } on FormatException catch (e) {
-        _log.severe('Invalid clientid: ${segments[4]}', e);
+      } on FormatException catch (e, s) {
+        _log.severe('Invalid clientid: ${segments[4]}', e, s);
         // Don't rethrow, just give a default client id
         clientId = 0;
       }
-    } on FormatException catch (e) {
-      _log.severe('Invalid message ${_segmentsToString(segments)}', e);
+    } on FormatException catch (e, s) {
+      _log.severe('Invalid message ${_segmentsToString(segments)}', e, s);
       rethrow;
     }
   }

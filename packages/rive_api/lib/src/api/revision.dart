@@ -29,7 +29,7 @@ class RevisionApi {
       return RevisionDM.fromDataList(
           data.getList<Map<String, dynamic>>('revisions'));
     } on FormatException catch (e) {
-      _log.severe('Error formatting teams api response: $e');
+      _log.severe('Error formatting teams api response', e);
       rethrow;
     }
   }

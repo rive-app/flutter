@@ -67,11 +67,8 @@ Future<void> loop(Future<SqsQueue> Function(ConsoleClient) getQueue,
           );
           _log.info('Work failed, removing from queue.');
         }
-        // ignore: avoid_catches_without_on_clauses
-      } catch (e, stacktrace) {
-        _log.severe('Encountered Error: $e\n'
-            'MESSAGE\n$message\n'
-            'STACKTRACE:\n$stacktrace');
+      } on Exception catch (e, s) {
+        _log.severe('Encountered Error: MESSAGE\n$message\n', e, s);
       }
     });
   }
@@ -83,8 +80,8 @@ Future<bool> execute(SqsMessage message,
   Map<String, dynamic> data;
   try {
     data = json.decode(message.body) as Map<String, dynamic>;
-  } on FormatException catch (_) {
-    _log.severe('Whaaat? JSON Error, message: ${message.body}');
+  } on FormatException catch (e, s) {
+    _log.severe('Whaaat? JSON Error, message: ${message.body}', e, s);
     return false;
   }
   if (data.containsKey('action')) {

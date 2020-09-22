@@ -25,7 +25,7 @@ void configureLogger({bool disableSentry = false}) {
   }
   final disableSentryEnv = Platform.environment['DISABLE_SENTRY'];
   final _disableSentry = disableSentry || disableSentryEnv != null;
-  print('Sentry disabled status $disableSentry');
+  print('Sentry disabled status $_disableSentry');
 
   // Print to the console and for SEVERE, write to sentry
   // When adding SEVERE logs, try to provide the error and stacktrace
