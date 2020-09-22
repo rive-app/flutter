@@ -7,11 +7,12 @@ import 'dart:typed_data';
 const port = 3003;
 
 Future<void> main() async {
-  final server = await HttpServer.bind('localhost', port);
+  final server = await HttpServer.bind('0.0.0.0', port);
 
   print('Listening on port $port');
 
   await for (final req in server) {
+    print('Request received');
     await _handleRequest(req);
     await req.response.close();
   }
