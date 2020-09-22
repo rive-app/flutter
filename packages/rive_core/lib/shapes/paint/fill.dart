@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/src/generated/shapes/paint/fill_base.dart';

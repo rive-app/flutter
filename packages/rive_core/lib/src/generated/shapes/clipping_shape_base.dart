@@ -17,50 +17,48 @@ abstract class ClippingShapeBase extends Component {
   Set<int> get coreTypes => {ClippingShapeBase.typeKey, ComponentBase.typeKey};
 
   /// --------------------------------------------------------------------------
-  /// ShapeId field with key 92.
-  Id _shapeId;
-  static const int shapeIdPropertyKey = 92;
+  /// SourceId field with key 92.
+  Id _sourceId;
+  static const int sourceIdPropertyKey = 92;
 
-  /// Identifier used to track the shape to use as a clipping source.
-  Id get shapeId => _shapeId;
+  /// Identifier used to track the node to use as a clipping source.
+  Id get sourceId => _sourceId;
 
-  /// Change the [_shapeId] field value.
-  /// [shapeIdChanged] will be invoked only if the field's value has changed.
-  set shapeId(Id value) {
-    if (_shapeId == value) {
+  /// Change the [_sourceId] field value.
+  /// [sourceIdChanged] will be invoked only if the field's value has changed.
+  set sourceId(Id value) {
+    if (_sourceId == value) {
       return;
     }
-    Id from = _shapeId;
-    _shapeId = value;
-    onPropertyChanged(shapeIdPropertyKey, from, value);
-    shapeIdChanged(from, value);
+    Id from = _sourceId;
+    _sourceId = value;
+    onPropertyChanged(sourceIdPropertyKey, from, value);
+    sourceIdChanged(from, value);
   }
 
-  void shapeIdChanged(Id from, Id to);
+  void sourceIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
-  /// ClipOpValue field with key 93.
-  int _clipOpValue = 0;
-  static const int clipOpValuePropertyKey = 93;
+  /// FillRule field with key 93.
+  int _fillRule = 0;
+  static const int fillRulePropertyKey = 93;
 
-  /// Backing enum value for the clipping operation type (intersection or
-  /// difference).
-  int get clipOpValue => _clipOpValue;
+  /// Backing enum value for the clipping fill rule (nonZero or evenOdd).
+  int get fillRule => _fillRule;
 
-  /// Change the [_clipOpValue] field value.
-  /// [clipOpValueChanged] will be invoked only if the field's value has
-  /// changed.
-  set clipOpValue(int value) {
-    if (_clipOpValue == value) {
+  /// Change the [_fillRule] field value.
+  /// [fillRuleChanged] will be invoked only if the field's value has changed.
+  set fillRule(int value) {
+    if (_fillRule == value) {
       return;
     }
-    int from = _clipOpValue;
-    _clipOpValue = value;
-    onPropertyChanged(clipOpValuePropertyKey, from, value);
-    clipOpValueChanged(from, value);
+    int from = _fillRule;
+    _fillRule = value;
+    onPropertyChanged(fillRulePropertyKey, from, value);
+    fillRuleChanged(from, value);
   }
 
-  void clipOpValueChanged(int from, int to);
+  void fillRuleChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// IsVisible field with key 94.
@@ -85,11 +83,11 @@ abstract class ClippingShapeBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (_shapeId != null) {
-      onPropertyChanged(shapeIdPropertyKey, _shapeId, _shapeId);
+    if (_sourceId != null) {
+      onPropertyChanged(sourceIdPropertyKey, _sourceId, _sourceId);
     }
-    if (_clipOpValue != null) {
-      onPropertyChanged(clipOpValuePropertyKey, _clipOpValue, _clipOpValue);
+    if (_fillRule != null) {
+      onPropertyChanged(fillRulePropertyKey, _fillRule, _fillRule);
     }
     if (_isVisible != null) {
       onPropertyChanged(isVisiblePropertyKey, _isVisible, _isVisible);
@@ -100,16 +98,16 @@ abstract class ClippingShapeBase extends Component {
   void writeRuntimeProperties(BinaryWriter writer,
       HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, propertyToField, idLookup);
-    if (_shapeId != null && exports(shapeIdPropertyKey)) {
-      var value = idLookup[_shapeId];
+    if (_sourceId != null && exports(sourceIdPropertyKey)) {
+      var value = idLookup[_sourceId];
       if (value != null) {
         context.uintType.writeRuntimeProperty(
-            shapeIdPropertyKey, writer, value, propertyToField);
+            sourceIdPropertyKey, writer, value, propertyToField);
       }
     }
-    if (_clipOpValue != null && exports(clipOpValuePropertyKey)) {
+    if (_fillRule != null && exports(fillRulePropertyKey)) {
       context.uintType.writeRuntimeProperty(
-          clipOpValuePropertyKey, writer, _clipOpValue, propertyToField);
+          fillRulePropertyKey, writer, _fillRule, propertyToField);
     }
     if (_isVisible != null && exports(isVisiblePropertyKey)) {
       context.boolType.writeRuntimeProperty(
@@ -120,8 +118,8 @@ abstract class ClippingShapeBase extends Component {
   @override
   bool exports(int propertyKey) {
     switch (propertyKey) {
-      case clipOpValuePropertyKey:
-        return _clipOpValue != 0;
+      case fillRulePropertyKey:
+        return _fillRule != 0;
       case isVisiblePropertyKey:
         return _isVisible != true;
     }
@@ -131,10 +129,10 @@ abstract class ClippingShapeBase extends Component {
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {
-      case shapeIdPropertyKey:
-        return shapeId as K;
-      case clipOpValuePropertyKey:
-        return clipOpValue as K;
+      case sourceIdPropertyKey:
+        return sourceId as K;
+      case fillRulePropertyKey:
+        return fillRule as K;
       case isVisiblePropertyKey:
         return isVisible as K;
       default:
@@ -145,8 +143,8 @@ abstract class ClippingShapeBase extends Component {
   @override
   bool hasProperty(int propertyKey) {
     switch (propertyKey) {
-      case shapeIdPropertyKey:
-      case clipOpValuePropertyKey:
+      case sourceIdPropertyKey:
+      case fillRulePropertyKey:
       case isVisiblePropertyKey:
         return true;
       default:

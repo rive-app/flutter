@@ -462,10 +462,10 @@ abstract class RiveCoreContext extends CoreContext {
         return 'rotation';
       case CubicMirroredVertexBase.distancePropertyKey:
         return 'distance';
-      case ClippingShapeBase.shapeIdPropertyKey:
-        return 'shapeId';
-      case ClippingShapeBase.clipOpValuePropertyKey:
-        return 'clipOpValue';
+      case ClippingShapeBase.sourceIdPropertyKey:
+        return 'sourceId';
+      case ClippingShapeBase.fillRulePropertyKey:
+        return 'fillRule';
       case ClippingShapeBase.isVisiblePropertyKey:
         return 'isVisible';
       case CubicDetachedVertexBase.inRotationPropertyKey:
@@ -602,7 +602,7 @@ abstract class RiveCoreContext extends CoreContext {
         case KeyFrameBase.interpolatorIdPropertyKey:
         case KeyFrameIdBase.valuePropertyKey:
         case AnimationBase.artboardIdPropertyKey:
-        case ClippingShapeBase.shapeIdPropertyKey:
+        case ClippingShapeBase.sourceIdPropertyKey:
         case DrawRulesBase.drawTargetIdPropertyKey:
         case BackboardBase.activeArtboardIdPropertyKey:
         case BackboardBase.mainArtboardIdPropertyKey:
@@ -636,7 +636,7 @@ abstract class RiveCoreContext extends CoreContext {
         case CubicWeightBase.outValuesPropertyKey:
         case CubicWeightBase.outIndicesPropertyKey:
         case PointsPathBase.editingModeValuePropertyKey:
-        case ClippingShapeBase.clipOpValuePropertyKey:
+        case ClippingShapeBase.fillRulePropertyKey:
         case TendonBase.indexPropertyKey:
           var value = uintType.deserialize(reader);
           setUint(object, change.op, value);
@@ -762,7 +762,7 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameBase.interpolatorIdPropertyKey:
       case KeyFrameIdBase.valuePropertyKey:
       case AnimationBase.artboardIdPropertyKey:
-      case ClippingShapeBase.shapeIdPropertyKey:
+      case ClippingShapeBase.sourceIdPropertyKey:
       case DrawRulesBase.drawTargetIdPropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
@@ -802,7 +802,7 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicWeightBase.outValuesPropertyKey:
       case CubicWeightBase.outIndicesPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
-      case ClippingShapeBase.clipOpValuePropertyKey:
+      case ClippingShapeBase.fillRulePropertyKey:
       case TendonBase.indexPropertyKey:
         if (value != null && value is int) {
           change.value = uintType.serialize(value);
@@ -1287,14 +1287,14 @@ abstract class RiveCoreContext extends CoreContext {
           object.distance = value;
         }
         break;
-      case ClippingShapeBase.shapeIdPropertyKey:
+      case ClippingShapeBase.sourceIdPropertyKey:
         if (object is ClippingShapeBase && value is Id) {
-          object.shapeId = value;
+          object.sourceId = value;
         }
         break;
-      case ClippingShapeBase.clipOpValuePropertyKey:
+      case ClippingShapeBase.fillRulePropertyKey:
         if (object is ClippingShapeBase && value is int) {
-          object.clipOpValue = value;
+          object.fillRule = value;
         }
         break;
       case ClippingShapeBase.isVisiblePropertyKey:
@@ -1846,14 +1846,14 @@ abstract class RiveCoreContext extends CoreContext {
           object.distanceCore = value;
         }
         break;
-      case ClippingShapeBase.shapeIdPropertyKey:
+      case ClippingShapeBase.sourceIdPropertyKey:
         if (object is ClippingShapeBase && value is Id) {
-          object.shapeId = value;
+          object.sourceId = value;
         }
         break;
-      case ClippingShapeBase.clipOpValuePropertyKey:
+      case ClippingShapeBase.fillRulePropertyKey:
         if (object is ClippingShapeBase && value is int) {
-          object.clipOpValue = value;
+          object.fillRule = value;
         }
         break;
       case ClippingShapeBase.isVisiblePropertyKey:
@@ -2933,14 +2933,14 @@ abstract class RiveCoreContext extends CoreContext {
           return object.distance;
         }
         break;
-      case ClippingShapeBase.shapeIdPropertyKey:
+      case ClippingShapeBase.sourceIdPropertyKey:
         if (object is ClippingShapeBase) {
-          return object.shapeId;
+          return object.sourceId;
         }
         break;
-      case ClippingShapeBase.clipOpValuePropertyKey:
+      case ClippingShapeBase.fillRulePropertyKey:
         if (object is ClippingShapeBase) {
-          return object.clipOpValue;
+          return object.fillRule;
         }
         break;
       case ClippingShapeBase.isVisiblePropertyKey:
@@ -3156,7 +3156,7 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameBase.interpolatorIdPropertyKey:
       case KeyFrameIdBase.valuePropertyKey:
       case AnimationBase.artboardIdPropertyKey:
-      case ClippingShapeBase.shapeIdPropertyKey:
+      case ClippingShapeBase.sourceIdPropertyKey:
       case DrawRulesBase.drawTargetIdPropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
@@ -3186,7 +3186,7 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicWeightBase.outValuesPropertyKey:
       case CubicWeightBase.outIndicesPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
-      case ClippingShapeBase.clipOpValuePropertyKey:
+      case ClippingShapeBase.fillRulePropertyKey:
       case TendonBase.indexPropertyKey:
         return uintType;
       case CubicInterpolatorBase.x1PropertyKey:
@@ -3302,8 +3302,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as KeyFrameIdBase).value;
       case AnimationBase.artboardIdPropertyKey:
         return (object as AnimationBase).artboardId;
-      case ClippingShapeBase.shapeIdPropertyKey:
-        return (object as ClippingShapeBase).shapeId;
+      case ClippingShapeBase.sourceIdPropertyKey:
+        return (object as ClippingShapeBase).sourceId;
       case DrawRulesBase.drawTargetIdPropertyKey:
         return (object as DrawRulesBase).drawTargetId;
       case BackboardBase.activeArtboardIdPropertyKey:
@@ -3370,8 +3370,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as CubicWeightBase).outIndices;
       case PointsPathBase.editingModeValuePropertyKey:
         return (object as PointsPathBase).editingModeValue;
-      case ClippingShapeBase.clipOpValuePropertyKey:
-        return (object as ClippingShapeBase).clipOpValue;
+      case ClippingShapeBase.fillRulePropertyKey:
+        return (object as ClippingShapeBase).fillRule;
       case TendonBase.indexPropertyKey:
         return (object as TendonBase).index;
     }
@@ -3578,8 +3578,8 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.artboardIdPropertyKey:
         (object as AnimationBase).artboardId = value;
         break;
-      case ClippingShapeBase.shapeIdPropertyKey:
-        (object as ClippingShapeBase).shapeId = value;
+      case ClippingShapeBase.sourceIdPropertyKey:
+        (object as ClippingShapeBase).sourceId = value;
         break;
       case DrawRulesBase.drawTargetIdPropertyKey:
         (object as DrawRulesBase).drawTargetIdCore = value;
@@ -3681,8 +3681,8 @@ abstract class RiveCoreContext extends CoreContext {
       case PointsPathBase.editingModeValuePropertyKey:
         (object as PointsPathBase).editingModeValue = value;
         break;
-      case ClippingShapeBase.clipOpValuePropertyKey:
-        (object as ClippingShapeBase).clipOpValue = value;
+      case ClippingShapeBase.fillRulePropertyKey:
+        (object as ClippingShapeBase).fillRule = value;
         break;
       case TendonBase.indexPropertyKey:
         (object as TendonBase).index = value;

@@ -23,7 +23,9 @@ abstract class Drawable extends DrawableBase {
   void buildDrawOrder(
       List<Drawable> drawables, DrawRules rules, List<DrawRules> allRules) {
     flattenedDrawRules = drawRules ?? rules;
+    // -> editor-only
     _naturalDrawOrder = drawables.length;
+    // <- editor-only
     drawables.add(this);
 
     super.buildDrawOrder(drawables, rules, allRules);
@@ -55,27 +57,7 @@ abstract class Drawable extends DrawableBase {
       if (!clip.isVisible) {
         continue;
       }
-      var shape = clip.shape;
-      var fillInWorld = shape.fillInWorld;
-      if (!fillInWorld) {
-        canvas.transform(shape.worldTransform.mat4);
-      }
-      if (clip.clipOp == ClipOp.difference) {
-        var path = Path();
-        path.fillType = PathFillType.evenOdd;
-        path.addPath(artboard.path, Offset.zero);
-        path.addPath(clip.shape.fillPath, Offset.zero);
-        canvas.clipPath(path);
-      } else {
-        canvas.clipPath(clip.shape.fillPath);
-      }
-      if (!fillInWorld) {
-        assert(
-            clip.shapeInverseWorld != null,
-            'Expect shapeInverseWorld to have been '
-            'created by the time we draw');
-        canvas.transform(clip.shapeInverseWorld.mat4);
-      }
+      canvas.clipPath(clip.clippingPath);
     }
     return true;
   }
@@ -84,6 +66,7 @@ abstract class Drawable extends DrawableBase {
   void update(int dirt) {
     super.update(dirt);
     if (dirt & ComponentDirt.clip != 0) {
+      
       // Find clip in parents.
       List<ClippingShape> clippingShapes = [];
       for (ContainerComponent p = this; p != null; p = p.parent) {

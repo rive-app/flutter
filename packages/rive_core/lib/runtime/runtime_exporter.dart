@@ -12,7 +12,6 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_header.dart';

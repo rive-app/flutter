@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
-import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_component.dart';
 import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
@@ -33,7 +33,7 @@ class InspectClipping extends ListenableInspectorBuilder {
     _dismissAlert();
   }
 
-  void _createClipper(InspectionSet inspecting, Shape shape) {
+  void _createClipper(InspectionSet inspecting, Node source) {
     var file = inspecting.fileContext.core;
     file.batchAdd(() {
       for (final component in inspecting.components) {
@@ -43,7 +43,7 @@ class InspectClipping extends ListenableInspectorBuilder {
 
         var clipper = ClippingShape();
         file.addObject(clipper);
-        clipper.shape = shape;
+        clipper.source = source;
         (component as TransformComponent).appendChild(clipper);
       }
     });
@@ -72,8 +72,8 @@ class InspectClipping extends ListenableInspectorBuilder {
                 _selectionHandlerRestorer =
                     inspecting.stage.addSelectionHandler(
                   (StageItem item) {
-                    if (item.component is Shape) {
-                      _createClipper(inspecting, item.component as Shape);
+                    if (item.component is Node) {
+                      _createClipper(inspecting, item.component as Node);
                     }
                     _dismissAlert();
                     return true;
@@ -94,7 +94,9 @@ class InspectClipping extends ListenableInspectorBuilder {
     var selectedComponent = inspecting.components.first;
     if (selectedComponent is TransformComponent &&
         selectedComponent is! core.Path) {
+          
       _clippableComponent = selectedComponent;
+
       changeWhen([_clippableComponent.clippingShapesChanged]);
       return true;
     }
