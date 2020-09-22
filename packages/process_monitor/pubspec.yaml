@@ -1,9 +1,0 @@
-name: process_monitor
-
-environment:
-  sdk: ">=2.8.0 <3.0.0"
-
-dependencies:
-
-dev_dependencies:
-  test: ^1.15.3
