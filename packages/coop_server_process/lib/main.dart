@@ -52,10 +52,15 @@ Future<void> server(List<String> arguments) async {
 
   // Start a heartbeat check with the 2D service
   // Sends a heartbeat ping every 5 minutes
-  final heartbeatTimer = Timer.periodic(
-    const Duration(minutes: 5),
-    (_) => server.heartbeat(),
-  );
+  final heartbeatTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+    final data = <String, String>{};
+    // Fetch free memory if possible
+    String freemem = await meminfo();
+    if (freemem != null) {
+      data['freemem'] = freemem;
+    }
+    server.heartbeat(data);
+  });
 
   // Shutdown function: called when some sort
   // of shutdown signal is received. Will
@@ -93,4 +98,24 @@ Future<void> server(List<String> arguments) async {
   } on SignalException catch (_) {
     _log.info('Signal SIGKILL is not supported by this service');
   }
+}
+
+/// Attempts to get memory info from the underlying OS
+/// If it fails, it returns null.
+Future<String> meminfo() async {
+  const meminfoPath = '/proc/meminfo';
+  final file = File(meminfoPath);
+  // ignore: avoid_slow_async_io
+  if (!await file.exists()) {
+    final infoLines = await file.readAsLines();
+    infoLines.forEach((line) {
+      if (line.toLowerCase().contains('memfree')) {
+        final tokens = line.split(RegExp(r'\s+'));
+        if (tokens.length > 2) {
+          return tokens[tokens.length - 2];
+        }
+      }
+    });
+  }
+  return null;
 }

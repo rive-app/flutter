@@ -96,9 +96,13 @@ class PrivateApi {
   }
 
   /// Pings the 2D service heartbeat endpoint
-  void heartbeat() {
+  void heartbeat([Map<String, String> data]) {
+    var params = '';
+    if (data != null && data.isNotEmpty) {
+      params = '?' + data.entries.map((e) => '${e.key}=${e.value}').join('&');
+    }
     try {
-      http.get('$host/coop/heartbeat').timeout(timeout);
+      http.get('$host/coop/heartbeat$params').timeout(timeout);
     } on Exception catch (e) {
       log.severe('Heartbeat ping to 2D service failed: $e');
     }
