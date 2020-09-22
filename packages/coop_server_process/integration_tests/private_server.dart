@@ -28,10 +28,19 @@ Future<void> _handleRequest(HttpRequest req) async {
     case '/coop/deregister':
       print('Deregister request');
       return;
-    case '/coop/heartbeat':
-      print('Heartbeat');
-      return;
   }
+  // Handle heartbeat request
+  // can contain query parameters
+  if (req.method == 'GET' && uriStr.contains('heartbeat')) {
+    print('Heartbeat');
+    if (req.uri.queryParameters.isNotEmpty) {
+      req.uri.queryParameters.forEach((k, v) => print('Param: $k: $v'));
+    } else {
+      print('No params');
+    }
+    return;
+  }
+
   // Handle save request
   // http.post('$host/revise/$ownerId/$fileId', body: data)
   if (req.method == 'POST' && uriStr.contains('revise')) {

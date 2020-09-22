@@ -51,15 +51,11 @@ Future<void> server(List<String> arguments) async {
   }
 
   // Start a heartbeat check with the 2D service
-  // Sends a heartbeat ping every 5 minutes
-  final heartbeatTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
-    final data = <String, String>{};
+  // Sends a heartbeat ping every 30 seconds
+  final heartbeatTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
     // Fetch free memory if possible
-    String freemem = await meminfo();
-    if (freemem != null) {
-      data['freemem'] = freemem;
-    }
-    server.heartbeat(data);
+    final memData = await _meminfo();
+    server.heartbeat(memData);
   });
 
   // Shutdown function: called when some sort
@@ -102,20 +98,51 @@ Future<void> server(List<String> arguments) async {
 
 /// Attempts to get memory info from the underlying OS
 /// If it fails, it returns null.
-Future<String> meminfo() async {
+Future<Map<String, String>> _meminfo() async {
+  // Converts memory size to MB if necessary
+  int _calculateMemorySize(int value, String symbol) {
+    if (symbol.toLowerCase() == 'kb') {
+      return value ~/ 1024;
+    }
+    return value;
+  }
+
+  // Parses a line from /proc/meminfo
+  int _parseMemInfoLine(String line) {
+    final tokens = line.split(RegExp(r'\s+'));
+    if (tokens.length > 2) {
+      final value = int.tryParse(tokens[tokens.length - 2]);
+      if (value != null) {
+        return _calculateMemorySize(value, tokens.last);
+      }
+    }
+    // Parse gone haywire, abort
+    return -1;
+  }
+
   const meminfoPath = '/proc/meminfo';
   final file = File(meminfoPath);
   // ignore: avoid_slow_async_io
-  if (!await file.exists()) {
+  if (await file.exists()) {
     final infoLines = await file.readAsLines();
-    infoLines.forEach((line) {
-      if (line.toLowerCase().contains('memfree')) {
-        final tokens = line.split(RegExp(r'\s+'));
-        if (tokens.length > 2) {
-          return tokens[tokens.length - 2];
-        }
+    int total; // total memory in MB
+    int free; // toal free memory in MB
+    for (final line in infoLines) {
+      if (line.toLowerCase().contains('memavailable')) {
+        free = _parseMemInfoLine(line);
       }
-    });
+      if (line.toLowerCase().contains('memtotal')) {
+        total = _parseMemInfoLine(line);
+      }
+    }
+    // Make sure we have values for both and return the params
+    if (total > 0 && free > 0) {
+      final percentUsed = 1 - (free / total);
+      return {
+        'memtotal': total.toString(),
+        'memuse': percentUsed.toStringAsFixed(2),
+      };
+    }
   }
   return null;
 }
