@@ -52,7 +52,7 @@ Future<void> server(List<String> arguments) async {
 
   // Start a heartbeat check with the 2D service
   // Sends a heartbeat ping every 30 seconds
-  final heartbeatTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+  final heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
     // Fetch free memory if possible
     final memData = await _meminfo();
     server.heartbeat(memData);
