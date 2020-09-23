@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
@@ -80,11 +81,29 @@ class Shape extends ShapeBase with ShapePaintContainer {
         appendChild(composer);
       });
     }
+
+    // Tell the artboard that clipping shapes need to re-build their
+    // dependencies. Because clipping shapes to shapes have complex many to many
+    // relationships, it's easier to rebuild the whole set when a shape is
+    // added/removed.
+    artboard?.rebuildClippingShapeDependencies();
+  }
+
+  @override
+  void onRemoved() {
+    artboard?.rebuildClippingShapeDependencies();
+    super.onRemoved();
+  }
+
+  @override
+  void parentChanged(ContainerComponent from, ContainerComponent to) {
+    super.parentChanged(from, to);
+    artboard?.rebuildClippingShapeDependencies();
   }
   // <- editor-only
 
   void _markComposerDirty() {
-    _pathComposer?.addDirt(ComponentDirt.path);
+    _pathComposer?.addDirt(ComponentDirt.path, recurse: true);
     // Stroke effects need to be rebuilt whenever the path composer rebuilds the
     // compound path.
     invalidateStrokeEffects();

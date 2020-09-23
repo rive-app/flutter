@@ -46,19 +46,19 @@ class PropertyClip extends StatelessWidget {
               CoreComboBox(
                 sizing: ComboSizing.expanded,
                 objects: [clippingShape],
-                propertyKey: ClippingShapeBase.clipOpValuePropertyKey,
-                options: ClipOp.values,
-                toLabel: (ClipOp op) {
-                  switch (op) {
-                    case ClipOp.intersection:
-                      return 'Intersection';
-                    case ClipOp.difference:
-                      return 'Difference';
+                propertyKey: ClippingShapeBase.fillRulePropertyKey,
+                options: PathFillType.values,
+                toLabel: (PathFillType fillType) {
+                  switch (fillType) {
+                    case PathFillType.evenOdd:
+                      return 'Even-Odd';
+                    case PathFillType.nonZero:
+                      return 'Non-Zero';
                   }
                   return '-';
                 },
-                toCoreValue: (ClipOp op) => op.index,
-                fromCoreValue: (int value) => ClipOp.values[value],
+                toCoreValue: (PathFillType op) => op.index,
+                fromCoreValue: (int value) => PathFillType.values[value],
               ),
             ],
           ),

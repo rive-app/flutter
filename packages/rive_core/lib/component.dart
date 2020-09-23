@@ -294,7 +294,7 @@ abstract class Component extends ComponentBase<RiveFile>
       parent.childRemoved(this);
     }
 
-    // The artboard containing this component will need it's dependencies
+    // The artboard containing this component will need its dependencies
     // re-sorted.
     if (artboard != null) {
       context?.markDependencyOrderDirty(

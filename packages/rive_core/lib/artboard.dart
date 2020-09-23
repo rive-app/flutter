@@ -17,6 +17,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/rive_animation_controller.dart';
+import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:utilities/dependency_sorter.dart';
@@ -442,6 +443,18 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   void onStrokesChanged() {}
 
   // -> editor-only
+
+  /// Rebuild the dependencies for any clipping shape in the artboard. This is
+  /// an editor-only operation that easily lets the system update dependencies
+  /// for clipping shapes.
+  void rebuildClippingShapeDependencies() {
+    forAll((component) {
+      if (component is ClippingShape) {
+        component.markRebuildDependencies();
+      }
+      return true;
+    });
+  }
 
   // Hacking in the draw order key state by emulating what animated objects do
   // with their key state properties, but we do it for the Drawable's drawOrder
