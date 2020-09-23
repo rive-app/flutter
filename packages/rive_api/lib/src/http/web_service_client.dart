@@ -136,9 +136,15 @@ class WebServiceClient {
   }
 
   Future<void> clearCookies() async {
-    cookies.clear();
-    headers['cookie'] = _generateCookieHeader();
-    await persist();
+    print('clear cookies');
+    // We should only clear cookies and regenerate the cook header if there are
+    // cookies; otherwise we're going to create a blank cookie header for the
+    // web app, which lets the browser manage cookies for it. fixes #647
+    if (cookies.isNotEmpty) {
+      cookies.clear();
+      headers['cookie'] = _generateCookieHeader();
+      await persist();
+    }
   }
 
   bool _setCookie(String rawCookie) {
