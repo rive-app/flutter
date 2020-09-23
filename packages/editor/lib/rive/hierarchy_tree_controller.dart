@@ -120,6 +120,7 @@ class HierarchyTreeController extends ComponentTreeController {
     switch (state) {
       case DropState.above:
       case DropState.below:
+
         // Set<TreeItemChildren> toSort = {};
         var parentComponent = target.parent?.data;
         if (parentComponent == null) {
@@ -132,30 +133,29 @@ class HierarchyTreeController extends ComponentTreeController {
           return;
         }
         var parentContainer = parentComponent as ContainerComponent;
+        var parentChildren = parentContainer.children;
         // First remove from existing so that proximity is preserved
         for (final item in items) {
           var treeItem = item.data;
           treeItem.parent = null;
           // treeItem.parent.children.remove(treeItem);
         }
-        for (final item in items) {
+
+        // If we're dropping items below the selection, add them in reverse
+        // order so they maitain their relative order.
+        var iterateItems = state == DropState.above ? items : items.reversed;
+        var inc = state == DropState.above ? -1 : 1;
+        for (final item in iterateItems) {
           var treeItem = item.data;
-          if (state == DropState.above) {
-            parentContainer.children.move(treeItem,
-                before: target.item.prev?.parent == target.parent
-                    ? target.item.prev?.data
-                    : null,
-                after: target.item.data);
-          } else {
-            parentContainer.children.move(treeItem,
-                before: target.item.data,
-                after: target.item.next?.parent == target.parent
-                    ? target.item.next?.data
-                    : null);
-          }
+          parentChildren.moveRelative(treeItem, target.item.data, inc);
 
           // re-parent last after changing index
           treeItem.parent = parentContainer;
+
+          // Immediately sort fractional as we iterate so the next item can find
+          // appropriate siblings.
+          parentChildren.sortFractional();
+
           // We're including only Nodes and RootBones in this drag set to start
           // with, so no non-translating bones should be in here.
           if (treeItem is TransformComponent) {
@@ -176,6 +176,7 @@ class HierarchyTreeController extends ComponentTreeController {
           var treeItem = item.data;
           targetContainer.children.moveToEnd(treeItem);
           treeItem.parent = targetContainer;
+          targetContainer.children.sortFractional();
           if (treeItem is TransformComponent) {
             /// Keep the node in the same position it last was at before getting
             /// parented.
