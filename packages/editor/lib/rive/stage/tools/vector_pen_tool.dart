@@ -458,8 +458,10 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           _addVertex(path, vertexA);
           _addVertex(path, vertexB);
 
-          patchBoundCubics[vertexA] = _PatchCubicOperation.all;
-          patchBoundCubics[vertexB] = _PatchCubicOperation.all;
+          if (isBoundToBones) {
+            patchBoundCubics[vertexA] = _PatchCubicOperation.all;
+            patchBoundCubics[vertexB] = _PatchCubicOperation.all;
+          }
 
           // Update our insert target to include the new vertices.
           target = target.copyWith(

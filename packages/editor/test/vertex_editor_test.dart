@@ -275,4 +275,65 @@ void main() {
       expect(insertedVertex.outDistance, 25);
     }
   });
+
+
+  test('subdivide a rounded corner', () async {
+    /// Test for issue #1302.
+    var file = await makeFile();
+    var core = file.core;
+
+    var stage = file.stage;
+    expect(stage != null, true);
+
+    stage.tool = VectorPenTool.instance;
+
+    stage.mouseMove(1, 100, 100);
+    stage.mouseDown(1, 100, 100);
+    stage.mouseUp(1, 100, 100);
+
+    stage.mouseMove(1, 200, 100);
+    stage.mouseDown(1, 200, 100);
+    stage.mouseUp(1, 200, 100);
+
+    stage.mouseMove(1, 200, 200);
+    stage.mouseDown(1, 200, 200);
+    stage.mouseUp(1, 200, 200);
+
+    expect(core.objectsOfType<PointsPath>().length, 1);
+
+    var pointsPath = core.objectsOfType<PointsPath>().first;
+    expect(pointsPath.vertices.length, 3);
+
+    var vtx2 = pointsPath.vertices[1];
+    expect(vtx2.x, 100);
+    expect(vtx2.y, 0);
+    // Turn it into a rounded corner.
+    (vtx2 as StraightVertex).radius = 20;
+
+    file.advance(0);
+
+    // Click on the corner.
+    stage.mouseMove(1, 193.6, 105.3);
+    stage.mouseDown(1, 193.6, 105.3);
+    stage.mouseUp(1, 193.6, 105.3);
+
+    // There should now be 5 points as the corner was replaced with 3 cubic
+    // points.
+    expect(pointsPath.vertices.length, 5);
+
+    var cubic1 = pointsPath.vertices[1];
+    var cubic2 = pointsPath.vertices[2];
+    var cubic3 = pointsPath.vertices[3];
+
+    expect(cubic1 is CubicDetachedVertex, true);
+    expect(cubic2 is CubicDetachedVertex, true);
+    expect(cubic3 is CubicDetachedVertex, true);
+
+    core.captureJournalEntry();
+
+    // Make sure we can undo the split.
+    core.undo();
+    expect(pointsPath.vertices.length, 3);
+    expect(pointsPath.vertices[1] is StraightVertex, true);
+  });
 }
