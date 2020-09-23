@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/widgets/bouncy_custom_scroll_controller.dart';
 import 'package:rive_editor/widgets/common/hit_deny.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/rive_scroll_view.dart';
@@ -242,7 +243,7 @@ class ScrollingTabList extends StatefulWidget {
 const double _fadeWidth = 20;
 
 class _ScrollingTabListState extends State<ScrollingTabList> {
-  final ScrollController _controller = ScrollController();
+  final ScrollController _controller = BouncyCustomScrollController();
 
   @override
   void didUpdateWidget(ScrollingTabList oldWidget) {
