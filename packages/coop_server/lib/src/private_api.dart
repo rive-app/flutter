@@ -99,7 +99,12 @@ class PrivateApi {
   void heartbeat([Map<String, String> data]) {
     var params = '';
     if (data != null && data.isNotEmpty) {
-      params = '?' + data.entries.map((e) => '${e.key}=${e.value}').join('&');
+      params = '?' +
+          data.entries.map((e) {
+            final key = Uri.encodeQueryComponent(e.key);
+            final value = Uri.encodeQueryComponent(e.value);
+            return '$key=$value';
+          }).join('&');
     }
     try {
       http.get('$host/coop/heartbeat$params').timeout(timeout);
