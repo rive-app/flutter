@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
-import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
@@ -99,7 +98,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     artboard?.rebuildClippingShapeDependencies();
     return result;
   }
-  
+
   // <- editor-only
 
   void _markComposerDirty() {

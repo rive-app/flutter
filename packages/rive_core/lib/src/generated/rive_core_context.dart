@@ -321,29 +321,29 @@ abstract class RiveCoreContext extends CoreContext {
       case ComponentBase.childOrderPropertyKey:
         return 'childOrder';
       case DrawTargetBase.drawableIdPropertyKey:
-        return 'drawableId';
+        return 'drawableid';
       case DrawTargetBase.placementValuePropertyKey:
-        return 'placementValue';
+        return 'placementvalue';
       case KeyedObjectBase.objectIdPropertyKey:
-        return 'objectId';
+        return 'objectid';
       case KeyedObjectBase.animationIdPropertyKey:
-        return 'animationId';
+        return 'animationid';
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
-        return 'keyedObjectId';
+        return 'keyedobjectid';
       case KeyedPropertyBase.propertyKeyPropertyKey:
-        return 'propertyKey';
+        return 'propertykey';
       case KeyFrameBase.keyedPropertyIdPropertyKey:
-        return 'keyedPropertyId';
+        return 'keyedpropertyid';
       case KeyFrameBase.framePropertyKey:
         return 'frame';
       case KeyFrameBase.interpolationTypePropertyKey:
-        return 'interpolationType';
+        return 'interpolation';
       case KeyFrameBase.interpolatorIdPropertyKey:
-        return 'interpolatorId';
+        return 'interpolatorid';
       case KeyFrameIdBase.valuePropertyKey:
         return 'value';
       case AnimationBase.artboardIdPropertyKey:
-        return 'artboardId';
+        return 'artboardid';
       case AnimationBase.namePropertyKey:
         return 'name';
       case AnimationBase.orderPropertyKey:
@@ -367,13 +367,13 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearAnimationBase.speedPropertyKey:
         return 'speed';
       case LinearAnimationBase.loopValuePropertyKey:
-        return 'loopValue';
+        return 'loop';
       case LinearAnimationBase.workStartPropertyKey:
-        return 'workStart';
+        return 'workstart';
       case LinearAnimationBase.workEndPropertyKey:
-        return 'workEnd';
+        return 'workend';
       case LinearAnimationBase.enableWorkAreaPropertyKey:
-        return 'enableWorkArea';
+        return 'enableworkarea';
       case ShapePaintBase.isVisiblePropertyKey:
         return 'isVisible';
       case LinearGradientBase.startXPropertyKey:
@@ -393,29 +393,29 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.joinPropertyKey:
         return 'join';
       case StrokeBase.transformAffectsStrokePropertyKey:
-        return 'transformAffectsStroke';
+        return 'transformaffectsstroke';
       case SolidColorBase.colorValuePropertyKey:
-        return 'colorValue';
+        return 'color';
       case GradientStopBase.colorValuePropertyKey:
-        return 'colorValue';
+        return 'color';
       case GradientStopBase.positionPropertyKey:
         return 'position';
       case TrimPathBase.startPropertyKey:
-        return 'start';
+        return 'trimStart';
       case TrimPathBase.endPropertyKey:
-        return 'end';
+        return 'trimEnd';
       case TrimPathBase.offsetPropertyKey:
-        return 'offset';
+        return 'trimOffset';
       case TrimPathBase.modeValuePropertyKey:
-        return 'modeValue';
+        return 'modevalue';
       case FillBase.fillRulePropertyKey:
-        return 'fillRule';
+        return 'fillrule';
       case TransformComponentBase.rotationPropertyKey:
-        return 'rotation';
+        return 'r';
       case TransformComponentBase.scaleXPropertyKey:
-        return 'scaleX';
+        return 'sx';
       case TransformComponentBase.scaleYPropertyKey:
-        return 'scaleY';
+        return 'sy';
       case TransformComponentBase.opacityPropertyKey:
         return 'opacity';
       case NodeBase.xPropertyKey:
@@ -435,23 +435,23 @@ abstract class RiveCoreContext extends CoreContext {
       case StraightVertexBase.radiusPropertyKey:
         return 'radius';
       case CubicWeightBase.inValuesPropertyKey:
-        return 'inValues';
+        return 'invalues';
       case CubicWeightBase.inIndicesPropertyKey:
-        return 'inIndices';
+        return 'inindices';
       case CubicWeightBase.outValuesPropertyKey:
-        return 'outValues';
+        return 'outvalues';
       case CubicWeightBase.outIndicesPropertyKey:
-        return 'outIndices';
+        return 'outindices';
       case CubicAsymmetricVertexBase.rotationPropertyKey:
         return 'rotation';
       case CubicAsymmetricVertexBase.inDistancePropertyKey:
-        return 'inDistance';
+        return 'indistance';
       case CubicAsymmetricVertexBase.outDistancePropertyKey:
-        return 'outDistance';
+        return 'outdistance';
       case PointsPathBase.isClosedPropertyKey:
-        return 'isClosed';
+        return 'isclosed';
       case PointsPathBase.editingModeValuePropertyKey:
-        return 'editingModeValue';
+        return 'editingmode';
       case ParametricPathBase.widthPropertyKey:
         return 'width';
       case ParametricPathBase.heightPropertyKey:
@@ -463,33 +463,33 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicMirroredVertexBase.distancePropertyKey:
         return 'distance';
       case ClippingShapeBase.sourceIdPropertyKey:
-        return 'sourceId';
+        return 'sourceid';
       case ClippingShapeBase.fillRulePropertyKey:
-        return 'fillRule';
+        return 'fillrule';
       case ClippingShapeBase.isVisiblePropertyKey:
-        return 'isVisible';
+        return 'isvisible';
       case CubicDetachedVertexBase.inRotationPropertyKey:
-        return 'inRotation';
+        return 'inrotation';
       case CubicDetachedVertexBase.inDistancePropertyKey:
-        return 'inDistance';
+        return 'indistance';
       case CubicDetachedVertexBase.outRotationPropertyKey:
-        return 'outRotation';
+        return 'outrotation';
       case CubicDetachedVertexBase.outDistancePropertyKey:
-        return 'outDistance';
+        return 'outdistance';
       case DrawRulesBase.drawTargetIdPropertyKey:
-        return 'drawTargetId';
+        return 'drawtargetid';
       case ArtboardBase.widthPropertyKey:
-        return 'width';
+        return 'w';
       case ArtboardBase.heightPropertyKey:
-        return 'height';
+        return 'h';
       case ArtboardBase.xPropertyKey:
         return 'x';
       case ArtboardBase.yPropertyKey:
         return 'y';
       case ArtboardBase.originXPropertyKey:
-        return 'originX';
+        return 'ox';
       case ArtboardBase.originYPropertyKey:
-        return 'originY';
+        return 'oy';
       case BackboardBase.activeArtboardIdPropertyKey:
         return 'activeArtboardId';
       case BackboardBase.mainArtboardIdPropertyKey:
@@ -517,7 +517,7 @@ abstract class RiveCoreContext extends CoreContext {
       case TendonBase.indexPropertyKey:
         return 'index';
       case TendonBase.boneIdPropertyKey:
-        return 'boneId';
+        return 'boneid';
       case TendonBase.xxPropertyKey:
         return 'xx';
       case TendonBase.yxPropertyKey:
