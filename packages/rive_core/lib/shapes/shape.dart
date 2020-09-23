@@ -81,12 +81,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
         appendChild(composer);
       });
     }
-
-    // Tell the artboard that clipping shapes need to re-build their
-    // dependencies. Because clipping shapes to shapes have complex many to many
-    // relationships, it's easier to rebuild the whole set when a shape is
-    // added/removed.
-    artboard?.rebuildClippingShapeDependencies();
   }
 
   @override
@@ -96,10 +90,16 @@ class Shape extends ShapeBase with ShapePaintContainer {
   }
 
   @override
-  void parentChanged(ContainerComponent from, ContainerComponent to) {
-    super.parentChanged(from, to);
+  bool resolveArtboard() {
+    bool result = super.resolveArtboard();
+    // Tell the artboard that clipping shapes need to re-build their
+    // dependencies. Because clipping shapes to shapes have complex many to many
+    // relationships, it's easier to rebuild the whole set when a shape is
+    // added/removed.
     artboard?.rebuildClippingShapeDependencies();
+    return result;
   }
+  
   // <- editor-only
 
   void _markComposerDirty() {
