@@ -1,5 +1,6 @@
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/shapes/paint/trim_path.dart';
 import 'package:rive_core/transform_component.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
@@ -19,6 +20,8 @@ InputValueConverter<T> converterForProperty<T>(int propertyKey) {
     case GradientStopBase.positionPropertyKey:
     case LinearGradientBase.opacityPropertyKey:
     case TransformComponentBase.opacityPropertyKey:
+    case TrimPathBase.startPropertyKey:
+    case TrimPathBase.endPropertyKey:
       return ClampedPercentageInputConverter.instance as InputValueConverter<T>;
     case TransformComponentBase.rotationPropertyKey:
     case CubicAsymmetricVertexBase.rotationPropertyKey:
@@ -31,6 +34,8 @@ InputValueConverter<T> converterForProperty<T>(int propertyKey) {
     case NodeBase.xPropertyKey:
     case NodeBase.yPropertyKey:
       return TranslationValueConverter.instance as InputValueConverter<T>;
+
+    case TrimPathBase.offsetPropertyKey:
     case TransformComponentBase.scaleXPropertyKey:
     case TransformComponentBase.scaleYPropertyKey:
       return ScalePercentageValueConverter.instance as InputValueConverter<T>;
