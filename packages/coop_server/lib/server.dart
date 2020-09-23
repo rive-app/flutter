@@ -31,7 +31,7 @@ class RiveCoopServer extends CoopServer {
 
   /// Pings the 2D service heartbeat endpoint
   @override
-  void heartbeat() => PrivateApi().heartbeat();
+  void heartbeat([Map<String, String> data]) => PrivateApi().heartbeat(data);
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
     var process = RiveCoopIsolateProcess();

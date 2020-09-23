@@ -1,0 +1,13 @@
+version: "2"
+
+services:
+  coop:
+    container_name: coop
+    build: 
+        context: .
+        dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PRIVATE_API=$PRIVATE_API
+      - DISABLE_SENTRY=True
