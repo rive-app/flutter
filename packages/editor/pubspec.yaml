@@ -33,13 +33,13 @@ dependencies:
   http: ^0.12.2
   dotted_border: ^1.0.6
   flutter_widgets: ^0.1.12
-  url_launcher: ^5.5.0
+  url_launcher: ^5.7.1
   rxdart: ^0.24.1
   collection: ^1.14.13
-  cached_network_image: ^2.3.0
+  cached_network_image: ^2.3.2+1
 
-  path_provider: ^1.6.14
-  path_provider_macos: ^0.0.4+3
+  path_provider: ^1.6.18
+  path_provider_macos: ^0.0.4+4
   bezier: ^1.1.5
   
   logging: ^0.11.4
@@ -52,7 +52,7 @@ dependencies:
 
 dev_dependencies:
   test: any
-  mockito: ^4.1.1
+  mockito: ^4.1.2
   image_res: ^0.2.3
   flutter_test:
     sdk: flutter

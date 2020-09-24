@@ -50,6 +50,12 @@ class UIStrings extends InheritedWidget {
 // have the abstraction in place.
 HashMap<String, String> _defaultUIStrings =
     HashMap<String, String>.from(<String, String>{
+  // hamburger menu
+  'file_name': 'File Name',
+  'revision_history': 'Revision History',
+  'help_center': 'Help Center',
+  'send_feedback': 'Send Feedback',
+
   'position': 'Position',
   'radius': 'Corner',
   'scale': 'Scale',

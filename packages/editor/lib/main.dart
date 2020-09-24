@@ -191,7 +191,7 @@ class RiveEditorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Rive",
+      title: 'Rive',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       home: DefaultTextStyle(
@@ -311,7 +311,7 @@ class _EditorState extends State<Editor> {
       }
       var ext = file.filename.substring(idx + 1);
       switch (ext) {
-        case "riv":
+        case 'riv':
           var importer = RuntimeImporter(core: activeFile.core);
           try {
             if (importer.import(file.bytes)) {
@@ -324,14 +324,14 @@ class _EditorState extends State<Editor> {
                 .addAlert(SimpleAlert('${file.filename} is unsupported.'));
           }
           break;
-        case "flr2d":
+        case 'flr2d':
           taskApi ??= TasksApi(activeFile.rive.api);
           var taskResult = await taskApi.convertFLR(file.bytes);
           if (taskResult != null) {
             backendConverting[taskResult.taskId] = file;
           }
           break;
-        case "svg":
+        case 'svg':
           taskApi ??= TasksApi(activeFile.rive.api);
           var taskResult = await taskApi.convertSVG(file.bytes);
           if (taskResult != null) {
@@ -369,6 +369,7 @@ class _EditorState extends State<Editor> {
           activeFile.addAlert(SimpleAlert('Error converting '
               '${backendConverting[result.taskId].filename}.'));
           rethrow;
+          // ignore: avoid_catching_errors
         } on UnsupportedError {
           activeFile.addAlert(SimpleAlert(
               '${backendConverting[result.taskId].filename} is unsupported.'));
