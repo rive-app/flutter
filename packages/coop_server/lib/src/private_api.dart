@@ -33,14 +33,16 @@ class SaveResult {
 /// Communication to 2D server private API
 ///
 class PrivateApi {
-  final String host;
-  final Logger log = Logger('CoopServer');
+  final log = Logger('CoopServer');
+  final Uri _uri;
+  String get origin => _uri.origin;
+  String get authority => _uri.authority;
 
   // host is either host, the env variable, or localhost:3003
   PrivateApi({String host})
-      : host = host ??
+      : _uri = Uri.parse(host ??
             Platform.environment['PRIVATE_API'] ??
-            'http://localhost:3003';
+            'http://localhost:3003');
 
   /// Registers the co-op server with the 2D service.
   /// The 2D service will gather the co-op server's IP address
@@ -52,9 +54,10 @@ class PrivateApi {
   Future<bool> register() async {
     try {
       final res = await retry(
-        () => http.get('$host/coop/register').timeout(timeout),
+        () => http.get('$origin/coop/register').timeout(timeout),
         retryIf: (e) => e is SocketException || e is TimeoutException,
-        onRetry: (e) => log.info('Unable to connect to 2D service @ $host', e),
+        onRetry: (e) =>
+            log.info('Unable to connect to 2D service @ $origin', e),
       );
       if (res.statusCode != 200) {
         // Problem registering coop server; it's now orphaned
@@ -78,7 +81,7 @@ class PrivateApi {
   /// it through.
   Future<bool> deregister() async {
     try {
-      final res = await http.get('$host/coop/deregister').timeout(timeout);
+      final res = await http.get('$origin/coop/deregister').timeout(timeout);
       if (res.statusCode != 200) {
         // Problem deregistering coop server; it's now orphaned
         // What to do?
@@ -97,17 +100,8 @@ class PrivateApi {
 
   /// Pings the 2D service heartbeat endpoint
   void heartbeat([Map<String, String> data]) {
-    var params = '';
-    if (data != null && data.isNotEmpty) {
-      params = '?' +
-          data.entries.map((e) {
-            final key = Uri.encodeQueryComponent(e.key);
-            final value = Uri.encodeQueryComponent(e.value);
-            return '$key=$value';
-          }).join('&');
-    }
     try {
-      http.get('$host/coop/heartbeat$params').timeout(timeout);
+      http.get(Uri.http(authority, '/coop/heartbeat', data)).timeout(timeout);
     } on Exception catch (e) {
       log.severe('Heartbeat ping to 2D service failed: $e');
     }
@@ -116,7 +110,7 @@ class PrivateApi {
   Future<SaveResult> save(int ownerId, int fileId, Uint8List data) async {
     try {
       var response =
-          await http.post('$host/revise/$ownerId/$fileId', body: data);
+          await http.post('$origin/revise/$ownerId/$fileId', body: data);
       if (response.statusCode == 200) {
         Map<String, dynamic> data;
         try {
@@ -153,7 +147,7 @@ class PrivateApi {
   Future<Uint8List> load(int ownerId, int fileId) async {
     print('loading $ownerId-$fileId');
     try {
-      var response = await http.get('$host/revision/$ownerId/$fileId');
+      var response = await http.get('$origin/revision/$ownerId/$fileId');
       if (response.statusCode == 200) {
         print('good!');
         return response.bodyBytes;
@@ -177,7 +171,7 @@ class PrivateApi {
     print('restoring revision $ownerId-$fileId $revisionId');
     try {
       var response =
-          await http.post('$host/revision/$ownerId/$fileId/$revisionId');
+          await http.post('$origin/revision/$ownerId/$fileId/$revisionId');
       if (response.statusCode == 200) {
         print('revision restored $ownerId-$fileId $revisionId');
         return response.bodyBytes;
@@ -206,7 +200,7 @@ class PrivateApi {
       changes.serialize(writer);
 
       var response = await http.post(
-        '$host/changeset/${file.ownerId}/${file.fileId}/${serverChangeId - CoopCommand.minChangeId}',
+        '$origin/changeset/${file.ownerId}/${file.fileId}/${serverChangeId - CoopCommand.minChangeId}',
         headers: headers,
         body: writer.uint8Buffer,
       );

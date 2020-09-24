@@ -26,15 +26,15 @@ class WebsocketCommsManager with Subscriptions {
   WebsocketCommsManager.tester(
     NotificationManager notificationsManager,
     CommsWebsocketClient client,
-  ) {
-    _notificationManager = notificationsManager;
-    _client = client;
+  )   : _notificationManager = notificationsManager,
+        _client = client {
     _attach();
   }
 
   /// Initiatize the state
   void _attach() {
-    // make sure our coms client is handling the right action (here to make testing easier)
+    // make sure our comms client is handling the right action (here to make
+    // testing easier)
     _client.callback = handleAction;
 
     /// When the logged in user is changed, fetch notifications for the new user
@@ -89,7 +89,7 @@ class CommsWebsocketClient extends ReconnectingWebsocketClient {
   @override
   Future<void> onConnect() async {
     var token = await _meAPI.token;
-    write(json.encode({"action": "register", "token": token.token}));
+    write(json.encode({'action': 'register', 'token': token.token}));
   }
 
   @override
@@ -110,14 +110,10 @@ class CommsWebsocketClient extends ReconnectingWebsocketClient {
   }
 
   @override
-  String pingMessage() {
-    return json.encode({"action": "ping"});
-  }
+  String pingMessage() => json.encode({'action': 'ping'});
 
   @override
-  void onStateChange(ConnectionState state) {
-    print('Websockets $state');
-  }
+  void onStateChange(ConnectionState state) => print('Websockets $state');
 
   @override
   Future<String> getUrl() async {
