@@ -17,6 +17,8 @@ class ResizePanel extends StatefulWidget {
   final ResizeSide side;
   final Widget child;
   final double hitSize;
+  final double hitOffset;
+  final double drawOffset;
 
   /// You can supply a dead zone to the ResizePanel at the start and the end of
   /// the axis.
@@ -33,6 +35,8 @@ class ResizePanel extends StatefulWidget {
     this.deadStart = 0,
     this.deadEnd = 0,
     this.hitSize = 10,
+    this.hitOffset = 0,
+    this.drawOffset = 0,
   }) : super(key: key);
 
   @override
@@ -144,7 +148,7 @@ class _ResizePanelState extends State<ResizePanel> {
           position(
             widget.hitSize,
             // -widget.hitSize/2,
-            -widget.hitSize,
+            -widget.hitSize + widget.hitOffset,
             OverlayHitDetect(
               customCursorIcon: widget.direction == ResizeDirection.vertical
                   ? PackedIcon.cursorResizeVertical
@@ -188,7 +192,7 @@ class _ResizePanelState extends State<ResizePanel> {
                 children: [
                   position(
                     2,
-                    widget.hitSize,
+                    widget.hitSize + widget.drawOffset,
                     Container(color: _showDragEdge ? Colors.blue : null),
                   ),
                 ],

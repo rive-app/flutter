@@ -9,29 +9,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
-import 'package:rive_core/runtime/runtime_importer.dart';
 import 'package:rive_editor/alerts_display.dart';
+import 'package:rive_editor/editor.dart';
 import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/global_messages.dart';
-import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/managers/global_message_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
-import 'package:rive_editor/rive/managers/task_manager.dart';
 import 'package:rive_editor/rive/managers/websocket_comms_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
-import 'package:rive_editor/widgets/hierarchy_panel.dart';
-import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
 
-import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/constants.dart';
@@ -40,25 +34,16 @@ import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/version.dart';
-import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/widgets/catastrophe.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/home/home.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
 import 'package:rive_editor/widgets/login/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/stage_late_view.dart';
 import 'package:rive_editor/widgets/stage_view.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
-import 'package:rive_editor/widgets/toolbar/connected_users.dart';
-import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
-import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
-import 'package:rive_editor/widgets/toolbar/mode_toggle.dart';
-import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
-import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
 import 'package:rive_widgets/listenable_builder.dart';
-import 'package:window_utils/window_utils.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -149,6 +134,35 @@ class _InitWindowWidgetState extends State<InitWindowWidget> {
 
 GlobalKey loadingScreenKey = GlobalKey();
 
+class CursorHandler extends StatelessWidget {
+  final Rive rive;
+
+  const CursorHandler({
+    @required this.rive,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CursorView(
+      onMoved: () {
+        final file = ActiveFile.find(context);
+        file?.delaySleep();
+      },
+      onPointerDown: (details) {
+        // If we click anywhere, suppress any ShortcutAction.togglePlay that
+        // may be pressed. #811
+        rive.cancelPress(ShortcutAction.togglePlay);
+
+        rive.focusNode.requestFocus();
+      },
+      child: RiveEditorApp(
+        rive: rive,
+      ),
+    );
+  }
+}
+
 class RiveEditorShell extends StatelessWidget {
   final Rive rive;
   final RiveImageCache imageCache;
@@ -164,18 +178,7 @@ class RiveEditorShell extends StatelessWidget {
     return InsertInheritedWidgets(
       rive: rive,
       imageCache: imageCache,
-      child: CursorView(
-        onPointerDown: (details) {
-          // If we click anywhere, suppress any ShortcutAction.togglePlay that
-          // may be pressed. #811
-          rive.cancelPress(ShortcutAction.togglePlay);
-
-          rive.focusNode.requestFocus();
-        },
-        child: RiveEditorApp(
-          rive: rive,
-        ),
-      ),
+      child: CursorHandler(rive:rive),
     );
   }
 }
@@ -191,7 +194,7 @@ class RiveEditorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Rive",
+      title: 'Rive',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       home: DefaultTextStyle(
@@ -276,221 +279,6 @@ class InsertInheritedWidgets extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// TODO: We converted Editor to a stateful widget so that we can easily detect
-/// at the UI layer when we're in the editor (and not plumb it in Rive or
-/// something else). This should get cleaned up when the file drop is moved into
-/// the FileBrowser and handled by the API layer instead.
-class Editor extends StatefulWidget {
-  const Editor();
-
-  @override
-  _EditorState createState() => _EditorState();
-}
-
-class _EditorState extends State<Editor> {
-  Future<void> _filesDropped(Iterable<DroppedFile> files) async {
-    var activeFile = ActiveFile.find(context);
-    if (activeFile == null || activeFile.state != OpenFileState.open) {
-      return;
-    } else {
-      // TODO: maybe we're in the files view?
-    }
-
-    List<DroppedFile> importedRive = [];
-    Map<String, DroppedFile> backendConverting = {};
-    TasksApi taskApi;
-    bool imported = false;
-    for (final file in files) {
-      var idx = file.filename.lastIndexOf('.');
-      if (idx == -1) {
-        continue;
-      }
-      var ext = file.filename.substring(idx + 1);
-      switch (ext) {
-        case "riv":
-          var importer = RuntimeImporter(core: activeFile.core);
-          try {
-            if (importer.import(file.bytes)) {
-              importedRive.add(file);
-              imported = true;
-            }
-            // ignore: avoid_catching_errors
-          } on UnsupportedError {
-            activeFile
-                .addAlert(SimpleAlert('${file.filename} is unsupported.'));
-          }
-          break;
-        case "flr2d":
-          taskApi ??= TasksApi(activeFile.rive.api);
-          var taskResult = await taskApi.convertFLR(file.bytes);
-          if (taskResult != null) {
-            backendConverting[taskResult.taskId] = file;
-          }
-          break;
-        case "svg":
-          taskApi ??= TasksApi(activeFile.rive.api);
-          var taskResult = await taskApi.convertSVG(file.bytes);
-          if (taskResult != null) {
-            backendConverting[taskResult.taskId] = file;
-          }
-          break;
-      }
-    }
-    if (imported) {
-      activeFile.core.captureJournalEntry();
-    }
-
-    if (importedRive.isNotEmpty) {
-      activeFile.addAlert(SimpleAlert(
-          'Imported ${importedRive.map((file) => file.filename).join(', ')}.'));
-    }
-    if (backendConverting.isNotEmpty) {
-      var fileNames =
-          backendConverting.values.map((file) => file.filename).join(', ');
-      activeFile.addAlert(SimpleAlert('Importing $fileNames.'));
-
-      var taskIds = backendConverting.keys.toSet();
-
-      var completer =
-          TaskManager().notifyTasks(taskIds, (TaskCompleted result) async {
-        try {
-          var rivBytes = await taskApi.taskData(result.taskId);
-          var importer = RuntimeImporter(core: activeFile.core);
-          if (importer.import(rivBytes)) {
-            activeFile.addAlert(SimpleAlert(
-                'Imported ${backendConverting[result.taskId].filename}.'));
-          }
-          activeFile.core.captureJournalEntry();
-        } on ApiException {
-          activeFile.addAlert(SimpleAlert('Error converting '
-              '${backendConverting[result.taskId].filename}.'));
-          rethrow;
-        } on UnsupportedError {
-          activeFile.addAlert(SimpleAlert(
-              '${backendConverting[result.taskId].filename} is unsupported.'));
-          rethrow;
-        }
-      });
-
-      await completer.future.timeout(const Duration(seconds: 10),
-          onTimeout: () {
-        activeFile.addAlert(SimpleAlert('Timed out converting files.'));
-        return null;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    win_utils.listenFilesDropped(_filesDropped);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    win_utils.cancelFilesDropped(_filesDropped);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // No need to depend on Rive as it never changes, so we can use find()
-    // instead of of().
-    final rive = RiveContext.find(context);
-
-    // Active file can change, so let's depend on it.
-    final file = ActiveFile.of(context);
-    if (file == null) {
-      return const CircularProgressIndicator();
-    }
-
-    return ListenableBuilder<Event>(
-      listenable: file.stateChanged,
-      builder: (context, event, _) {
-        switch (file.state) {
-          case OpenFileState.loading:
-            return Container(
-              color: RiveTheme.of(context).colors.stageBackground,
-              alignment: Alignment.center,
-              child: const CircularProgressIndicator(),
-            );
-          case OpenFileState.error:
-            return Center(
-              child: Text(file.stateInfo ?? 'An error occurred...'),
-            );
-          case OpenFileState.open:
-          default:
-            return Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.only(
-                      top: 6, bottom: 6, left: 8, right: 6),
-                  height: 42,
-                  color: const Color.fromRGBO(60, 60, 60, 1),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      HamburgerPopupButton(),
-                      TransformPopupButton(),
-                      CreatePopupButton(),
-                      SharePopupButton(),
-                      const Spacer(),
-                      ConnectedUsers(rive: rive),
-                      VisibilityPopupButton(),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10, right: 14),
-                        // child: DesignAnimateToggle(),
-                        child: ValueListenableBuilder<EditorMode>(
-                          valueListenable: file.mode,
-                          builder: (context, mode, _) => ModeToggle(
-                            modes: const [
-                              EditorMode.design,
-                              EditorMode.animate,
-                            ],
-                            selected: mode,
-                            label: (EditorMode mode) {
-                              switch (mode) {
-                                case EditorMode.design:
-                                  return 'Design';
-                                case EditorMode.animate:
-                                default:
-                                  return 'Animate';
-                              }
-                            },
-                            select: (EditorMode mode) {
-                              file.changeMode(mode);
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      HierarchyPanel(),
-                      const Expanded(
-                        child: StagePanel(),
-                      ),
-                      const SizedBox(
-                        width: 235,
-                        child: InspectorPanel(),
-                      ),
-                    ],
-                  ),
-                ),
-                AnimationPanel(),
-              ],
-            );
-            break;
-        }
-      },
     );
   }
 }

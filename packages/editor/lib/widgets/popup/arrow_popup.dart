@@ -280,6 +280,9 @@ class _ListPopupMultiLayoutDelegate extends _RelayoutMultiLayoutDelegate {
       );
     }
 
+    // special case where we shift the position to fit.
+    bool allowVerticalShift = fallbackDirections == null;
+
     // Make sure to subtract the bottom of the rectangle we're popping out from
     // the height to have a best guess of max available height. Note that this
     // will break for directions that pop upwards. We may want to detect that
@@ -289,9 +292,11 @@ class _ListPopupMultiLayoutDelegate extends _RelayoutMultiLayoutDelegate {
     // child with new constraints.
 
     var previousBest = bestDirection;
-    var maxHeight = bestDirection != null && bestDirection.from.y < 0
-        ? from.top
-        : size.height - from.bottom;
+    var maxHeight = allowVerticalShift
+        ? double.maxFinite
+        : bestDirection != null && bestDirection.from.y < 0
+            ? from.top
+            : size.height - from.bottom;
 
     Size bodySize = layoutChild(
       _ListPopupLayoutElement.body,
@@ -304,25 +309,12 @@ class _ListPopupMultiLayoutDelegate extends _RelayoutMultiLayoutDelegate {
             ),
     );
 
-    // bodySize = layoutChild(
-    //   _ListPopupLayoutElement.body,
-    //   width == null
-    //       ? BoxConstraints(maxHeight: maxHeight)
-    //       : BoxConstraints(
-    //           maxHeight: maxHeight,
-    //           minWidth: width,
-    //           maxWidth: width,
-    //         ),
-    // );
-
     Offset bodyPosition = _computeBodyPosition(direction, bodySize);
     bestDirection = direction;
     Offset vector = direction.offsetVector;
 
     if (_isOutOf(bodyPosition, bodySize, size, arrowSize)) {
-      if (fallbackDirections == null) {
-        // special case where we shift the position to fit.
-
+      if (allowVerticalShift) {
         // Shift vertical if we overflow the bottom.
         if (bodyPosition.dy + bodySize.height >
             size.height - arrowSize.height - _edgePad) {

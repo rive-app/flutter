@@ -1221,6 +1221,11 @@ class Stage extends Debouncer {
 
     var canvas = context.canvas;
 
+    canvas.save();
+    // Translate to widget space
+    canvas.clipRRect(
+        RRect.fromRectAndRadius(offset & size, const Radius.circular(5)));
+
     // Clear bg.
     var backboardColor = file.core.backboard.color;
     canvas.drawRect(
@@ -1232,6 +1237,7 @@ class Stage extends Debouncer {
     if (_viewportWidth == 0 || _viewportHeight == 0) {
       // Keep this here to prevent flashing on load. Make sure we clear to
       // backboard regardless.
+      canvas.restore();
       return;
     }
 
@@ -1250,9 +1256,6 @@ class Stage extends Debouncer {
         // If the value is dark, darken as darkness decreases.
         : Colors.white.withOpacity(contrast / 128 * 0.3 + 0.5);
 
-    canvas.save();
-    // Translate to widget space
-    canvas.clipRect(offset & size);
     canvas.translate(offset.dx, offset.dy);
     canvas.save();
 

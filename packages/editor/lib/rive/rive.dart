@@ -236,6 +236,11 @@ class Rive {
 
   final Set<ShortcutKey> _pressedKeys = {};
   void onRawKeyPress(ShortcutKey key, bool isPress, bool isRepeat) {
+    // We delay sleep here as this is called whenver a key is pressed. We want
+    // to delay when unhandled keys are pressed too (user might be inputting
+    // text or something).
+    file.value?.delaySleep();
+    
     // First update our pressed set.
     if (isPress) {
       // remove and re-add so it's always at the end.

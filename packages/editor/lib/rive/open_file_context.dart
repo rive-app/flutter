@@ -48,7 +48,7 @@ import 'package:rive_editor/widgets/popup/base_popup.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
-enum OpenFileState { loading, error, open }
+enum OpenFileState { loading, error, open, sleeping }
 enum EditorMode { design, animate }
 
 /// Helper for state managed by a single open file. The file may be open (in a
@@ -86,6 +86,8 @@ class OpenFileContext with RiveFileDelegate {
 
   OpenFileState _state = OpenFileState.loading;
   String _stateInfo;
+  Timer _sleepTimer;
+  Iterable<Id> _sleepSelection;
 
   final _alerts = ValueNotifier<Iterable<EditorAlert>>([]);
 
@@ -275,7 +277,6 @@ class OpenFileContext with RiveFileDelegate {
 
   @protected
   void completeInitialConnection(OpenFileState state, [String info]) {
-    print("COMPLETE WITH $state $info");
     _stateInfo = info;
     _state = state;
     if (state == OpenFileState.error) {
@@ -331,6 +332,38 @@ class OpenFileContext with RiveFileDelegate {
       return true;
     }
     return false;
+  }
+
+  void delaySleep() {
+    switch (_state) {
+      case OpenFileState.sleeping:
+        _sleepTimer?.cancel();
+        core.forceReconnect();
+        break;
+      case OpenFileState.open:
+        _sleepTimer?.cancel();
+        _sleepTimer = Timer(const Duration(seconds: 2), _sleep);
+        break;
+      default:
+        // Don't do anything if we're not connected or already asleep.
+        return;
+    }
+  }
+
+  void _sleep() {
+    // tell manager to sleep and serialize any of their selection...
+    // _editingAnimationManager.onSleep();
+    // .. later do:
+    // _editingAnimationManager.onAwake();
+
+    _sleepSelection = selection.items
+        .whereType<StageItem>()
+        .map((item) => (item.component as Component).id)
+        .toList();
+
+    _state = OpenFileState.sleeping;
+    stateChanged.notify();
+    core?.disconnect();
   }
 
   @override
@@ -508,6 +541,13 @@ class OpenFileContext with RiveFileDelegate {
         break;
       case CoopConnectionState.connected:
         _state = OpenFileState.open;
+        if (_sleepSelection != null) {
+          selection.selectMultiple(_sleepSelection
+              .map((id) => core.resolve<Component>(id)?.stageItem)
+              .where((item) => item != null));
+          _sleepSelection = null;
+        }
+
         core.advance(0);
         // _stage.tool = AutoTool.instance;
         stateChanged.notify();
