@@ -159,6 +159,29 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
             after != null ? orderOf(after) : _maxIndex));
   }
 
+  /// Move item relative to to target offseting by incIndex. Computes the
+  /// appropraite fractional index for the item.
+  void moveRelative(T item, T target, int incIndex) {
+    int targetIndex = indexOf(target);
+    assert(targetIndex != -1);
+    var relativeIndex = targetIndex + incIndex;
+    FractionalIndex siblingFracIndex;
+    if (relativeIndex < 0) {
+      siblingFracIndex = _minIndex;
+    } else if (relativeIndex >= length) {
+      siblingFracIndex = _maxIndex;
+    } else {
+      siblingFracIndex = orderOf(this[relativeIndex]);
+    }
+    setOrderOf(
+      item,
+      FractionalIndex.between(
+        siblingFracIndex,
+        orderOf(target),
+      ),
+    );
+  }
+
   void reverse() {
     var indices = <FractionalIndex>[];
     for (final item in _values) {

@@ -657,7 +657,7 @@ class Definition {
         for (final property in definition.properties) {
           ctxCode.write('case ${property.definition._name}Base');
           ctxCode.writeln('.${property.name}PropertyKey:');
-          ctxCode.writeln('return \'${property.name}\';');
+          ctxCode.writeln('return \'${property.key.stringValue}\';');
         }
       }
       ctxCode.writeln('default: return null; }}');

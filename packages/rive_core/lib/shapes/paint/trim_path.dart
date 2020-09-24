@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_core/shapes/paint/stroke_effect.dart';
@@ -100,6 +101,9 @@ class TrimPath extends TrimPathBase implements StrokeEffect {
   }
 
   // -> editor-only
+  @override
+  Component get timelineProxy => parent;
+
   @override
   bool validate() =>
       super.validate() && parent is Stroke && mode != TrimPathMode.none;

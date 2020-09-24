@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
-import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
@@ -81,12 +80,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
         appendChild(composer);
       });
     }
-
-    // Tell the artboard that clipping shapes need to re-build their
-    // dependencies. Because clipping shapes to shapes have complex many to many
-    // relationships, it's easier to rebuild the whole set when a shape is
-    // added/removed.
-    artboard?.rebuildClippingShapeDependencies();
   }
 
   @override
@@ -96,10 +89,16 @@ class Shape extends ShapeBase with ShapePaintContainer {
   }
 
   @override
-  void parentChanged(ContainerComponent from, ContainerComponent to) {
-    super.parentChanged(from, to);
+  bool resolveArtboard() {
+    bool result = super.resolveArtboard();
+    // Tell the artboard that clipping shapes need to re-build their
+    // dependencies. Because clipping shapes to shapes have complex many to many
+    // relationships, it's easier to rebuild the whole set when a shape is
+    // added/removed.
     artboard?.rebuildClippingShapeDependencies();
+    return result;
   }
+
   // <- editor-only
 
   void _markComposerDirty() {
