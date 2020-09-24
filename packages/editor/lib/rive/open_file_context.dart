@@ -51,6 +51,13 @@ typedef ActionHandler = bool Function(ShortcutAction action);
 enum OpenFileState { loading, error, open, sleeping }
 enum EditorMode { design, animate }
 
+class SleepData {
+  final Iterable<Id> selection;
+  final Iterable<Id> treeExpansion;
+
+  SleepData({this.selection, this.treeExpansion});
+}
+
 /// Helper for state managed by a single open file. The file may be open (in a
 /// tab) but it is not guaranteed to be in memory.
 class OpenFileContext with RiveFileDelegate {
@@ -87,7 +94,7 @@ class OpenFileContext with RiveFileDelegate {
   OpenFileState _state = OpenFileState.loading;
   String _stateInfo;
   Timer _sleepTimer;
-  Iterable<Id> _sleepSelection;
+  SleepData _sleepData;
 
   final _alerts = ValueNotifier<Iterable<EditorAlert>>([]);
 
@@ -356,10 +363,15 @@ class OpenFileContext with RiveFileDelegate {
     // .. later do:
     // _editingAnimationManager.onAwake();
 
-    _sleepSelection = selection.items
-        .whereType<StageItem>()
-        .map((item) => (item.component as Component).id)
-        .toList();
+    _sleepData = SleepData(
+      selection: selection.items
+          .whereType<StageItem>()
+          .map((item) => (item.component as Component).id)
+          .toList(),
+      treeExpansion: treeController.value.expanded
+          .map((component) => component.id)
+          .toList(),
+    );
 
     _state = OpenFileState.sleeping;
     stateChanged.notify();
@@ -425,7 +437,6 @@ class OpenFileContext with RiveFileDelegate {
     // our delegate isn't registered yet. So we can use this opportunity to wipe
     // the existing stage and set ourselves up for the next set of data.
     stage?.wipe();
-    _resetManagers();
     _restoringAlert?.dismiss();
     _restoringAlert = null;
   }
@@ -458,6 +469,17 @@ class OpenFileContext with RiveFileDelegate {
   void _resetManagers() {
     _disposeManagers();
     treeController.value = HierarchyTreeController(this);
+    if (_sleepData != null) {
+      var controller = treeController.value;
+      for (final id in _sleepData.treeExpansion) {
+        var component = core.resolve<Component>(id);
+        if (component == null) {
+          continue;
+        }
+        controller.expand(component, callFlatten: false);
+      }
+      controller.flatten();
+    }
     _vertexEditor = VertexEditor(this, stage);
 
     // This can happen during a _wipe call during initialization, this is
@@ -541,11 +563,13 @@ class OpenFileContext with RiveFileDelegate {
         break;
       case CoopConnectionState.connected:
         _state = OpenFileState.open;
-        if (_sleepSelection != null) {
-          selection.selectMultiple(_sleepSelection
+        _resetManagers();
+        if (_sleepData != null) {
+          selection.selectMultiple(_sleepData.selection
               .map((id) => core.resolve<Component>(id)?.stageItem)
               .where((item) => item != null));
-          _sleepSelection = null;
+
+          _sleepData = null;
         }
 
         core.advance(0);
