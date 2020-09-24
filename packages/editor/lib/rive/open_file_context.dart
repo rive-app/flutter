@@ -143,6 +143,7 @@ class OpenFileContext with RiveFileDelegate {
       return;
     }
     _isActive.value = value;
+    delaySleep();
   }
 
   /// Controller for the hierarchy of this file.
@@ -306,6 +307,7 @@ class OpenFileContext with RiveFileDelegate {
     stage.tool = AutoTool.instance;
     _resetManagers();
     stateChanged.notify();
+    delaySleep();
   }
 
   @protected
@@ -344,12 +346,16 @@ class OpenFileContext with RiveFileDelegate {
   void delaySleep() {
     switch (_state) {
       case OpenFileState.sleeping:
+        // Notify the UI that the state had changed when we slept.
+        stateChanged.notify();
+
         _sleepTimer?.cancel();
         core.forceReconnect();
         break;
       case OpenFileState.open:
         _sleepTimer?.cancel();
-        _sleepTimer = Timer(const Duration(seconds: 2), _sleep);
+        _sleepTimer =
+            Timer(Duration(seconds: _isActive.value ? 30 : 5), _sleep);
         break;
       default:
         // Don't do anything if we're not connected or already asleep.
@@ -368,13 +374,16 @@ class OpenFileContext with RiveFileDelegate {
           .whereType<StageItem>()
           .map((item) => (item.component as Component).id)
           .toList(),
-      treeExpansion: treeController.value.expanded
-          .map((component) => component.id)
-          .toList(),
+      treeExpansion: treeController.value == null
+          ? []
+          : treeController.value.expanded
+              .map((component) => component.id)
+              .toList(),
     );
 
     _state = OpenFileState.sleeping;
-    stateChanged.notify();
+    // N.B. NOT calling stateChanged.notify() here to hide this state from the
+    // UI until the awakening in the next call to delaySleep();
     core?.disconnect();
   }
 
@@ -573,8 +582,8 @@ class OpenFileContext with RiveFileDelegate {
         }
 
         core.advance(0);
-        // _stage.tool = AutoTool.instance;
         stateChanged.notify();
+        delaySleep();
         break;
       default:
         break;
