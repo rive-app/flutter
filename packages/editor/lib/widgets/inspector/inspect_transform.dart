@@ -12,6 +12,8 @@ import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
 /// Returns the inspector for Artboard selections.
 class TransformInspectorBuilder extends ListenableInspectorBuilder {
   bool _isScaleLinked = false;
+  bool _isSizeLinked = false;
+
   @override
   bool validate(InspectionSet inspecting) =>
       inspecting.intersectingCoreTypes.contains(TransformComponentBase.typeKey);
@@ -77,6 +79,11 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
         (context) => PropertyDual<double>(
               name: 'Size',
               linkable: true,
+              isLinked: _isSizeLinked,
+              toggleLink: (value) {
+                _isSizeLinked = value;
+                notifyListeners();
+              },
               objects: inspecting.components,
               propertyKeyA: ParametricPathBase.widthPropertyKey,
               propertyKeyB: ParametricPathBase.heightPropertyKey,

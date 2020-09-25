@@ -178,7 +178,7 @@ class RiveEditorShell extends StatelessWidget {
     return InsertInheritedWidgets(
       rive: rive,
       imageCache: imageCache,
-      child: CursorHandler(rive:rive),
+      child: CursorHandler(rive: rive),
     );
   }
 }

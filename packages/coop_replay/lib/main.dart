@@ -1,20 +1,18 @@
+// ignore_for_file: implementation_imports
+
 import 'dart:io';
 import 'dart:typed_data';
-// ignore: implementation_imports
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_file.dart';
 import 'package:core/core.dart';
 import 'package:core_generator/src/definition.dart';
-// ignore: implementation_imports
 import 'package:core_generator/src/property.dart';
-// ignore: implementation_imports
 import 'package:core_generator/src/field_types/initialize.dart';
 import 'package:coop_replay/src/configuration.dart';
 // ignore: implementation_imports
 import 'package:core_generator/src/configuration.dart' as core_generator;
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:colorize/colorize.dart';
-import 'package:filesize/filesize.dart';
 
 final Map<int, Definition> keyToDef = {};
 final Map<int, Property> keyToProperty = {};
@@ -182,7 +180,8 @@ class ReplayFile {
           case CoreContext.removeKey:
             var objectId = clientObjectChanges.objectId;
             color(
-                '  Delete ${keyToDef[modifiedFile.objects[objectId].key]?.name} $objectId',
+                '  Delete ${keyToDef[modifiedFile.objects[objectId].key]?.name}'
+                ' $objectId',
                 front: Styles.RED);
             object = modifiedFile.objects.remove(objectId);
             // Destroy object with id
@@ -195,7 +194,7 @@ class ReplayFile {
               var type = keyToProperty[change.op].type;
               var reader = BinaryReader.fromList(change.value);
               if (type.name == 'String') {
-                print("    value: ${reader.readString(explicitLength: false)}");
+                print('    value: ${reader.readString(explicitLength: false)}');
               }
             }
             break;

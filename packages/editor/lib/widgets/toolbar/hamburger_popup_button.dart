@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:rive_editor/external_url.dart';
@@ -9,9 +9,9 @@ import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
-import 'package:rive_editor/widgets/popup/modal_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/ui_strings.dart';
 
 class HamburgerPopupButton extends StatelessWidget {
   @override
@@ -32,7 +32,7 @@ class HamburgerPopupButton extends StatelessWidget {
       width: 267,
       contextItemsBuilder: (context) => [
         PopupContextItem.focusable(
-          'File Name',
+          UIStrings.of(context).withKey('file_name'),
           child: (focus, key) {
             // Focus this input right away when the popup displays.
             focus.requestFocus();
@@ -53,41 +53,29 @@ class HamburgerPopupButton extends StatelessWidget {
             );
           },
         ),
-        // PopupContextItem(
-        //   'Team Permissions',
-        //   select: () => _showModal(context, (_) => Container()),
-        // ),
         PopupContextItem(
-          'Revision History',
+          UIStrings.of(context).withKey('revision_history'),
           select: () => ActiveFile.find(context).showRevisionHistory(),
         ),
         PopupContextItem.separator(),
-        // PopupContextItem(
-        //   'Manual',
-        // ),
-        // PopupContextItem(
-        //   'Shortcuts',
-        // ),
+        // TODO: while this fixes this timing problem, it's pretty ugly. Need to
+        // implement a way to call url launcher once the popup has tidied itself
+        // up and closed
         PopupContextItem(
-          'Help Center',
-          select: launchHelpUrl,
+          UIStrings.of(context).withKey('help_center'),
+          select: () => Future.delayed(
+            const Duration(milliseconds: 100),
+            launchHelpUrl,
+          ),
         ),
         PopupContextItem(
-          'Send feedback',
-          select: launchSupportUrl,
+          UIStrings.of(context).withKey('send_feedback'),
+          select: () => Future.delayed(
+            const Duration(milliseconds: 100),
+            launchSupportUrl,
+          ),
         ),
-        // PopupContextItem(
-        //   'Work with Us!',
-        // ),
       ],
     );
-  }
-
-  void _showModal(BuildContext context, WidgetBuilder builder) {
-    ModalPopup(
-      builder: builder,
-      size: const Size(750, 629),
-      elevation: 20,
-    ).show(context);
   }
 }
