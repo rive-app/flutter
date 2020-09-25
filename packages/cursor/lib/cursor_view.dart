@@ -206,12 +206,14 @@ class CursorView extends StatefulWidget {
   final Widget child;
   final PropagatingPointerDownEventListener onPointerDown;
   final PropagatingPointerUpEventListener onPointerUp;
+  final VoidCallback onMoved;
 
   const CursorView({
     Key key,
     this.child,
     this.onPointerDown,
     this.onPointerUp,
+    this.onMoved,
   }) : super(key: key);
 
   @override
@@ -248,6 +250,7 @@ class _CursorViewState extends State<CursorView> {
           setState(() {
             _position = details.position;
           });
+          widget.onMoved?.call();
         },
         child: PropagatingListenerRoot(
           child: PropagatingListener(

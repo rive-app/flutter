@@ -48,8 +48,15 @@ import 'package:rive_editor/widgets/popup/base_popup.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
-enum OpenFileState { loading, error, open }
+enum OpenFileState { loading, error, open, sleeping }
 enum EditorMode { design, animate }
+
+class SleepData {
+  final Iterable<Id> selection;
+  final Iterable<Id> treeExpansion;
+
+  SleepData({this.selection, this.treeExpansion});
+}
 
 /// Helper for state managed by a single open file. The file may be open (in a
 /// tab) but it is not guaranteed to be in memory.
@@ -86,6 +93,8 @@ class OpenFileContext with RiveFileDelegate {
 
   OpenFileState _state = OpenFileState.loading;
   String _stateInfo;
+  Timer _sleepTimer;
+  SleepData _sleepData;
 
   final _alerts = ValueNotifier<Iterable<EditorAlert>>([]);
 
@@ -134,6 +143,7 @@ class OpenFileContext with RiveFileDelegate {
       return;
     }
     _isActive.value = value;
+    delaySleep();
   }
 
   /// Controller for the hierarchy of this file.
@@ -275,7 +285,6 @@ class OpenFileContext with RiveFileDelegate {
 
   @protected
   void completeInitialConnection(OpenFileState state, [String info]) {
-    print("COMPLETE WITH $state $info");
     _stateInfo = info;
     _state = state;
     if (state == OpenFileState.error) {
@@ -298,6 +307,7 @@ class OpenFileContext with RiveFileDelegate {
     stage.tool = AutoTool.instance;
     _resetManagers();
     stateChanged.notify();
+    delaySleep();
   }
 
   @protected
@@ -331,6 +341,50 @@ class OpenFileContext with RiveFileDelegate {
       return true;
     }
     return false;
+  }
+
+  void delaySleep() {
+    switch (_state) {
+      case OpenFileState.sleeping:
+        // Notify the UI that the state had changed when we slept.
+        stateChanged.notify();
+
+        _sleepTimer?.cancel();
+        core.forceReconnect();
+        break;
+      case OpenFileState.open:
+        _sleepTimer?.cancel();
+        _sleepTimer =
+            Timer(Duration(seconds: _isActive.value ? 30 : 5), _sleep);
+        break;
+      default:
+        // Don't do anything if we're not connected or already asleep.
+        return;
+    }
+  }
+
+  void _sleep() {
+    // tell manager to sleep and serialize any of their selection...
+    // _editingAnimationManager.onSleep();
+    // .. later do:
+    // _editingAnimationManager.onAwake();
+
+    _sleepData = SleepData(
+      selection: selection.items
+          .whereType<StageItem>()
+          .map((item) => (item.component as Component).id)
+          .toList(),
+      treeExpansion: treeController.value == null
+          ? []
+          : treeController.value.expanded
+              .map((component) => component.id)
+              .toList(),
+    );
+
+    _state = OpenFileState.sleeping;
+    // N.B. NOT calling stateChanged.notify() here to hide this state from the
+    // UI until the awakening in the next call to delaySleep();
+    core?.disconnect();
   }
 
   @override
@@ -392,7 +446,6 @@ class OpenFileContext with RiveFileDelegate {
     // our delegate isn't registered yet. So we can use this opportunity to wipe
     // the existing stage and set ourselves up for the next set of data.
     stage?.wipe();
-    _resetManagers();
     _restoringAlert?.dismiss();
     _restoringAlert = null;
   }
@@ -425,6 +478,17 @@ class OpenFileContext with RiveFileDelegate {
   void _resetManagers() {
     _disposeManagers();
     treeController.value = HierarchyTreeController(this);
+    if (_sleepData != null) {
+      var controller = treeController.value;
+      for (final id in _sleepData.treeExpansion) {
+        var component = core.resolve<Component>(id);
+        if (component == null) {
+          continue;
+        }
+        controller.expand(component, callFlatten: false);
+      }
+      controller.flatten();
+    }
     _vertexEditor = VertexEditor(this, stage);
 
     // This can happen during a _wipe call during initialization, this is
@@ -508,9 +572,18 @@ class OpenFileContext with RiveFileDelegate {
         break;
       case CoopConnectionState.connected:
         _state = OpenFileState.open;
+        _resetManagers();
+        if (_sleepData != null) {
+          selection.selectMultiple(_sleepData.selection
+              .map((id) => core.resolve<Component>(id)?.stageItem)
+              .where((item) => item != null));
+
+          _sleepData = null;
+        }
+
         core.advance(0);
-        // _stage.tool = AutoTool.instance;
         stateChanged.notify();
+        delaySleep();
         break;
       default:
         break;

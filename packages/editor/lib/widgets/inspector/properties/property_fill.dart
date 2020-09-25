@@ -29,7 +29,7 @@ class PropertyFill extends StatelessWidget {
   Widget build(BuildContext context) {
     return InspectorPopoutComponent(
       components: fills,
-      prefix: (context) => Padding(
+      prefix: (_) => Padding(
         padding: const EdgeInsets.only(right: 10),
         child: InspectorColorSwatch(
           inspectorContext: context,

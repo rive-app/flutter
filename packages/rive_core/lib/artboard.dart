@@ -448,12 +448,11 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// an editor-only operation that easily lets the system update dependencies
   /// for clipping shapes.
   void rebuildClippingShapeDependencies() {
-    forAll((component) {
-      if (component is ClippingShape) {
-        component.markRebuildDependencies();
+    for (final component in _components) {
+      if (component.coreType == ClippingShapeBase.typeKey) {
+        (component as ClippingShape).markRebuildDependencies();
       }
-      return true;
-    });
+    }
   }
 
   // Hacking in the draw order key state by emulating what animated objects do

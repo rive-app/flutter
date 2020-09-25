@@ -18,6 +18,10 @@ class TestOpenFileContext extends OpenFileContext {
     completeInitialConnection(OpenFileState.open);
     return true;
   }
+
+  // Never schedule a delay sleep timer when testing as it'll hang up the tests.
+  @override
+  void delaySleep() {}
 }
 
 class TestRiveFile extends RiveFile {

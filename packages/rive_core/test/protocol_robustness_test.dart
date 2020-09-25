@@ -300,6 +300,7 @@ void main() {
       expect(server.editingFileCount, 0,
           reason: 'Editing file count should be 0');
       expect(await server.close(), true);
+      await Future.delayed(const Duration(milliseconds: 200), () {});
       expect(await privateApi.close(), true);
     },
     timeout: const Timeout(
@@ -331,7 +332,6 @@ void main() {
           reason: 'private api starts listening');
 
       unawaited(privateApi.startServing());
-
 
       expect(
         (await client1.connect('ws://localhost:$coopPort', filePath, 'fake'))
@@ -394,6 +394,7 @@ void main() {
 
       expect(await client1.disconnect(), true);
       expect(await server.close(), true);
+      await Future.delayed(const Duration(milliseconds: 200), () {});
       expect(await privateApi.close(), true);
     },
     timeout: const Timeout(
@@ -485,6 +486,7 @@ void main() {
 
       expect(await client1.disconnect(), true);
       expect(await server.close(), true);
+      await Future.delayed(const Duration(milliseconds: 200), () {});
       expect(await privateApi.close(), true);
     },
     timeout: const Timeout(
@@ -567,6 +569,7 @@ void main() {
 
       expect(await client1.disconnect(), true);
       expect(await server.close(), true);
+      await Future.delayed(const Duration(milliseconds: 200), () {});
       expect(await privateApi.close(), true);
     },
     timeout: const Timeout(

@@ -466,7 +466,7 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
 
         var clipper = ClippingShape();
         file.addObject(clipper);
-        clipper.shape = clippingRefs[clipAttr];
+        clipper.source = clippingRefs[clipAttr];
         node.appendChild(clipper);
       }
 
@@ -517,7 +517,7 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
 
         var clipper = ClippingShape();
         file.addObject(clipper);
-        clipper.shape = clippingRefs[clipAttr];
+        clipper.source = clippingRefs[clipAttr];
         node.appendChild(clipper);
       }
 
