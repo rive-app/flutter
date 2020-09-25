@@ -48,6 +48,12 @@ typedef BatchAddCallback = void Function();
 abstract class Core<T extends CoreContext> {
   Id id;
 
+  /// Managed by CoreContext internally.
+  bool _isActive = false;
+
+  /// Returns true when the object is actively registered with the core context.
+  bool get isActive => _isActive;
+
   covariant T context;
   int get coreType;
 
@@ -171,9 +177,6 @@ abstract class Core<T extends CoreContext> {
   /// If an object is in a corrupt state, it will be removed from core prior to
   /// calling onAdded for the object.
   bool validate() => true;
-
-  /// Returns true when the object is actively registered with the core context.
-  bool get isActive => context != null && context.isHolding(this);
 }
 
 /// Helper interface for something that can resolve Core objects.
@@ -322,7 +325,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     }
     object.context = this;
 
-    _objects[object.id] = object;
+    _holdObject(object);
     if (_delayAdd != null) {
       _delayAdd.add(object);
     } else {
@@ -547,6 +550,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       // Object was already removed or not a part of this context.
       return;
     }
+    object._isActive = false;
     if (_isRecording) {
       bool wasJustAdded = false;
       if (_currentChanges != null) {
@@ -600,6 +604,11 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     return true;
   }
 
+  void _holdObject(Core object) {
+    object._isActive = true;
+    _objects[object.id] = object;
+  }
+
   void _applyJournalEntry(
     CorePropertyChanges changes, {
     bool isUndo,
@@ -622,7 +631,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
             regeneratedObjects.add(object);
             object.id = objectId;
             object.context = this;
-            _objects[object.id] = object;
+            _holdObject(object);
             break entryLoop;
           }
         }
@@ -877,6 +886,9 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   void _wipe() {
     onWipe();
     _players.clear();
+    for (final object in _objects.values) {
+      object._isActive = false;
+    }
     _objects.clear();
     _journalIndex = 0;
     journal.clear();
