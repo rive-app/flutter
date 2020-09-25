@@ -46,7 +46,7 @@ class MiddlePanel extends StatelessWidget {
                 ' with this ‘quick start’ video series.'
                 ' We’ll walk you through all the basics'
                 ' to get you up and running in no time.',
-            riveFile: 'get-started.riv',
+            riveFile: 'get_started.riv',
             fillColor: Color(0xFF0D101B),
             episodes: [
               VideoSeriesEpisode(
@@ -87,7 +87,7 @@ class MiddlePanel extends StatelessWidget {
                 ' tools then you\'ll feel right at home with Rive. That said,'
                 ' there are some aspects we approach differently,'
                 ' so we created this video series to help.',
-            riveFile: 'distinctly-rive.riv',
+            riveFile: 'distinctly_rive.riv',
             fillColor: Color(0xFF541B4D),
             episodes: [
               VideoSeriesEpisode(
@@ -143,7 +143,7 @@ class MiddlePanel extends StatelessWidget {
             blurb: 'Ready to integrate your Rive animations into your site,'
                 ' app, or game? Join us in this series on implementing'
                 ' and interacting with your animations!',
-            riveFile: 'runtime-funtime.riv',
+            riveFile: 'runtime_funtime.riv',
             fillColor: Color(0xFFDFC0D8),
             episodes: [
               VideoSeriesEpisode(
