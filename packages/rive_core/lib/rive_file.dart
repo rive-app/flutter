@@ -426,8 +426,9 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void connectionStateChanged(core.CoopConnectionState state) =>
-      delegates.forEach((delegate) => delegate.onConnectionStateChanged(state));
+  void connectionStateChanged(core.CoopConnectionState state) => delegates
+      .toList()
+      .forEach((delegate) => delegate.onConnectionStateChanged(state));
 
   @override
   CoreIdType get idType => RiveIdType.instance;

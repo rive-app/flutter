@@ -11,7 +11,7 @@ class TestPrivateApi {
     await _server.close(force: true);
     return true;
   }
-  
+
   Future<bool> listen(int port) async {
     _server = await HttpServer.bind(
       InternetAddress.loopbackIPv4,
@@ -22,7 +22,6 @@ class TestPrivateApi {
 
   Future<void> startServing() async {
     await for (final request in _server) {
-      // print("SEGS ${request.uri.pathSegments} ${request.method}");
       var segs = request.uri.pathSegments;
       if (segs.length == 3) {
         switch (segs[0]) {

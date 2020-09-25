@@ -10,6 +10,7 @@ import 'package:rive_editor/widgets/inspector/color/color_popout.dart';
 import 'package:rive_editor/widgets/inspector/color/color_preview.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/popup/arrow_popup.dart';
+import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_widgets/frozen_value_listenable_builder.dart';
 
 class TimelineColorSwatch extends StatefulWidget {
@@ -84,6 +85,8 @@ class _TimelineColorSwatchState extends State<TimelineColorSwatch> {
             _arrowPopup = ArrowPopup.show(
               context,
               background: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
+              direction: PopupDirection.rightToCenter,
+              fallbackDirections: null,
               canCancelWithAction: true,
               borderRadius: BorderRadius.circular(10),
               showArrow: false,
