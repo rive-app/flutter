@@ -21,4 +21,9 @@ class Node extends NodeBase {
   }
 
   AABB get localBounds => AABB.fromValues(x, y, x, y);
+
+  // -> editor-only
+  @override
+  bool validate() => super.validate() && artboard != null;
+  // <- editor-only
 }
