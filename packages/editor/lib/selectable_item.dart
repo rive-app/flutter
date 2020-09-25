@@ -36,6 +36,9 @@ abstract class SelectableItem {
   void onHoverChanged(bool hovered) {}
   void onSelectedChanged(bool selected, bool notify) {}
 
+  /// Returns true if this item is either selected or hovered.
+  bool get hasSelectionFlags => _selectionFlags != 0;
+
   /// Whether this item has a pointer over it.
   bool get isHovered => _selectionFlags & _SelectionFlags.hovered != 0;
   set isHovered(bool value) {

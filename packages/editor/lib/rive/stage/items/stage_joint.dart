@@ -10,17 +10,21 @@ import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
+import 'package:rive_editor/rive/stage/stage_hideable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
 import 'package:rive_editor/rive/stage/tools/transform_handle_tool.dart';
 
-class StageJoint extends StageItem<Bone>
+class StageJoint extends HideableStageItem<Bone>
     implements StageTransformable, TransfomHandleSelectionMutator {
   static const double hitRadius = BoneJointRenderer.radius + 3;
   static const double hitRadiusSquared = hitRadius * hitRadius;
   static const double _maxWorldJointSize =
       BoneJointRenderer.radius / BoneJointRenderer.minJointScale;
   Vec2D _worldTranslation;
+
+  @override
+  ValueNotifier<bool> get isShownNotifier => stage.showNodesNotifier;
 
   final Event _jointTransformChanged = Event();
 
