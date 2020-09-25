@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/bounds_delegate.dart';
@@ -19,6 +20,10 @@ class StageBone extends HideableStageItem<Bone>
     with BoundsDelegate, StageTransformableComponent<Bone> {
   static const double hitDistance = 4;
   static const double hitDistanceSquared = hitDistance * hitDistance;
+
+  @override
+  ValueNotifier<bool> get isShownNotifier => stage.showNodesNotifier;
+  
   final Path path = Path();
   bool _needsUpdate = true;
   double _worldLength = 0;

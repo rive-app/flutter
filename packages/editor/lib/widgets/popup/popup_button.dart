@@ -87,6 +87,9 @@ class _PopupButtonState<T extends PopupListItem> extends State<PopupButton<T>> {
                 arrowTweak: widget.arrowTweak,
                 width: widget.width,
                 onClose: () {
+                  if (!mounted) {
+                    return;
+                  }
                   setState(() => _popup = null);
                   _tipContext?.encourage();
                   _tipContext = null;

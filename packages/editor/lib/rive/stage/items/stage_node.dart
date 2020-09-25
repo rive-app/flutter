@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -15,6 +16,9 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 /// A Node component as it's drawn on the stage.
 class StageNode extends HideableStageItem<Node>
     with BoundsDelegate, StageTransformableComponent<Node> {
+  @override
+  ValueNotifier<bool> get isShownNotifier => stage.showNodesNotifier;
+
   @override
   Iterable<StageDrawPass> get drawPasses => [
         StageDrawPass(

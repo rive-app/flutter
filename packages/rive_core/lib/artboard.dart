@@ -293,7 +293,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     }
   }
 
-  bool get isTranslucent => fills.any((fill) => fill.isTranslucent);
+  bool get isTranslucent =>
+      fills.isEmpty ||
+      fills.every((fill) => fill.isTranslucent || !fill.isVisible);
   // <- editor-only
 
   /// Draw the drawable components in this artboard.
