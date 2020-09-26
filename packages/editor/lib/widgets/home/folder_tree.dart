@@ -179,7 +179,6 @@ class FolderTreeIcon extends StatelessWidget {
     } else {
       return AvatarView(
         diameter: 15,
-        padding: 0,
         borderWidth: 0,
         imageUrl: owner.avatarUrl,
         name: owner.displayName,

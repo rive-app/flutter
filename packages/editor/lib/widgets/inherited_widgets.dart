@@ -141,6 +141,9 @@ class ImageCacheProvider extends StatefulWidget {
   static ImageManager of(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<_InheritedImageCacheProvider>()
       .manager;
+  static ImageManager find(BuildContext context) => context
+      .findAncestorWidgetOfExactType<_InheritedImageCacheProvider>()
+      .manager;
 }
 
 class _ImageCacheProviderState extends State<ImageCacheProvider> {
