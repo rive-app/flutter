@@ -413,7 +413,6 @@ class _TeamInviteNotificationWidgetState
             child: AvatarView(
               diameter: 50,
               borderWidth: 0,
-              padding: 0,
               imageUrl: widget.notification.avatarUrl,
               name: widget.notification.teamName,
               color: StageCursor.colorFromPalette(widget.notification.teamId),
@@ -476,7 +475,6 @@ class TeamInviteAcceptedNotificationWidget extends StatelessWidget {
             child: AvatarView(
               diameter: 50,
               borderWidth: 0,
-              padding: 0,
               imageUrl: notification.avatarUrl,
               name: notification.teamName,
               color: StageCursor.colorFromPalette(notification.teamId),
@@ -533,7 +531,6 @@ class TeamInviteRejectedNotificationWidget extends StatelessWidget {
             child: AvatarView(
               diameter: 50,
               borderWidth: 0,
-              padding: 0,
               imageUrl: notification.avatarUrl,
               name: notification.teamName,
               color: StageCursor.colorFromPalette(notification.teamId),
@@ -573,7 +570,6 @@ class TeamInviteRescindedNotificationWidget extends StatelessWidget {
             child: AvatarView(
               diameter: 50,
               borderWidth: 0,
-              padding: 0,
               imageUrl: notification.avatarUrl,
               name: notification.teamName,
               color: StageCursor.colorFromPalette(notification.teamId),

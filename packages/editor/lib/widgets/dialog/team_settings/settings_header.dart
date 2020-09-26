@@ -150,6 +150,7 @@ class EditableAvatar extends StatefulWidget {
 class _EditableAvatarState extends State<EditableAvatar> {
   final double radius;
   bool _hover = false;
+  bool _avatarImageFailed = false;
 
   _EditableAvatarState({this.radius = 25});
   void setHover(bool hover) {
@@ -163,38 +164,61 @@ class _EditableAvatarState extends State<EditableAvatar> {
     List<Widget> children = [];
     final theme = RiveTheme.of(context);
     final riveColors = theme.colors;
-
     if (widget.avatarUploading) {
       children.add(Center(
           child: SizedBox(
               width: radius * 2,
               height: radius * 2,
               child: const CircularProgressIndicator())));
-    } else if (widget.avatarPath == null) {
-      children.addAll([
-        Positioned.fill(
+    } else if (widget.avatarPath == null || _avatarImageFailed) {
+      children.addAll(
+        [
+          Positioned.fill(
             child: CustomPaint(
-                painter: _DashedCirclePainter(
-          radius: radius,
-        ))),
-        Center(
+              painter: _DashedCirclePainter(
+                radius: radius,
+              ),
+            ),
+          ),
+          Center(
             child: TintedIcon(
-                color: riveColors.fileIconColor, icon: PackedIcon.image))
-      ]);
+                color: riveColors.fileIconColor, icon: PackedIcon.image),
+          )
+        ],
+      );
     } else {
-      children.add(Center(
-        child: SizedBox(
+      children.add(
+        Center(
+          child: SizedBox(
             width: radius * 2,
             height: radius * 2,
-            child: CachedCircleAvatar(widget.avatarPath)),
-      ));
+            child: CachedCircleAvatar(
+              widget.avatarPath,
+              onImageError: () {
+                if (!mounted) {
+                  return;
+                }
+                setState(
+                  () {
+                    _avatarImageFailed = true;
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
     }
     if (_hover) {
-      children.add(Positioned.fill(
+      children.add(
+        Positioned.fill(
           child: CustomPaint(
-              painter: _CirclePainter(
-        radius: radius,
-      ))));
+            painter: _CirclePainter(
+              radius: radius,
+            ),
+          ),
+        ),
+      );
     }
     return SizedBox(
       width: radius * 2,

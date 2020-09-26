@@ -5,6 +5,7 @@ import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:utilities/utilities.dart';
 
 class ConnectedUsers extends StatelessWidget {
@@ -42,7 +43,7 @@ class ConnectedUsers extends StatelessWidget {
   }
 }
 
-class AvatarView extends StatelessWidget {
+class AvatarView extends StatefulWidget {
   const AvatarView({
     @required this.imageUrl,
     @required this.color,
@@ -50,7 +51,7 @@ class AvatarView extends StatelessWidget {
     Key key,
     this.diameter = 26,
     this.borderWidth = 2,
-    this.padding = 10,
+    // this.padding = 10,
   }) : super(key: key);
 
   final String imageUrl;
@@ -58,48 +59,72 @@ class AvatarView extends StatelessWidget {
   final String name;
   final double diameter;
   final double borderWidth;
-  final double padding;
+  // final double padding;
+
+  @override
+  _AvatarViewState createState() => _AvatarViewState();
+}
+
+class _AvatarViewState extends State<AvatarView> {
+  bool _avatarImageFailed = false;
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
-    final hasName = name != null && name.isNotEmpty;
-    final darkFont = useDarkContrast(color.red, color.green, color.blue);
+    var renderDiameter =
+        widget.diameter % 2 == 0 ? widget.diameter + 1 : widget.diameter;
+    final hasImage = !_avatarImageFailed &&
+        widget.imageUrl != null &&
+        widget.imageUrl.isNotEmpty;
+    final hasName = widget.name != null && widget.name.isNotEmpty;
+    final darkFont = useDarkContrast(
+        widget.color.red, widget.color.green, widget.color.blue);
 
     return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: padding),
-        child: SizedBox(
-          width: diameter,
-          height: diameter,
-          child: Container(
-            decoration: BoxDecoration(
-              color: imageUrl == null ? color : null,
-              border: (borderWidth == 0)
-                  ? null
-                  : Border.all(color: color, width: borderWidth),
-              borderRadius: BorderRadius.circular(diameter / 2),
-            ),
-            padding: const EdgeInsets.all(1),
-            child: hasImage
-                ? CachedCircleAvatar(imageUrl, diameter: diameter)
-                : Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Text(
-                        hasName ? name.substring(0, 1).toUpperCase() : '?',
-                        style: TextStyle(
-                          fontSize: diameter / 2,
-                          height: 1,
-                          color: darkFont
-                              ? const Color(0xFF000000)
-                              : const Color(0xFFFFFFFF),
-                        ),
-                      ),
-                    ),
-                  ),
-          ),
+      child: Container(
+        width: renderDiameter,
+        height: renderDiameter,
+        decoration: BoxDecoration(
+          color: !hasImage ? widget.color : null,
+          border: (widget.borderWidth == 0)
+              ? null
+              : Border.all(color: widget.color, width: widget.borderWidth),
+          borderRadius: BorderRadius.circular(renderDiameter / 2),
         ),
+        padding: widget.borderWidth != 0 && hasImage
+            ? const EdgeInsets.all(1)
+            : null,
+        child: hasImage
+            ? CachedCircleAvatar(
+                widget.imageUrl,
+                diameter: renderDiameter,
+                onImageError: () {
+                  if (!mounted) {
+                    return;
+                  }
+                  setState(
+                    () {
+                      _avatarImageFailed = true;
+                    },
+                  );
+                },
+              )
+            : Center(
+                child: Text(
+                  hasName ? widget.name.substring(0, 1).toUpperCase() : '?',
+                  textAlign: TextAlign.center,
+                  textHeightBehavior: const TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                    applyHeightToLastDescent: false,
+                  ),
+                  style: RiveTheme.of(context).textStyles.basic.copyWith(
+                        fontFamily: 'Roboto-Light',
+                        fontSize: renderDiameter * 0.65,
+                        color: darkFont
+                            ? const Color(0xFF000000)
+                            : const Color(0xFFFFFFFF),
+                      ),
+                ),
+              ),
       ),
     );
   }

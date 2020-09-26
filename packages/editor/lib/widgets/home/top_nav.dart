@@ -31,7 +31,6 @@ class TopNav extends StatelessWidget {
         AvatarView(
           diameter: 30,
           borderWidth: 0,
-          padding: 0,
           imageUrl: owner.avatarUrl,
           name: owner.displayName,
           color: StageCursor.colorFromPalette(owner.ownerId),

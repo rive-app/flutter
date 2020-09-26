@@ -96,7 +96,6 @@ class _TeamMember extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
-    final colors = theme.colors;
     final styles = theme.textStyles;
 
     return Padding(
@@ -110,7 +109,6 @@ class _TeamMember extends StatelessWidget {
             AvatarView(
               diameter: 20,
               borderWidth: 0,
-              padding: 0,
               imageUrl: teamMember.avatarUrl,
               name: teamMember.displayName,
               color: StageCursor.colorFromPalette(teamMember.ownerId),

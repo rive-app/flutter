@@ -1,13 +1,15 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 /// An experimental manager for caching images
 import 'package:http/http.dart' as http;
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ImageManager {
-  final _rawImageCache = <String, CachedRawImage>{};
+  final _rawImageCache = <String, _CachedRawImage>{};
 
   /// Removes expired entries in the cache
   void _expireCaches() =>
@@ -19,11 +21,21 @@ class ImageManager {
   Future<Uint8List> loadRawImageFromUrl(String url) async {
     _expireCaches();
     if (_rawImageCache.containsKey(url)) {
-      return _rawImageCache[url].rawImage;
+      return _rawImageCache[url].completer.future;
     }
+    // To make sure we don't double load, immediately store the _CachedRawImage
+    // so further calls can get the completer's future (conditional above).
+    var cachedImage = _CachedRawImage();
+    _rawImageCache[url] = cachedImage;
+
+    // Ok now that we've saved the cache object, start loading...
     final res = await http.get(url);
     final bytes = res.bodyBytes;
-    _rawImageCache[url] = CachedRawImage(bytes, DateTime.now());
+    cachedImage.rawImage = bytes;
+    
+    // Tell anyone waiting for this that it's ready.
+    cachedImage.completer.complete(bytes);
+
     return bytes;
   }
 }
@@ -31,47 +43,48 @@ class ImageManager {
 class CachedCircleAvatar extends StatelessWidget {
   final String imageUrl;
   final double diameter;
+  final VoidCallback onImageError;
 
   const CachedCircleAvatar(
     this.imageUrl, {
     Key key,
     this.diameter,
+    this.onImageError,
   }) : super(key: key);
+
+  Widget _buildAvatar(Uint8List imageData) {
+    return CircleAvatar(
+      backgroundColor: Colors.transparent,
+      maxRadius: diameter != null ? diameter / 2 : null,
+      backgroundImage: (imageData != null) ? MemoryImage(imageData) : null,
+      onBackgroundImageError: (dynamic _, __) {
+        SchedulerBinding.instance
+            .addPostFrameCallback((_) => onImageError?.call());
+      },
+    );
+  }
+
+  Future<Widget> _loadAvatar(ImageManager manager) async {
+    var bytes = await manager.loadRawImageFromUrl(imageUrl);
+    return _buildAvatar(bytes);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final cachedImage = ImageCacheProvider.of(context).getCachedImage(imageUrl);
+    var imageManager = ImageCacheProvider.find(context);
+    final cachedImage = imageManager.getCachedImage(imageUrl);
 
-    Widget getAvatar(Uint8List imageData) {
-      return CircleAvatar(
-        backgroundColor: Colors.transparent,
-        maxRadius: diameter != null ? diameter / 2 : null,
-        backgroundImage: (imageData != null) ? MemoryImage(imageData) : null,
-      );
-    }
-
-    Future<Widget> _getFutureAvatar(String url) async {
-      var bytes =
-          await ImageCacheProvider.of(context).loadRawImageFromUrl(imageUrl);
-      return getAvatar(bytes);
-    }
-
-    Widget getCachedAvatar(Uint8List cachedImage) {
-      if (cachedImage != null) {
-        return getAvatar(cachedImage);
-      } else {
-        return FutureBuilder<Widget>(
-          future: _getFutureAvatar(imageUrl),
-          builder: (context, snapshot) {
-            return snapshot.hasData
-                ? snapshot.data
-                : const CircularProgressIndicator();
-          },
-          initialData: const CircularProgressIndicator(),
-        );
-      }
-    }
-
-    return getCachedAvatar(cachedImage);
+    return FutureBuilder<Widget>(
+      future: cachedImage == null ? _loadAvatar(imageManager) : null,
+      builder: (context, snapshot) {
+        return snapshot.hasData
+            ? snapshot.data
+            : const CircularProgressIndicator();
+      },
+      initialData: cachedImage != null
+          ? _buildAvatar(cachedImage)
+          : const CircularProgressIndicator(),
+    );
   }
 }
 
@@ -79,10 +92,10 @@ class CachedCircleAvatar extends StatelessWidget {
 const ttl = Duration(hours: 1);
 
 /// Cached raw image with a timestamp
-class CachedRawImage {
-  const CachedRawImage(this.rawImage, this.timestamp);
-  final Uint8List rawImage;
-  final DateTime timestamp;
+class _CachedRawImage {
+  Uint8List rawImage;
+  final DateTime timestamp = DateTime.now();
+  final Completer<Uint8List> completer = Completer<Uint8List>();
 
   bool get expired => timestamp.isAfter(timestamp.add(ttl));
 }
