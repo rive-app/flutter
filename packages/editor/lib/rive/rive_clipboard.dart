@@ -8,6 +8,7 @@ import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
@@ -317,7 +318,10 @@ class _RiveHierarchyClipboard extends RiveClipboard {
       for (int i = 0; i < objects.length; i++) {
         final object = objects[i];
         if (object is Component && object.parentId == null) {
-          if (pasteToOriginalParents) {
+          if(object is Artboard) {
+            // Intentionally empty, artboard has no parent.
+          }
+          else if (pasteToOriginalParents) {
             // Go look up the parent..
             object.parentId = (originalParent[i] ?? pasteDestination).id;
           } else {
