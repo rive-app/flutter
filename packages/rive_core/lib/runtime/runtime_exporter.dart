@@ -24,6 +24,12 @@ class RuntimeExporter {
   final RiveCoreContext core;
   final RuntimeHeader info;
 
+  /// This was the max property key defined in core when we introduced the table
+  /// of contents for the property keys. Every runtime beyond 6.0 is guaranteed
+  /// to understand any property under or equal to key 122. If keys are ever
+  /// recycled, the major version of the runtime must be incremented.
+  static const int baseLinePropertyKey = 122;
+
   RuntimeExporter({
     @required this.core,
     @required this.info,
@@ -201,6 +207,10 @@ class RuntimeExporter {
     int currentInt = 0;
     int currentBit = 0;
     List<int> bitArray = [];
+
+    // This key is guaranteed to be understood by our runtimes, so skip it and
+    // make sure to not add it's field type to the bit array.
+    propertyToField.removeWhere((key, value) => key <= baseLinePropertyKey);
 
     propertyToField.forEach((key, field) {
       headerWriter.writeVarUint(key);
