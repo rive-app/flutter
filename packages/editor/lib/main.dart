@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
@@ -45,7 +46,14 @@ import 'package:rive_editor/widgets/stage_view.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_widgets/listenable_builder.dart';
 
+void _configureLogging() {
+  Logger.root.onRecord.listen((r) {
+    print('${r.level.name}: ${r.time}: ${r.message}');
+  });
+}
+
 Future<void> main() async {
+  _configureLogging();
   FlutterError.onError = (FlutterErrorDetails details) {
     ErrorLogger.instance.reportException(details.exception, details.stack);
   };

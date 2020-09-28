@@ -6,7 +6,10 @@ import 'package:flutter/scheduler.dart';
 
 /// An experimental manager for caching images
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+
+final log = Logger('image_manager');
 
 class ImageManager {
   final _rawImageCache = <String, _CachedRawImage>{};
@@ -32,7 +35,7 @@ class ImageManager {
     final res = await http.get(url);
     final bytes = res.bodyBytes;
     cachedImage.rawImage = bytes;
-    
+
     // Tell anyone waiting for this that it's ready.
     cachedImage.completer.complete(bytes);
 
@@ -58,6 +61,7 @@ class CachedCircleAvatar extends StatelessWidget {
       maxRadius: diameter != null ? diameter / 2 : null,
       backgroundImage: (imageData != null) ? MemoryImage(imageData) : null,
       onBackgroundImageError: (dynamic _, __) {
+        log.info('unable to load image $imageUrl');
         SchedulerBinding.instance
             .addPostFrameCallback((_) => onImageError?.call());
       },
