@@ -66,9 +66,11 @@ class VertexInspector extends ListenableInspectorBuilder {
       },
       (context) {
         return Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: 20,
+          padding: const EdgeInsets.only(
+            top: 10,
+            bottom: 0,
+            left: 20,
+            right: 20,
           ),
           child: ValueListenableBuilder<Iterable<PointsPath>>(
             valueListenable:
@@ -93,6 +95,25 @@ class VertexInspector extends ListenableInspectorBuilder {
                 );
               },
             ),
+          ),
+        );
+      },
+      (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 10,
+            horizontal: 20,
+          ),
+          child: InspectorPillButton(
+            label: 'Reverse Direction',
+            icon: PackedIcon.pathOpen,
+            press: () {
+              var paths = ActiveFile.find(context).vertexEditor.editingPaths;
+              for(final path in paths) {
+                path.reversePoints();
+              }
+              paths.first.context.captureJournalEntry();
+            },
           ),
         );
       },

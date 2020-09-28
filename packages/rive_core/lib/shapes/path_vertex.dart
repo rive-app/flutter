@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:core/core.dart';
 import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/bones/weighted_vertex.dart';
 import 'package:rive_core/bounds_delegate.dart';
@@ -133,6 +134,15 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   }
   // -> editor-only
 
+  @override
+  void childOrderChanged(FractionalIndex from, FractionalIndex to) {
+    super.childOrderChanged(from, to);
+
+    // Let the path know it needs to update and re-sort vertices.
+    path?.markPathDirty();
+    path?.addDirt(ComponentDirt.vertices);
+  }
+
   void cloneWeight(Weight weight);
 
   /// Returns the vertex that will immediately follow this one after
@@ -160,7 +170,7 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   void initWeight();
 
   bool validateWeight(int tendonCount) {
-    if(weight == null) {
+    if (weight == null) {
       return true;
     }
     var helpers = weightedVertices;

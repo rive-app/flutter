@@ -75,4 +75,11 @@ class CubicMirroredVertex extends CubicMirroredVertexBase {
     _inPoint = _outPoint = null;
     path?.markPathDirty();
   }
+
+  // -> editor-only
+  @override
+  void swapInOut() {
+    rotation += pi;
+  }
+  // <- editor-only
 }

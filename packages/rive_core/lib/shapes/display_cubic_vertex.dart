@@ -23,5 +23,11 @@ class DisplayCubicVertex extends CubicVertex {
   @override
   void writeRuntimeProperties(BinaryWriter writer,
       HashMap<int, CoreFieldType> propertyToField, HashMap<Id, int> idLookup) {}
+
+  @override
+  void swapInOut() {
+    // Should never be called.
+    assert(false);
+  }
 }
 // <- editor-only
