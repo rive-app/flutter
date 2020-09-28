@@ -1,4 +1,6 @@
 // -> editor-only
+import 'dart:async';
+
 import 'package:core/coop/change.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/coop/coop_client.dart' as core;
@@ -24,6 +26,7 @@ export 'package:rive_core/src/generated/rive_core_context.dart';
 class RiveFile extends RiveCoreContext {
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
+  final Set<RiveFileDelegate> connectionDelegates = {};
 
   int _dirt = 0;
   final RivePersist _persist;
@@ -75,6 +78,8 @@ class RiveFile extends RiveCoreContext {
   }
 
   bool addDelegate(RiveFileDelegate delegate) => delegates.add(delegate);
+  bool addConnectionDelegate(RiveFileDelegate delegate) =>
+      connectionDelegates.add(delegate);
 
   bool advance(double elapsed) {
     cleanDirt();
@@ -426,9 +431,12 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void connectionStateChanged(core.CoopConnectionState state) => delegates
-      .toList()
-      .forEach((delegate) => delegate.onConnectionStateChanged(state));
+  void connectionStateChanged(core.CoopConnectionStatus status) {
+    delegates
+        .union(connectionDelegates)
+        .toList()
+        .forEach((delegate) => delegate.onConnectionStateChanged(status));
+  }
 
   @override
   CoreIdType get idType => RiveIdType.instance;
@@ -488,7 +496,7 @@ abstract class RiveFileDelegate {
   void onWipe() {}
 
   /// Let the delegate know the connection state somehow changed.
-  void onConnectionStateChanged(core.CoopConnectionState state) {}
+  void onConnectionStateChanged(core.CoopConnectionStatus status) {}
 }
 
 class _RiveDirt {

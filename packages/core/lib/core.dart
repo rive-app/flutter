@@ -430,17 +430,22 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       }
       ..stateChanged = connectionStateChanged;
 
-    var result = await _client.connect();
-    if (result.state == ConnectState.connected) {
+    // does this need to return anything?
+    return _client.connect();
+  }
+
+  void completeConnection() {
+    if (_client != null) {
       int maxId = 0;
+
       for (final object in _objects.values) {
-        if (object.id.client == clientId) {
+        if (object.id.client == _client.clientId) {
           if (object.id.object >= maxId) {
             maxId = object.id.object;
           }
         }
       }
-      _nextObjectId = Id(clientId, maxId + 1);
+      _nextObjectId = Id(_client?.clientId, maxId + 1);
 
       // Load is complete, we can now process any deferred batch add operations.
       if (_deferredBatchAdd != null) {
@@ -448,10 +453,9 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
         _deferredBatchAdd = null;
         deferred.forEach(batchAdd);
       }
-
-      onConnected();
     }
-    return result;
+
+    onConnected();
   }
 
   void onConnected();
@@ -918,7 +922,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     _client.sendCursor(_lastCursorX, _lastCursorY);
   }
 
-  void connectionStateChanged(CoopConnectionState state);
+  void connectionStateChanged(CoopConnectionStatus status);
 
   void _skipProperty(BinaryReader reader, int propertyKey,
       HashMap<int, CoreFieldType> propertyToField) {

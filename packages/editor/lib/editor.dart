@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
@@ -9,6 +12,7 @@ import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/managers/task_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/animation/animation_panel.dart';
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/hierarchy_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
@@ -156,16 +160,11 @@ class _EditorState extends State<Editor> {
       listenable: file.stateChanged,
       builder: (context, event, _) {
         switch (file.state) {
-          // case OpenFileState.loading:
-          //   return Container(
-          //     color: RiveTheme.of(context).colors.stageBackground,
-          //     alignment: Alignment.center,
-          //     child: const CircularProgressIndicator(),
-          //   );
           case OpenFileState.error:
             return Center(
               child: Text(file.stateInfo ?? 'An error occurred...'),
             );
+          case OpenFileState.timeout:
           case OpenFileState.loading:
           case OpenFileState.open:
           case OpenFileState.sleeping:
@@ -187,9 +186,8 @@ class _EditorState extends State<Editor> {
                             mainAxisSize: MainAxisSize.max,
                             children:
                                 // Don't show toolbar while loading
-                                file.state == OpenFileState.loading
-                                    ? []
-                                    : [
+                                {OpenFileState.open}.contains(file.state)
+                                    ? [
                                         HamburgerPopupButton(),
                                         TransformPopupButton(),
                                         CreatePopupButton(),
@@ -226,7 +224,8 @@ class _EditorState extends State<Editor> {
                                             ),
                                           ),
                                         ),
-                                      ],
+                                      ]
+                                    : [],
                           ),
                         ),
                         Expanded(
@@ -261,11 +260,12 @@ class _EditorState extends State<Editor> {
                                     color: RiveTheme.of(context)
                                         .colors
                                         .panelBackgroundDarkGrey,
-                                    child: file.state == OpenFileState.loading
+                                    child: {OpenFileState.open}
+                                            .contains(file.state)
                                         ?
                                         // Don't show inspector while loading
-                                        const SizedBox()
-                                        : const InspectorPanel(),
+                                        const InspectorPanel()
+                                        : const SizedBox(),
                                   ),
                                 ),
                               ),
@@ -287,12 +287,91 @@ class _EditorState extends State<Editor> {
                       ),
                     ),
                   ),
+                  if (file.state == OpenFileState.timeout)
+                    Positioned.fill(
+                        child: Center(
+                      child: CountDown(
+                          targetTime: file.nextConnectionAttempt, file: file),
+                    ))
                 ],
               ),
             );
             break;
         }
       },
+    );
+  }
+}
+
+class CountDown extends StatefulWidget {
+  final DateTime targetTime;
+  final OpenFileContext file;
+
+  const CountDown({Key key, this.targetTime, this.file}) : super(key: key);
+
+  @override
+  _CountDownState createState() => _CountDownState();
+}
+
+class _CountDownState extends State<CountDown> {
+  Timer _timer;
+  int remainingMillis() {
+    return max(widget.targetTime.difference(DateTime.now()).inMilliseconds, 0);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  void startTimer() {
+    _timer = Timer.periodic(
+      // TODO: 20fps probably enough?
+      const Duration(milliseconds: 50),
+      (Timer timer) => setState(
+        () {},
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    // TODO: implement build
+    var millis = remainingMillis();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          'Connection lost, reconnecting in '
+          '${(millis / 1000).toStringAsFixed(1)} seconds',
+          style: const TextStyle(color: Colors.white),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        FlatIconButton(
+          label: 'Reconnect now',
+          onTap: () {
+            widget.file.reconnect();
+          },
+          color: colors.textButtonLight,
+          textColor: colors.buttonLightText,
+          hoverColor: colors.textButtonLightHover,
+          hoverTextColor: colors.buttonLightText,
+          radius: 20,
+          mainAxisAlignment: MainAxisAlignment.center,
+        )
+      ],
     );
   }
 }

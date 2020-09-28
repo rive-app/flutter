@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:core/coop/connect_result.dart';
 import 'package:core/coop/coop_client.dart';
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
@@ -49,7 +48,7 @@ import 'package:rive_editor/widgets/popup/base_popup.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
-enum OpenFileState { loading, error, open, sleeping }
+enum OpenFileState { loading, error, open, sleeping, timeout }
 enum EditorMode { design, animate }
 
 class SleepData {
@@ -63,6 +62,7 @@ class SleepData {
 /// tab) but it is not guaranteed to be in memory.
 class OpenFileContext with RiveFileDelegate {
   /// Globally unique identifier set for the file, composed of ownerId/fileId.
+  bool fileInitialized = false;
   final File file;
   int get ownerId => file.fileOwnerId;
   int get fileId => file.id;
@@ -96,6 +96,7 @@ class OpenFileContext with RiveFileDelegate {
   Stage get stage => _stage.value;
 
   OpenFileState _state = OpenFileState.loading;
+  DateTime _nextConnectionAttempt;
   String _stateInfo;
   Timer _sleepTimer;
   SleepData _sleepData;
@@ -246,6 +247,7 @@ class OpenFileContext with RiveFileDelegate {
     this.fileApi,
   }) : _name = ValueNotifier<String>(file.name);
 
+  DateTime get nextConnectionAttempt => _nextConnectionAttempt;
   OpenFileState get state => _state;
   String get stateInfo => _stateInfo;
 
@@ -267,28 +269,31 @@ class OpenFileContext with RiveFileDelegate {
       LocalDataPlatform dataPlatform = LocalDataPlatform.make();
       await dataPlatform.initialize();
       core = RiveFile(filePath, api: api, localDataPlatform: dataPlatform);
+      core.addConnectionDelegate(this);
 
       var connectionInfo = await fileApi.establishCoop(ownerId, fileId);
       if (connectionInfo == null) {
         return false;
       }
-      var result = await core.connect(
+      await core.connect(
         connectionInfo.socketHost,
         filePath,
         spectre,
       );
-      completeInitialConnection(
-          result.state == ConnectState.connected
-              ? OpenFileState.open
-              : OpenFileState.error,
-          result.info);
     }
 
     return true;
   }
 
+  Future<bool> reconnect() async {
+    return core.forceReconnect();
+  }
+
   @protected
   void completeInitialConnection(OpenFileState state, [String info]) {
+    // TODO: this is now pretty much just called on successful connection.
+
+    core.completeConnection();
     _stateInfo = info;
     _state = state;
     if (state == OpenFileState.error) {
@@ -354,6 +359,7 @@ class OpenFileContext with RiveFileDelegate {
         stateChanged.notify();
 
         _sleepTimer?.cancel();
+
         core.forceReconnect();
         break;
       case OpenFileState.open:
@@ -384,10 +390,17 @@ class OpenFileContext with RiveFileDelegate {
               .map((component) => component.id)
               .toList(),
     );
-
+    var notify = OpenFileState.open != _state;
     _state = OpenFileState.sleeping;
-    // N.B. NOT calling stateChanged.notify() here to hide this state from the
-    // UI until the awakening in the next call to delaySleep();
+    if (notify) {
+      // N.B.
+      // only calling stateChanged.notify() when changing state from an
+      // open file. anything else we may as well notify.
+      // Open files will look 'original' so users can use a rive tab for
+      // file reference. Any subsequent call to delaySleep() will notify the ui
+      stateChanged.notify();
+    }
+
     core?.disconnect();
   }
 
@@ -566,30 +579,43 @@ class OpenFileContext with RiveFileDelegate {
   Backboard get backboard => _backboard;
 
   @override
-  void onConnectionStateChanged(CoopConnectionState state) {
+  void onConnectionStateChanged(CoopConnectionStatus status) {
     /// We use this to handle changes that can come in during use. Right now we
     /// only handle showing the re-connecting (connecting) state.
-    switch (state) {
+
+    switch (status.state) {
+      case CoopConnectionState.reconnectTimeout:
+        _state = OpenFileState.timeout;
+        _nextConnectionAttempt = status.nextConnectionAttempt;
+        stateChanged.notify();
+        break;
       case CoopConnectionState.connecting:
         _state = OpenFileState.loading;
         stateChanged.notify();
         break;
       case CoopConnectionState.connected:
         _state = OpenFileState.open;
-        _resetManagers();
-        if (_sleepData != null) {
-          selection.selectMultiple(_sleepData.selection
-              .map((id) => core.resolve<Component>(id)?.stageItem)
-              .where((item) => item != null));
+        if (!fileInitialized) {
+          completeInitialConnection(OpenFileState.open);
+          fileInitialized = true;
+          break;
+        } else {
+          _resetManagers();
+          if (_sleepData != null) {
+            selection.selectMultiple(_sleepData.selection
+                .map((id) => core.resolve<Component>(id)?.stageItem)
+                .where((item) => item != null));
 
-          _sleepData = null;
+            _sleepData = null;
+          }
+
+          core.advance(0);
+          stateChanged.notify();
+          delaySleep();
         }
-
-        core.advance(0);
-        stateChanged.notify();
-        delaySleep();
         break;
       default:
+        stateChanged.notify();
         break;
     }
   }

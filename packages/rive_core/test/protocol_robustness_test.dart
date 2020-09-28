@@ -465,6 +465,7 @@ void main() {
             .state,
         ConnectState.connected,
       );
+      client1.completeConnection();
 
       expect(client1.patched, true,
           reason: 'client 1 connected and nuked the bad node');
@@ -479,6 +480,7 @@ void main() {
             .state,
         ConnectState.connected,
       );
+      client1.completeConnection();
 
       expect(client1.patched, false,
           reason: 'no patching was necessary as previous connection cleaned '
@@ -529,6 +531,7 @@ void main() {
             .state,
         ConnectState.connected,
       );
+      client1.completeConnection();
       // Make a somewhat sane file.
       Artboard artboardOnClient1;
       Node crazyIdNode;
@@ -563,6 +566,7 @@ void main() {
             .state,
         ConnectState.connected,
       );
+      client1.completeConnection();
 
       expect(client1.nextObjectId.object, crazyId.object + 1,
           reason: 'our monotonic id should now have reset to the crazy+1');

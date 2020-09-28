@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -22,9 +23,22 @@ typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
 typedef HelloCallback = void Function(int);
 typedef PlayersCallback = void Function(List<Player>);
 typedef UpdateCursorCallback = void Function(int, PlayerCursor);
-typedef ConnectionChangedCallback = void Function(CoopConnectionState);
+typedef ConnectionChangedCallback = void Function(CoopConnectionStatus);
 
-enum CoopConnectionState { disconnected, connecting, handshaking, connected }
+enum CoopConnectionState {
+  disconnected,
+  connecting,
+  reconnectTimeout,
+  handshaking,
+  connected
+}
+
+class CoopConnectionStatus {
+  final CoopConnectionState state;
+  final DateTime nextConnectionAttempt;
+
+  CoopConnectionStatus({this.state, this.nextConnectionAttempt});
+}
 
 class CoopClient extends CoopReader {
   final String url;
@@ -32,13 +46,14 @@ class CoopClient extends CoopReader {
   CoopWriter _writer;
   bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
-  CoopConnectionState get connectionState => _connectionState;
-  CoopConnectionState _connectionState = CoopConnectionState.disconnected;
+  CoopConnectionStatus get connectionStatus => _connectionStatus;
+  CoopConnectionStatus _connectionStatus =
+      CoopConnectionStatus(state: CoopConnectionState.disconnected);
 
-  void _changeState(CoopConnectionState state) {
-    if (_connectionState != state) {
-      _connectionState = state;
-      stateChanged?.call(state);
+  void _changeState(CoopConnectionStatus status) {
+    if (_connectionStatus != status) {
+      _connectionStatus = status;
+      stateChanged?.call(status);
     }
   }
 
@@ -63,6 +78,7 @@ class CoopClient extends CoopReader {
   PlayersCallback updatePlayers;
   UpdateCursorCallback updateCursor;
   ConnectionChangedCallback stateChanged;
+  DateTime _nextReconnectAttempt;
 
   CoopClient(
     String host,
@@ -79,22 +95,33 @@ class CoopClient extends CoopReader {
   void _reconnect() {
     _reconnectTimer?.cancel();
 
-    _reconnectTimer =
-        Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
+    // add a little randomness into reconnection attempts
+    // so if servers go down at the same time, our reconnect attempts will
+    // be spaced out
+    var seconds = (_reconnectAttempt * 4 * (1 + Random().nextDouble())).floor();
+
+    _nextReconnectAttempt = DateTime.now().add(Duration(seconds: seconds));
+    _reconnectTimer = Timer(Duration(seconds: seconds), connect);
+    _changeState(CoopConnectionStatus(
+        state: CoopConnectionState.reconnectTimeout,
+        nextConnectionAttempt: _nextReconnectAttempt));
     if (_reconnectAttempt < 1) {
       _reconnectAttempt = 1;
+    } else {
+      _reconnectAttempt *= 2;
     }
-    _reconnectAttempt *= 2;
   }
 
   void dispose() {
     disconnect();
+    _pingTimer?.cancel();
+    _pingTimer = null;
     _reconnectTimer?.cancel();
-
     _reconnectTimer = null;
   }
 
-  bool get isConnected => _connectionState == CoopConnectionState.connected;
+  bool get isConnected =>
+      _connectionStatus.state == CoopConnectionState.connected;
 
   void _ping() {
     if (!isConnected) {
@@ -108,6 +135,7 @@ class CoopClient extends CoopReader {
   Future<bool> disconnect() async {
     _allowReconnect = false;
     _pingTimer?.cancel();
+    _reconnectTimer?.cancel();
     if (_channel != null) {
       await _channel.sink.close();
     }
@@ -119,12 +147,14 @@ class CoopClient extends CoopReader {
   Future<bool> forceReconnect() async {
     _allowReconnect = true;
     _pingTimer?.cancel();
-    if (_channel == null) {
-      var result = await connect();
-      return result.state == ConnectState.connected;
+
+    await _subscription?.cancel();
+    if (_channel != null) {
+      // TODO: this doesnt seem to return if we await it.
+      _channel?.sink?.close();
     }
-    await _channel?.sink?.close();
-    return true;
+    var result = await connect();
+    return result.state == ConnectState.connected;
   }
 
   Completer<ConnectResult> _connectionCompleter;
@@ -148,37 +178,50 @@ class CoopClient extends CoopReader {
     _channel = RiveWebSocketChannel.connect(Uri.parse(url), _token);
     _connectionCompleter = Completer<ConnectResult>();
 
-    _changeState(CoopConnectionState.connecting);
+    _changeState(CoopConnectionStatus(state: CoopConnectionState.connecting));
 
-    runZoned(() {
-      _subscription =
-          _channel.stream.listen(_onStreamData, onError: (dynamic error) {
-        _disconnected();
-      }, onDone: () async {
-        // Get the reason before disconnecting...
-        var reason = _channel?.closeReason;
-        await _disconnected();
+    runZoned(
+      () {
+        _subscription = _channel.stream.listen(
+          _onStreamData,
+          onError: (dynamic error) {
+            _disconnected();
 
-        _connectionCompleter
-            ?.complete(ConnectResult(ConnectState.networkError, info: reason));
-        _connectionCompleter = null;
-        if (_allowReconnect) {
-          _reconnect();
+            _connectionCompleter?.complete(ConnectResult(
+                ConnectState.networkError,
+                info: error.toString()));
+            if (_allowReconnect) {
+              _reconnect();
+            }
+          },
+          onDone: () async {
+            // Get the reason before disconnecting...
+            var reason = _channel?.closeReason;
+            await _disconnected();
+
+            _connectionCompleter?.complete(
+                ConnectResult(ConnectState.networkError, info: reason));
+            _connectionCompleter = null;
+            if (_allowReconnect) {
+              _reconnect();
+            }
+          },
+        );
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        try {
+          ErrorLogger.instance.reportException(error, stackTrace);
+        } on Exception catch (e) {
+          print('Failed to report: $e');
+          print('Error was: $error, $stackTrace');
         }
-      });
-    }, onError: (Object error, StackTrace stackTrace) {
-      try {
-        ErrorLogger.instance.reportException(error, stackTrace);
-      } on Exception catch (e) {
-        print('Failed to report: $e');
-        print('Error was: $error, $stackTrace');
-      }
-    });
+      },
+    );
     return _connectionCompleter.future;
   }
 
   Future<void> _disconnected() async {
-    _changeState(CoopConnectionState.disconnected);
+    _changeState(CoopConnectionStatus(state: CoopConnectionState.disconnected));
     _pingTimer?.cancel();
     if (_channel != null && _channel.sink != null) {
       await _channel.sink.close();
@@ -188,8 +231,8 @@ class CoopClient extends CoopReader {
   }
 
   void write(Uint8List buffer) {
-    assert(_connectionState == CoopConnectionState.handshaking ||
-        _connectionState == CoopConnectionState.connected);
+    assert(_connectionStatus.state == CoopConnectionState.handshaking ||
+        _connectionStatus.state == CoopConnectionState.connected);
     _channel?.sink?.add(buffer);
   }
 
@@ -241,13 +284,14 @@ class CoopClient extends CoopReader {
   Future<void> recvHello(int clientId) async {
     _clientId = clientId;
     gotClientId?.call(clientId);
-    _changeState(CoopConnectionState.handshaking);
+
+    _changeState(CoopConnectionStatus(state: CoopConnectionState.handshaking));
     _reconnectAttempt = 0;
     _isAuthenticated = true;
 
     // Once all offline changes are sent...
 
-    assert(_connectionState == CoopConnectionState.handshaking);
+    assert(_connectionStatus.state == CoopConnectionState.handshaking);
 
     var changes = await getOfflineChanges?.call();
     _writer.writeSync(changes);
@@ -255,7 +299,7 @@ class CoopClient extends CoopReader {
 
   @override
   Future<void> recvReady() async {
-    _changeState(CoopConnectionState.connected);
+    _changeState(CoopConnectionStatus(state: CoopConnectionState.connected));
     _connectionCompleter?.complete(ConnectResult(ConnectState.connected));
     _connectionCompleter = null;
     _ping();
