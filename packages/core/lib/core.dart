@@ -725,6 +725,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   @protected
   Future<void> changesRejected(ChangeSet changes) async {
     await _client.disconnect();
+    clearJournal();
     await _client.connect();
   }
 
@@ -890,8 +891,6 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       object._isActive = false;
     }
     _objects.clear();
-    _journalIndex = 0;
-    journal.clear();
     freshChanges.clear();
     inflight.clear();
   }
