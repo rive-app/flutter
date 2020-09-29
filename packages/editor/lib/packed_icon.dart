@@ -9,7 +9,7 @@ class PackedIcon {
   final int scale;
   final int index;
 
-  static const String cachebust = 'd7272b7638d6cacf90b6353eb46f8a9af8eacc70';
+  static const String cachebust = 'a16fc741430d23cdcdceeeaccba1236bab4eba56';
 
   const PackedIcon._(
       this.x, this.y, this.width, this.height, this.scale, this.index);
@@ -48,122 +48,122 @@ class PackedIcon {
     PackedIcon._(180, 60, 41, 40, 2, 0),
     PackedIcon._(876, 42, 61, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> toolBone = [
+  static const Iterable<PackedIcon> vertexAsymmetric = [
     PackedIcon._(46, 54, 20, 20, 1, 0),
-    PackedIcon._(568, 0, 40, 40, 2, 0),
-    PackedIcon._(660, 102, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> signinGoogle = [
-    PackedIcon._(0, 64, 20, 20, 1, 0),
-    PackedIcon._(221, 60, 40, 40, 2, 0),
-    PackedIcon._(930, 122, 60, 60, 3, 0),
+    PackedIcon._(968, 0, 40, 40, 2, 0),
+    PackedIcon._(240, 150, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> signinFacebook = [
-    PackedIcon._(20, 64, 20, 20, 1, 0),
+    PackedIcon._(0, 64, 20, 20, 1, 0),
     PackedIcon._(261, 60, 40, 40, 2, 0),
     PackedIcon._(0, 90, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> toolCreate = [
+    PackedIcon._(20, 64, 20, 20, 1, 0),
+    PackedIcon._(176, 100, 40, 40, 2, 0),
+    PackedIcon._(60, 90, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> dropdownNoSpace = [
     PackedIcon._(40, 64, 5, 3, 1, 0),
     PackedIcon._(80, 128, 10, 6, 2, 0),
     PackedIcon._(1003, 0, 15, 9, 3, 0),
   ];
-  static const Iterable<PackedIcon> toolCreate = [
-    PackedIcon._(111, 30, 20, 20, 1, 0),
-    PackedIcon._(132, 129, 40, 40, 2, 0),
-    PackedIcon._(120, 90, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolExport = [
-    PackedIcon._(131, 30, 20, 20, 1, 0),
-    PackedIcon._(176, 100, 40, 40, 2, 0),
-    PackedIcon._(60, 90, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> cursorResizeVertical = [
-    PackedIcon._(151, 30, 14, 22, 1, 0),
-    PackedIcon._(301, 60, 28, 44, 2, 0),
-    PackedIcon._(915, 299, 42, 66, 3, 0),
-  ];
   static const Iterable<PackedIcon> target = [
-    PackedIcon._(111, 50, 20, 20, 1, 0),
+    PackedIcon._(111, 30, 20, 20, 1, 0),
     PackedIcon._(80, 148, 40, 40, 2, 0),
     PackedIcon._(180, 90, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> teamsButton = [
-    PackedIcon._(131, 50, 20, 20, 1, 0),
-    PackedIcon._(216, 100, 40, 40, 2, 0),
-    PackedIcon._(360, 90, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> calendar = [
-    PackedIcon._(89, 51, 20, 20, 1, 0),
+    PackedIcon._(131, 30, 20, 20, 1, 0),
     PackedIcon._(0, 168, 40, 40, 2, 0),
     PackedIcon._(240, 90, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> discord = [
+  static const Iterable<PackedIcon> cursorResizeVertical = [
+    PackedIcon._(151, 30, 14, 22, 1, 0),
+    PackedIcon._(301, 60, 28, 44, 2, 0),
+    PackedIcon._(552, 312, 42, 66, 3, 0),
+  ];
+  static const Iterable<PackedIcon> toolExport = [
+    PackedIcon._(111, 50, 20, 20, 1, 0),
+    PackedIcon._(132, 129, 40, 40, 2, 0),
+    PackedIcon._(120, 90, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> vertexStraight = [
+    PackedIcon._(131, 50, 20, 20, 1, 0),
+    PackedIcon._(608, 0, 40, 40, 2, 0),
+    PackedIcon._(720, 102, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> popupAdd = [
+    PackedIcon._(89, 51, 20, 20, 1, 0),
+    PackedIcon._(448, 0, 40, 40, 2, 0),
+    PackedIcon._(480, 102, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> calendar = [
     PackedIcon._(66, 64, 20, 20, 1, 0),
     PackedIcon._(40, 168, 40, 40, 2, 0),
     PackedIcon._(300, 90, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> vertexStraight = [
+  static const Iterable<PackedIcon> discord = [
     PackedIcon._(40, 74, 20, 20, 1, 0),
-    PackedIcon._(648, 0, 40, 40, 2, 0),
-    PackedIcon._(780, 132, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> popupAdd = [
-    PackedIcon._(0, 84, 20, 20, 1, 0),
-    PackedIcon._(448, 0, 40, 40, 2, 0),
-    PackedIcon._(480, 102, 60, 60, 3, 0),
+    PackedIcon._(216, 100, 40, 40, 2, 0),
+    PackedIcon._(360, 90, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> vertexDetached = [
-    PackedIcon._(20, 84, 20, 20, 1, 0),
+    PackedIcon._(0, 84, 20, 20, 1, 0),
     PackedIcon._(488, 0, 40, 40, 2, 0),
     PackedIcon._(540, 102, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> creditcard = [
-    PackedIcon._(224, 0, 20, 20, 1, 0),
+    PackedIcon._(20, 84, 20, 20, 1, 0),
     PackedIcon._(528, 0, 40, 40, 2, 0),
     PackedIcon._(600, 102, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> toolMenu = [
+  static const Iterable<PackedIcon> toolBone = [
+    PackedIcon._(224, 0, 20, 20, 1, 0),
+    PackedIcon._(568, 0, 40, 40, 2, 0),
+    PackedIcon._(660, 102, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> signinGoogle = [
     PackedIcon._(244, 0, 20, 20, 1, 0),
-    PackedIcon._(256, 100, 40, 40, 2, 0),
-    PackedIcon._(420, 90, 60, 60, 3, 0),
+    PackedIcon._(221, 60, 40, 40, 2, 0),
+    PackedIcon._(930, 122, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> back = [
+  static const Iterable<PackedIcon> toolAuto = [
     PackedIcon._(264, 0, 20, 20, 1, 0),
-    PackedIcon._(40, 128, 40, 40, 2, 0),
-    PackedIcon._(870, 102, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolTranslate = [
-    PackedIcon._(284, 0, 20, 20, 1, 0),
-    PackedIcon._(608, 0, 40, 40, 2, 0),
-    PackedIcon._(720, 102, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolPen = [
-    PackedIcon._(304, 0, 20, 20, 1, 0),
-    PackedIcon._(688, 0, 40, 40, 2, 0),
-    PackedIcon._(840, 162, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> helpCenter = [
-    PackedIcon._(324, 0, 20, 20, 1, 0),
-    PackedIcon._(768, 0, 40, 40, 2, 0),
-    PackedIcon._(960, 182, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolRectangle = [
-    PackedIcon._(344, 0, 20, 20, 1, 0),
-    PackedIcon._(728, 0, 40, 40, 2, 0),
-    PackedIcon._(900, 182, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolArtboard = [
-    PackedIcon._(364, 0, 20, 20, 1, 0),
     PackedIcon._(92, 108, 40, 40, 2, 0),
     PackedIcon._(810, 72, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> toolEllipse = [
+  static const Iterable<PackedIcon> toolPen = [
+    PackedIcon._(284, 0, 20, 20, 1, 0),
+    PackedIcon._(688, 0, 40, 40, 2, 0),
+    PackedIcon._(840, 162, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> toolTranslate = [
+    PackedIcon._(304, 0, 20, 20, 1, 0),
+    PackedIcon._(648, 0, 40, 40, 2, 0),
+    PackedIcon._(780, 132, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> helpCenter = [
+    PackedIcon._(324, 0, 20, 20, 1, 0),
+    PackedIcon._(728, 0, 40, 40, 2, 0),
+    PackedIcon._(900, 182, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> back = [
+    PackedIcon._(344, 0, 20, 20, 1, 0),
+    PackedIcon._(40, 128, 40, 40, 2, 0),
+    PackedIcon._(870, 102, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> toolRectangle = [
+    PackedIcon._(364, 0, 20, 20, 1, 0),
+    PackedIcon._(768, 0, 40, 40, 2, 0),
+    PackedIcon._(960, 182, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> toolTriangle = [
     PackedIcon._(384, 0, 20, 20, 1, 0),
     PackedIcon._(808, 0, 40, 40, 2, 0),
     PackedIcon._(0, 150, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> toolTriangle = [
+  static const Iterable<PackedIcon> toolEllipse = [
     PackedIcon._(404, 0, 20, 20, 1, 0),
     PackedIcon._(848, 0, 40, 40, 2, 0),
     PackedIcon._(60, 150, 60, 60, 3, 0),
@@ -175,361 +175,366 @@ class PackedIcon {
   ];
   static const Iterable<PackedIcon> pathOpen = [
     PackedIcon._(444, 0, 20, 20, 1, 0),
-    PackedIcon._(728, 40, 40, 40, 2, 0),
-    PackedIcon._(840, 222, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> vertexAsymmetric = [
-    PackedIcon._(464, 0, 20, 20, 1, 0),
     PackedIcon._(928, 0, 40, 40, 2, 0),
     PackedIcon._(180, 150, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> runtimes = [
+  static const Iterable<PackedIcon> toolMenu = [
+    PackedIcon._(464, 0, 20, 20, 1, 0),
+    PackedIcon._(256, 100, 40, 40, 2, 0),
+    PackedIcon._(420, 90, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> pathReverse = [
     PackedIcon._(484, 0, 20, 20, 1, 0),
-    PackedIcon._(648, 40, 40, 40, 2, 0),
-    PackedIcon._(720, 162, 60, 60, 3, 0),
+    PackedIcon._(768, 40, 40, 40, 2, 0),
+    PackedIcon._(900, 242, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> pathClose = [
+  static const Iterable<PackedIcon> toolArtboard = [
     PackedIcon._(504, 0, 20, 20, 1, 0),
-    PackedIcon._(329, 68, 40, 40, 2, 0),
-    PackedIcon._(360, 150, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolAuto = [
-    PackedIcon._(524, 0, 20, 20, 1, 0),
     PackedIcon._(0, 128, 40, 40, 2, 0),
     PackedIcon._(937, 62, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> desktop = [
-    PackedIcon._(544, 0, 20, 20, 1, 0),
-    PackedIcon._(448, 40, 40, 40, 2, 0),
-    PackedIcon._(300, 150, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> feedback = [
-    PackedIcon._(564, 0, 20, 20, 1, 0),
-    PackedIcon._(528, 40, 40, 40, 2, 0),
-    PackedIcon._(540, 162, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> popupCheck = [
-    PackedIcon._(584, 0, 20, 20, 1, 0),
-    PackedIcon._(369, 68, 40, 40, 2, 0),
-    PackedIcon._(420, 150, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolNode = [
-    PackedIcon._(604, 0, 20, 20, 1, 0),
-    PackedIcon._(488, 40, 40, 40, 2, 0),
-    PackedIcon._(480, 162, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> vertexMirrored = [
-    PackedIcon._(624, 0, 20, 20, 1, 0),
-    PackedIcon._(568, 40, 40, 40, 2, 0),
-    PackedIcon._(600, 162, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> hire = [
-    PackedIcon._(644, 0, 20, 20, 1, 0),
-    PackedIcon._(608, 40, 40, 40, 2, 0),
-    PackedIcon._(660, 162, 60, 60, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toolShapes = [
-    PackedIcon._(664, 0, 20, 20, 1, 0),
+  static const Iterable<PackedIcon> runtimes = [
+    PackedIcon._(524, 0, 20, 20, 1, 0),
     PackedIcon._(688, 40, 40, 40, 2, 0),
     PackedIcon._(780, 192, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> download = [
+    PackedIcon._(544, 0, 20, 20, 1, 0),
+    PackedIcon._(448, 40, 40, 40, 2, 0),
+    PackedIcon._(300, 150, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> desktop = [
+    PackedIcon._(564, 0, 20, 20, 1, 0),
+    PackedIcon._(329, 68, 40, 40, 2, 0),
+    PackedIcon._(360, 150, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> feedback = [
+    PackedIcon._(584, 0, 20, 20, 1, 0),
+    PackedIcon._(568, 40, 40, 40, 2, 0),
+    PackedIcon._(600, 162, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> popupCheck = [
+    PackedIcon._(604, 0, 20, 20, 1, 0),
+    PackedIcon._(488, 40, 40, 40, 2, 0),
+    PackedIcon._(480, 162, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> toolNode = [
+    PackedIcon._(624, 0, 20, 20, 1, 0),
+    PackedIcon._(528, 40, 40, 40, 2, 0),
+    PackedIcon._(540, 162, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> vertexMirrored = [
+    PackedIcon._(644, 0, 20, 20, 1, 0),
+    PackedIcon._(608, 40, 40, 40, 2, 0),
+    PackedIcon._(660, 162, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> hire = [
+    PackedIcon._(664, 0, 20, 20, 1, 0),
+    PackedIcon._(648, 40, 40, 40, 2, 0),
+    PackedIcon._(720, 162, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> toolShapes = [
     PackedIcon._(684, 0, 20, 20, 1, 0),
-    PackedIcon._(968, 0, 40, 40, 2, 0),
-    PackedIcon._(240, 150, 60, 60, 3, 0),
+    PackedIcon._(728, 40, 40, 40, 2, 0),
+    PackedIcon._(840, 222, 60, 60, 3, 0),
+  ];
+  static const Iterable<PackedIcon> pathClose = [
+    PackedIcon._(704, 0, 20, 20, 1, 0),
+    PackedIcon._(369, 68, 40, 40, 2, 0),
+    PackedIcon._(420, 150, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> group179 = [
-    PackedIcon._(704, 0, 20, 18, 1, 0),
+    PackedIcon._(724, 0, 20, 18, 1, 0),
   ];
   static const Iterable<PackedIcon> vector = [
-    PackedIcon._(724, 0, 20, 14, 1, 0),
-  ];
-  static const Iterable<PackedIcon> group159 = [
     PackedIcon._(744, 0, 20, 14, 1, 0),
   ];
+  static const Iterable<PackedIcon> group159 = [
+    PackedIcon._(764, 0, 20, 14, 1, 0),
+  ];
   static const Iterable<PackedIcon> cursorAdd = [
-    PackedIcon._(764, 0, 19, 19, 1, 0),
+    PackedIcon._(784, 0, 19, 19, 1, 0),
     PackedIcon._(409, 68, 38, 38, 2, 0),
-    PackedIcon._(900, 242, 57, 57, 3, 0),
+    PackedIcon._(960, 242, 57, 57, 3, 0),
   ];
   static const Iterable<PackedIcon> cursorFill = [
-    PackedIcon._(724, 14, 17, 21, 1, 0),
-    PackedIcon._(802, 40, 34, 42, 2, 0),
+    PackedIcon._(744, 14, 17, 21, 1, 0),
+    PackedIcon._(842, 40, 34, 42, 2, 0),
     PackedIcon._(0, 210, 51, 63, 3, 0),
   ];
   static const Iterable<PackedIcon> cursor = [
-    PackedIcon._(704, 18, 17, 21, 1, 0),
-    PackedIcon._(836, 40, 34, 42, 2, 0),
+    PackedIcon._(724, 18, 17, 21, 1, 0),
+    PackedIcon._(876, 40, 34, 42, 2, 0),
     PackedIcon._(51, 210, 51, 63, 3, 0),
   ];
   static const Iterable<PackedIcon> cursorPen = [
-    PackedIcon._(741, 14, 17, 21, 1, 0),
-    PackedIcon._(768, 40, 34, 42, 2, 0),
-    PackedIcon._(957, 242, 51, 63, 3, 0),
+    PackedIcon._(761, 14, 17, 21, 1, 0),
+    PackedIcon._(808, 40, 34, 42, 2, 0),
+    PackedIcon._(960, 299, 51, 63, 3, 0),
   ];
   static const Iterable<PackedIcon> settingsSmall = [
-    PackedIcon._(783, 0, 17, 17, 1, 0),
+    PackedIcon._(803, 0, 17, 17, 1, 0),
     PackedIcon._(296, 104, 32, 32, 2, 0),
     PackedIcon._(102, 210, 47, 47, 3, 0),
   ];
-  static const Iterable<PackedIcon> alignCenter = [
-    PackedIcon._(800, 0, 15, 15, 1, 0),
-    PackedIcon._(507, 80, 30, 30, 2, 0),
-    PackedIcon._(239, 255, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> toStart = [
+    PackedIcon._(820, 0, 15, 15, 1, 0),
+    PackedIcon._(292, 166, 30, 30, 2, 0),
+    PackedIcon._(90, 302, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> boneSmall = [
-    PackedIcon._(815, 0, 15, 15, 1, 0),
-    PackedIcon._(388, 136, 30, 30, 2, 0),
-    PackedIcon._(45, 318, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> starSmall = [
+    PackedIcon._(835, 0, 15, 15, 1, 0),
+    PackedIcon._(358, 108, 30, 30, 2, 0),
+    PackedIcon._(600, 222, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> play = [
-    PackedIcon._(830, 0, 15, 15, 1, 0),
-    PackedIcon._(150, 170, 30, 30, 2, 0),
-    PackedIcon._(327, 300, 45, 45, 3, 0),
+    PackedIcon._(850, 0, 15, 15, 1, 0),
+    PackedIcon._(240, 170, 30, 30, 2, 0),
+    PackedIcon._(417, 300, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> joinBevel = [
-    PackedIcon._(845, 0, 15, 15, 1, 0),
-    PackedIcon._(747, 82, 30, 30, 2, 0),
-    PackedIcon._(599, 267, 45, 45, 3, 0),
+    PackedIcon._(865, 0, 15, 15, 1, 0),
+    PackedIcon._(897, 100, 30, 30, 2, 0),
+    PackedIcon._(689, 267, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> oneShot = [
-    PackedIcon._(860, 0, 15, 15, 1, 0),
-    PackedIcon._(961, 40, 30, 30, 2, 0),
+    PackedIcon._(880, 0, 15, 15, 1, 0),
+    PackedIcon._(910, 70, 30, 30, 2, 0),
     PackedIcon._(285, 210, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> capNone = [
-    PackedIcon._(875, 0, 15, 15, 1, 0),
-    PackedIcon._(180, 170, 30, 30, 2, 0),
-    PackedIcon._(552, 312, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> curves1 = [
+    PackedIcon._(895, 0, 15, 15, 1, 0),
+    PackedIcon._(747, 80, 30, 30, 2, 0),
+    PackedIcon._(464, 267, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> pingPong = [
-    PackedIcon._(890, 0, 15, 15, 1, 0),
-    PackedIcon._(991, 40, 30, 30, 2, 0),
+    PackedIcon._(910, 0, 15, 15, 1, 0),
+    PackedIcon._(940, 70, 30, 30, 2, 0),
     PackedIcon._(330, 210, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> rocket = [
-    PackedIcon._(905, 0, 15, 15, 1, 0),
-    PackedIcon._(870, 40, 31, 30, 2, 0),
-    PackedIcon._(149, 210, 46, 45, 3, 0),
+  static const Iterable<PackedIcon> capNone = [
+    PackedIcon._(925, 0, 15, 15, 1, 0),
+    PackedIcon._(469, 110, 30, 30, 2, 0),
+    PackedIcon._(462, 312, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> eyedropper = [
-    PackedIcon._(920, 0, 15, 15, 1, 0),
-    PackedIcon._(870, 70, 30, 30, 2, 0),
+    PackedIcon._(940, 0, 15, 15, 1, 0),
+    PackedIcon._(970, 70, 30, 30, 2, 0),
     PackedIcon._(375, 210, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> notification = [
-    PackedIcon._(935, 0, 15, 15, 1, 0),
-    PackedIcon._(292, 166, 30, 30, 2, 0),
-    PackedIcon._(282, 300, 45, 45, 3, 0),
+    PackedIcon._(955, 0, 15, 15, 1, 0),
+    PackedIcon._(180, 170, 30, 30, 2, 0),
+    PackedIcon._(327, 300, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> alignBot = [
-    PackedIcon._(950, 0, 15, 15, 1, 0),
-    PackedIcon._(900, 70, 30, 30, 2, 0),
+    PackedIcon._(970, 0, 15, 15, 1, 0),
+    PackedIcon._(447, 80, 30, 30, 2, 0),
     PackedIcon._(420, 210, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> unlocked = [
-    PackedIcon._(965, 0, 15, 15, 1, 0),
-    PackedIcon._(717, 80, 30, 30, 2, 0),
-    PackedIcon._(554, 267, 45, 45, 3, 0),
+    PackedIcon._(985, 0, 15, 15, 1, 0),
+    PackedIcon._(867, 82, 30, 30, 2, 0),
+    PackedIcon._(644, 267, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> playSmall = [
-    PackedIcon._(980, 0, 15, 15, 1, 0),
-    PackedIcon._(930, 70, 30, 30, 2, 0),
+    PackedIcon._(1000, 0, 15, 15, 1, 0),
+    PackedIcon._(409, 106, 30, 30, 2, 0),
     PackedIcon._(465, 222, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> rectangleSmall = [
-    PackedIcon._(995, 0, 15, 15, 1, 0),
-    PackedIcon._(987, 100, 30, 30, 2, 0),
-    PackedIcon._(90, 302, 45, 45, 3, 0),
+    PackedIcon._(820, 15, 15, 15, 1, 0),
+    PackedIcon._(110, 199, 30, 30, 2, 0),
+    PackedIcon._(45, 318, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> loop = [
-    PackedIcon._(800, 15, 15, 15, 1, 0),
-    PackedIcon._(356, 138, 30, 30, 2, 0),
-    PackedIcon._(237, 300, 45, 45, 3, 0),
+    PackedIcon._(803, 17, 15, 15, 1, 0),
+    PackedIcon._(30, 238, 30, 30, 2, 0),
+    PackedIcon._(282, 300, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> capRound = [
-    PackedIcon._(783, 17, 15, 15, 1, 0),
-    PackedIcon._(960, 70, 30, 30, 2, 0),
+    PackedIcon._(778, 19, 15, 15, 1, 0),
+    PackedIcon._(328, 108, 30, 30, 2, 0),
     PackedIcon._(510, 222, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> folder = [
-    PackedIcon._(758, 19, 15, 15, 1, 0),
-    PackedIcon._(990, 70, 30, 30, 2, 0),
-    PackedIcon._(555, 222, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> visibility = [
+    PackedIcon._(835, 15, 15, 15, 1, 0),
+    PackedIcon._(202, 140, 30, 30, 2, 0),
+    PackedIcon._(870, 302, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> triangleSmall = [
-    PackedIcon._(815, 15, 15, 15, 1, 0),
-    PackedIcon._(901, 40, 30, 30, 2, 0),
+    PackedIcon._(850, 15, 15, 15, 1, 0),
+    PackedIcon._(941, 40, 30, 30, 2, 0),
     PackedIcon._(195, 210, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> curves1 = [
-    PackedIcon._(830, 15, 15, 15, 1, 0),
-    PackedIcon._(627, 80, 30, 30, 2, 0),
-    PackedIcon._(419, 255, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> starSmall = [
-    PackedIcon._(845, 15, 15, 15, 1, 0),
-    PackedIcon._(447, 80, 30, 30, 2, 0),
-    PackedIcon._(600, 222, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> curves = [
-    PackedIcon._(860, 15, 15, 15, 1, 0),
-    PackedIcon._(409, 106, 30, 30, 2, 0),
-    PackedIcon._(645, 222, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> shapeSmall = [
-    PackedIcon._(875, 15, 15, 15, 1, 0),
-    PackedIcon._(931, 40, 30, 30, 2, 0),
-    PackedIcon._(240, 210, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> pause = [
-    PackedIcon._(890, 15, 15, 15, 1, 0),
-    PackedIcon._(0, 238, 30, 30, 2, 0),
-    PackedIcon._(462, 312, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> trash = [
-    PackedIcon._(905, 15, 15, 15, 1, 0),
-    PackedIcon._(326, 138, 30, 30, 2, 0),
-    PackedIcon._(192, 300, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> distributeVertical = [
-    PackedIcon._(920, 15, 15, 15, 1, 0),
-    PackedIcon._(328, 108, 30, 30, 2, 0),
-    PackedIcon._(690, 222, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> link = [
-    PackedIcon._(935, 15, 15, 15, 1, 0),
-    PackedIcon._(296, 136, 30, 30, 2, 0),
-    PackedIcon._(735, 222, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> boneSmall = [
+    PackedIcon._(865, 15, 15, 15, 1, 0),
+    PackedIcon._(927, 100, 30, 30, 2, 0),
+    PackedIcon._(734, 267, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> distributeMid = [
-    PackedIcon._(950, 15, 15, 15, 1, 0),
-    PackedIcon._(597, 80, 30, 30, 2, 0),
+    PackedIcon._(880, 15, 15, 15, 1, 0),
+    PackedIcon._(717, 80, 30, 30, 2, 0),
+    PackedIcon._(419, 255, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> shapeSmall = [
+    PackedIcon._(895, 15, 15, 15, 1, 0),
+    PackedIcon._(971, 40, 30, 30, 2, 0),
+    PackedIcon._(240, 210, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> curves = [
+    PackedIcon._(910, 15, 15, 15, 1, 0),
+    PackedIcon._(172, 140, 30, 30, 2, 0),
+    PackedIcon._(645, 222, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> trash = [
+    PackedIcon._(925, 15, 15, 15, 1, 0),
+    PackedIcon._(60, 218, 30, 30, 2, 0),
+    PackedIcon._(192, 300, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> alignTop = [
+    PackedIcon._(940, 15, 15, 15, 1, 0),
+    PackedIcon._(687, 80, 30, 30, 2, 0),
     PackedIcon._(374, 255, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> ellipseSmall = [
-    PackedIcon._(965, 15, 15, 15, 1, 0),
-    PackedIcon._(60, 218, 30, 30, 2, 0),
-    PackedIcon._(417, 300, 45, 45, 3, 0),
+    PackedIcon._(955, 15, 15, 15, 1, 0),
+    PackedIcon._(0, 238, 30, 30, 2, 0),
+    PackedIcon._(237, 300, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> distributeVertical = [
+    PackedIcon._(970, 15, 15, 15, 1, 0),
+    PackedIcon._(120, 169, 30, 30, 2, 0),
+    PackedIcon._(690, 222, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> link = [
+    PackedIcon._(985, 15, 15, 15, 1, 0),
+    PackedIcon._(80, 188, 30, 30, 2, 0),
+    PackedIcon._(735, 222, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> locked = [
+    PackedIcon._(1000, 15, 15, 15, 1, 0),
+    PackedIcon._(657, 80, 30, 30, 2, 0),
+    PackedIcon._(329, 255, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> unlink = [
-    PackedIcon._(980, 15, 15, 15, 1, 0),
-    PackedIcon._(30, 238, 30, 30, 2, 0),
+    PackedIcon._(818, 30, 15, 15, 1, 0),
+    PackedIcon._(499, 110, 30, 30, 2, 0),
     PackedIcon._(507, 312, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> polygonSmall = [
-    PackedIcon._(995, 15, 15, 15, 1, 0),
-    PackedIcon._(687, 80, 30, 30, 2, 0),
-    PackedIcon._(509, 267, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> distributeHorizontal = [
-    PackedIcon._(798, 30, 15, 15, 1, 0),
-    PackedIcon._(172, 140, 30, 30, 2, 0),
-    PackedIcon._(825, 282, 45, 45, 3, 0),
+    PackedIcon._(793, 32, 15, 15, 1, 0),
+    PackedIcon._(807, 82, 30, 30, 2, 0),
+    PackedIcon._(554, 267, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> delete = [
-    PackedIcon._(773, 32, 15, 15, 1, 0),
-    PackedIcon._(777, 82, 30, 30, 2, 0),
-    PackedIcon._(644, 267, 45, 45, 3, 0),
+    PackedIcon._(778, 34, 15, 15, 1, 0),
+    PackedIcon._(837, 82, 30, 30, 2, 0),
+    PackedIcon._(599, 267, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> alignTop = [
-    PackedIcon._(758, 34, 15, 15, 1, 0),
-    PackedIcon._(567, 80, 30, 30, 2, 0),
-    PackedIcon._(329, 255, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> visibility = [
-    PackedIcon._(721, 35, 15, 15, 1, 0),
-    PackedIcon._(120, 169, 30, 30, 2, 0),
-    PackedIcon._(870, 299, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> add = [
-    PackedIcon._(736, 35, 15, 15, 1, 0),
-    PackedIcon._(80, 188, 30, 30, 2, 0),
-    PackedIcon._(957, 305, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> hidden = [
-    PackedIcon._(813, 30, 15, 15, 1, 0),
-    PackedIcon._(0, 208, 30, 30, 2, 0),
-    PackedIcon._(957, 350, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> distributeHorizontal = [
+    PackedIcon._(741, 35, 15, 15, 1, 0),
+    PackedIcon._(30, 208, 30, 30, 2, 0),
+    PackedIcon._(825, 282, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> joinRound = [
-    PackedIcon._(828, 30, 15, 15, 1, 0),
-    PackedIcon._(807, 82, 30, 30, 2, 0),
-    PackedIcon._(689, 267, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> recents = [
-    PackedIcon._(843, 30, 15, 15, 1, 0),
-    PackedIcon._(837, 82, 30, 30, 2, 0),
-    PackedIcon._(734, 267, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> options = [
-    PackedIcon._(858, 30, 15, 15, 1, 0),
-    PackedIcon._(867, 100, 30, 30, 2, 0),
+    PackedIcon._(756, 35, 15, 15, 1, 0),
+    PackedIcon._(957, 100, 30, 30, 2, 0),
     PackedIcon._(779, 297, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> capSquare = [
-    PackedIcon._(873, 30, 15, 15, 1, 0),
-    PackedIcon._(657, 80, 30, 30, 2, 0),
-    PackedIcon._(464, 267, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> folder = [
+    PackedIcon._(833, 30, 15, 15, 1, 0),
+    PackedIcon._(296, 136, 30, 30, 2, 0),
+    PackedIcon._(555, 222, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> rive = [
-    PackedIcon._(888, 30, 15, 15, 1, 0),
-    PackedIcon._(927, 100, 30, 30, 2, 0),
-    PackedIcon._(869, 344, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> add = [
+    PackedIcon._(848, 30, 15, 15, 1, 0),
+    PackedIcon._(232, 140, 30, 30, 2, 0),
+    PackedIcon._(915, 302, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> image = [
-    PackedIcon._(903, 30, 15, 15, 1, 0),
-    PackedIcon._(358, 108, 30, 30, 2, 0),
-    PackedIcon._(780, 252, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> recents = [
+    PackedIcon._(863, 30, 15, 15, 1, 0),
+    PackedIcon._(987, 100, 30, 30, 2, 0),
+    PackedIcon._(824, 327, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> alignRight = [
-    PackedIcon._(918, 30, 15, 15, 1, 0),
-    PackedIcon._(957, 100, 30, 30, 2, 0),
-    PackedIcon._(147, 300, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> toStart = [
-    PackedIcon._(933, 30, 15, 15, 1, 0),
-    PackedIcon._(439, 110, 30, 30, 2, 0),
-    PackedIcon._(0, 318, 45, 45, 3, 0),
-  ];
-  static const Iterable<PackedIcon> chevron = [
-    PackedIcon._(948, 30, 15, 15, 1, 0),
-    PackedIcon._(30, 208, 30, 30, 2, 0),
+  static const Iterable<PackedIcon> hidden = [
+    PackedIcon._(878, 30, 15, 15, 1, 0),
+    PackedIcon._(262, 140, 30, 30, 2, 0),
     PackedIcon._(149, 255, 45, 45, 3, 0),
   ];
+  static const Iterable<PackedIcon> options = [
+    PackedIcon._(893, 30, 15, 15, 1, 0),
+    PackedIcon._(439, 110, 30, 30, 2, 0),
+    PackedIcon._(869, 347, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> capSquare = [
+    PackedIcon._(908, 30, 15, 15, 1, 0),
+    PackedIcon._(777, 80, 30, 30, 2, 0),
+    PackedIcon._(509, 267, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> rive = [
+    PackedIcon._(923, 30, 15, 15, 1, 0),
+    PackedIcon._(326, 138, 30, 30, 2, 0),
+    PackedIcon._(959, 362, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> alignCenter = [
+    PackedIcon._(938, 30, 15, 15, 1, 0),
+    PackedIcon._(627, 80, 30, 30, 2, 0),
+    PackedIcon._(284, 255, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> alignRight = [
+    PackedIcon._(953, 30, 15, 15, 1, 0),
+    PackedIcon._(356, 138, 30, 30, 2, 0),
+    PackedIcon._(147, 300, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> image = [
+    PackedIcon._(968, 30, 15, 15, 1, 0),
+    PackedIcon._(0, 208, 30, 30, 2, 0),
+    PackedIcon._(780, 252, 45, 45, 3, 0),
+  ];
   static const Iterable<PackedIcon> artboard = [
-    PackedIcon._(963, 30, 15, 15, 1, 0),
-    PackedIcon._(110, 199, 30, 30, 2, 0),
+    PackedIcon._(983, 30, 15, 15, 1, 0),
+    PackedIcon._(150, 170, 30, 30, 2, 0),
+    PackedIcon._(0, 318, 45, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> pause = [
+    PackedIcon._(998, 30, 15, 15, 1, 0),
+    PackedIcon._(210, 170, 30, 30, 2, 0),
     PackedIcon._(372, 300, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> alignLeft = [
-    PackedIcon._(978, 30, 15, 15, 1, 0),
-    PackedIcon._(202, 140, 30, 30, 2, 0),
+  static const Iterable<PackedIcon> chevron = [
+    PackedIcon._(808, 45, 15, 15, 1, 0),
+    PackedIcon._(477, 80, 30, 30, 2, 0),
     PackedIcon._(102, 257, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> alertSmall = [
-    PackedIcon._(993, 30, 15, 15, 1, 0),
-    PackedIcon._(232, 140, 30, 30, 2, 0),
+  static const Iterable<PackedIcon> rocket = [
+    PackedIcon._(793, 47, 15, 15, 1, 0),
+    PackedIcon._(910, 40, 31, 30, 2, 0),
+    PackedIcon._(149, 210, 46, 45, 3, 0),
+  ];
+  static const Iterable<PackedIcon> alignLeft = [
+    PackedIcon._(771, 49, 15, 15, 1, 0),
+    PackedIcon._(507, 80, 30, 30, 2, 0),
     PackedIcon._(0, 273, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> joinMiter = [
-    PackedIcon._(1008, 30, 15, 15, 1, 0),
-    PackedIcon._(262, 140, 30, 30, 2, 0),
+  static const Iterable<PackedIcon> alertSmall = [
+    PackedIcon._(823, 45, 15, 15, 1, 0),
+    PackedIcon._(537, 80, 30, 30, 2, 0),
     PackedIcon._(45, 273, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> node = [
-    PackedIcon._(788, 45, 15, 15, 1, 0),
-    PackedIcon._(477, 80, 30, 30, 2, 0),
+  static const Iterable<PackedIcon> joinMiter = [
+    PackedIcon._(838, 45, 15, 15, 1, 0),
+    PackedIcon._(567, 80, 30, 30, 2, 0),
     PackedIcon._(194, 255, 45, 45, 3, 0),
   ];
   static const Iterable<PackedIcon> dropdown = [
-    PackedIcon._(773, 47, 15, 15, 1, 0),
-    PackedIcon._(897, 100, 30, 30, 2, 0),
-    PackedIcon._(824, 327, 45, 45, 3, 0),
+    PackedIcon._(853, 45, 15, 15, 1, 0),
+    PackedIcon._(388, 136, 30, 30, 2, 0),
+    PackedIcon._(914, 347, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> locked = [
-    PackedIcon._(751, 49, 15, 15, 1, 0),
-    PackedIcon._(537, 80, 30, 30, 2, 0),
-    PackedIcon._(284, 255, 45, 45, 3, 0),
+  static const Iterable<PackedIcon> node = [
+    PackedIcon._(868, 45, 15, 15, 1, 0),
+    PackedIcon._(597, 80, 30, 30, 2, 0),
+    PackedIcon._(239, 255, 45, 45, 3, 0),
   ];
 }

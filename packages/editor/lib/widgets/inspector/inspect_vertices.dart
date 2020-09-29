@@ -106,10 +106,10 @@ class VertexInspector extends ListenableInspectorBuilder {
           ),
           child: InspectorPillButton(
             label: 'Reverse Direction',
-            icon: PackedIcon.pathOpen,
+            icon: PackedIcon.pathReverse,
             press: () {
               var paths = ActiveFile.find(context).vertexEditor.editingPaths;
-              for(final path in paths) {
+              for (final path in paths) {
                 path.reversePoints();
               }
               paths.first.context.captureJournalEntry();
