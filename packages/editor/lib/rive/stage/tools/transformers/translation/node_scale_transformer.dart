@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -12,9 +12,10 @@ import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:utilities/utilities.dart';
 
-/// Transformer that rotates [StageItem]'s with underlying [Node] components.
+/// Transformer that rotates [StageItem]'s with underlying [TransformComponent]
+/// components.
 class NodeScaleTransformer extends StageTransformer {
-  Iterable<Node> _nodes;
+  Iterable<TransformComponent> _transformComponents;
 
   /// The scale transform is applied to world coordinates and then decomposed
   /// into each object's parent's transform. This means that the scale must be
@@ -34,7 +35,7 @@ class NodeScaleTransformer extends StageTransformer {
   // activated, so we can return to the last scale if turns off
   Vec2D _previousScale;
 
-  final _inHandleSpace = HashMap<Node, Mat2D>();
+  final _inHandleSpace = HashMap<TransformComponent, Mat2D>();
 
   NodeScaleTransformer({
     this.handle,
@@ -80,13 +81,14 @@ class NodeScaleTransformer extends StageTransformer {
     var transform = Mat2D();
     Mat2D.compose(transform, transformComponents);
 
-    for (final node in _nodes) {
-      var inHandleSpace = _inHandleSpace[node];
+    for (final tc in _transformComponents) {
+      var inHandleSpace = _inHandleSpace[tc];
       var nodeWorld = Mat2D.multiply(Mat2D(), transform, inHandleSpace);
 
       var toParent = Mat2D();
-      if (node.parent is Node) {
-        if (!Mat2D.invert(toParent, (node.parent as Node).worldTransform)) {
+      if (tc.parent is TransformComponent) {
+        if (!Mat2D.invert(
+            toParent, (tc.parent as TransformComponent).worldTransform)) {
           Mat2D.identity(toParent);
         }
       }
@@ -97,26 +99,26 @@ class NodeScaleTransformer extends StageTransformer {
 
       // TODO: Figure out if we want to provide more specific thresholds for
       // scale and radian angles.
-      if (threshold(node.x, components.x)) {
-        node.x = components.x;
+      if (threshold(tc.x, components.x)) {
+        tc.x = components.x;
       }
-      if (threshold(node.y, components.y)) {
-        node.y = components.y;
-      }
-
-      if (threshold(node.scaleX, components.scaleX)) {
-        node.scaleX = components.scaleX;
-      }
-      if (threshold(node.scaleY, components.scaleY)) {
-        node.scaleY = components.scaleY;
+      if (threshold(tc.y, components.y)) {
+        tc.y = components.y;
       }
 
-      var lastRotation = node.rotation;
+      if (threshold(tc.scaleX, components.scaleX)) {
+        tc.scaleX = components.scaleX;
+      }
+      if (threshold(tc.scaleY, components.scaleY)) {
+        tc.scaleY = components.scaleY;
+      }
+
+      var lastRotation = tc.rotation;
       var rotation = lastRotation +
           atan2(sin(components.rotation - lastRotation),
               cos(components.rotation - lastRotation));
-      if (threshold(node.rotation, rotation)) {
-        node.rotation = rotation;
+      if (threshold(tc.rotation, rotation)) {
+        tc.rotation = rotation;
       }
     }
   }
@@ -127,7 +129,9 @@ class NodeScaleTransformer extends StageTransformer {
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
-    _nodes = items.mapWhereType<Node>((element) => element.component).toList();
+    _transformComponents = items
+        .mapWhereType<TransformComponent>((element) => element.component)
+        .toList();
 
     var handleTransform = handle.transform;
 
@@ -142,24 +146,23 @@ class NodeScaleTransformer extends StageTransformer {
       Mat2D.identity(toHandle);
     }
 
-    _nodes = topComponents(_nodes);
+    _transformComponents = topComponents(_transformComponents);
 
     // HACK: proportional scaling only activates with exactly one top component
     // selected
-    if (_nodes.length == 1) {
-      _proportionalScale = _nodes.first.scale;
+    if (_transformComponents.length == 1) {
+      _proportionalScale = _transformComponents.first.scale;
       // Subscribe to keypress events on the shortcut action
       proportionalScaleShortcut?.addListener(_advanceWithPrevious);
     } else {
       _proportionalScale = null;
     }
 
-    for (final node in _nodes) {
-      _inHandleSpace[node] =
-          Mat2D.multiply(Mat2D(), toHandle, node.worldTransform);
+    for (final tc in _transformComponents) {
+      _inHandleSpace[tc] = Mat2D.multiply(Mat2D(), toHandle, tc.worldTransform);
     }
 
-    return _nodes.isNotEmpty;
+    return _transformComponents.isNotEmpty;
   }
 
   /// Advance using the previous scale details if there are any
