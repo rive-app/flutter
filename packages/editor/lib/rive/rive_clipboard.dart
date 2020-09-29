@@ -318,10 +318,9 @@ class _RiveHierarchyClipboard extends RiveClipboard {
       for (int i = 0; i < objects.length; i++) {
         final object = objects[i];
         if (object is Component && object.parentId == null) {
-          if(object is Artboard) {
+          if (object is Artboard) {
             // Intentionally empty, artboard has no parent.
-          }
-          else if (pasteToOriginalParents) {
+          } else if (pasteToOriginalParents) {
             // Go look up the parent..
             object.parentId = (originalParent[i] ?? pasteDestination).id;
           } else {

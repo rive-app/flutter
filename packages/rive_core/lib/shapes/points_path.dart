@@ -2,6 +2,7 @@ import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/shapes/points_path_base.dart';
 
@@ -151,6 +152,25 @@ class PointsPath extends PointsPathBase with Skinnable {
     for (final vertex in _vertices) {
       vertex.clearWeight();
     }
+  }
+
+  void reversePoints() {
+    // Copy out order to avoid overwriting as we go. Note we don't change the
+    // order of the first element as we always want it to be the start.
+    var order = _vertices.skip(1).map((v) => v.childOrder).toList();
+
+    // Invert order
+    for (int i = 0; i < order.length; i++) {
+      _vertices[1 + order.length - 1 - i].childOrder = order[i];
+    }
+    for(final vertex in _vertices) {
+     if(vertex is CubicVertex) {
+       vertex.swapInOut();
+     }
+    }
+
+    _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
+    markPathDirty();
   }
   // <- editor-only
 }

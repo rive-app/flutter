@@ -1,14 +1,18 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_core/shapes/path.dart' as core;
 
 /// Implementation of StageVertex for CubicVertex and StraightVertex.
 class StagePathVertex extends StageVertex<PathVertex> {
@@ -19,8 +23,7 @@ class StagePathVertex extends StageVertex<PathVertex> {
   StageControlVertex get controlOut => _out;
 
   @override
-  double get radiusScale =>
-      component.path.vertices.first == component ? 1.5 : 1;
+  double get radiusScale => 1;
 
   bool get hasControlPoints => component is CubicVertex;
 
@@ -82,14 +85,46 @@ class StagePathVertex extends StageVertex<PathVertex> {
     _lineOut?.boundsChanged();
   }
 
-  // TODO: component.path?.stageItem
   @override
   StageItem get soloParent => component.path.stageItem;
 
+  WindingArrow _windingArrow;
+
   @override
   void drawPoint(Canvas canvas, Rect rect, Paint stroke, Paint fill) {
-    canvas.drawOval(rect, stroke);
-    canvas.drawOval(rect, fill);
+    var drawWindingArrow = component.path.vertices.first == component;
+    if (drawWindingArrow) {
+      if (_windingArrow?.size != rect) {
+        _windingArrow = WindingArrow(rect);
+      }
+      var path = _windingArrow.uiPath;
+
+      canvas.save();
+      canvas.scale(radiusScale);
+      double angle = 0;
+      if (component is StraightVertex) {
+        var vertices = component.path.vertices;
+        var index = vertices.indexOf(component);
+        if (index != -1 && vertices.length > 1) {
+          var next = vertices[(index + 1) % vertices.length];
+          var diff =
+              Vec2D.subtract(Vec2D(), next.translation, component.translation);
+          angle = atan2(diff[1], diff[0]);
+        }
+      } else {
+        var cubic = component as CubicVertex;
+        var diff =
+            Vec2D.subtract(Vec2D(), cubic.outPoint, component.translation);
+        angle = atan2(diff[1], diff[0]);
+      }
+      canvas.rotate(angle);
+      canvas.drawPath(path, stroke);
+      canvas.drawPath(path, fill);
+      canvas.restore();
+    } else {
+      canvas.drawOval(rect, stroke);
+      canvas.drawOval(rect, fill);
+    }
   }
 
   @override
@@ -119,4 +154,36 @@ class StagePathVertex extends StageVertex<PathVertex> {
     assert(component.weight != null);
     component.weight.values = value;
   }
+}
+
+class WindingArrow extends core.Path {
+  static final Mat2D _identity = Mat2D();
+  final Rect size;
+
+  WindingArrow(this.size);
+
+  @override
+  Mat2D get inversePathTransform => _identity;
+
+  @override
+  bool get isClosed => true;
+
+  @override
+  Mat2D get pathTransform => _identity;
+
+  @override
+  List<PathVertex> get vertices => [
+        StraightVertex()
+          ..x = -size.width / 2
+          ..y = -size.height / 2
+          ..radius = 0.5,
+        StraightVertex()
+          ..x = size.width / 2
+          ..y = 0
+          ..radius = 0.5,
+        StraightVertex()
+          ..x = -size.width / 2
+          ..y = size.height / 2
+          ..radius = 0.5
+      ];
 }

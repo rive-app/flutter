@@ -136,5 +136,15 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
     }
     return super.exports(propertyKey);
   }
+
+  @override
+  void swapInOut() {
+    var ind = inDistance;
+    var inr = inRotation;
+    inDistance = outDistance;
+    inRotation = outRotation;
+    outDistance = ind;
+    outRotation = inr;
+  }
   // <- editor-only
 }

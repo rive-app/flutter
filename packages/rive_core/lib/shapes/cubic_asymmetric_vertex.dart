@@ -8,6 +8,17 @@ export 'package:rive_core/src/generated/shapes/cubic_asymmetric_vertex_base.dart
 class CubicAsymmetricVertex extends CubicAsymmetricVertexBase {
   Vec2D _inPoint;
   Vec2D _outPoint;
+
+  // -> editor-only
+  @override
+  void swapInOut() {
+    var ind = inDistance;
+    inDistance = outDistance;
+    outDistance = ind;
+    rotation += pi;
+  }
+  // <- editor-only
+
   @override
   Vec2D get outPoint {
     return _outPoint ??= Vec2D.add(

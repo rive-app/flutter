@@ -1,6 +1,5 @@
 library fractional;
 
-// -> include-runtime
 import 'dart:collection';
 
 const _minIndex = FractionalIndex.min();
@@ -160,7 +159,7 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
   }
 
   /// Move item relative to to target offseting by incIndex. Computes the
-  /// appropraite fractional index for the item.
+  /// appropriate fractional index for the item.
   void moveRelative(T item, T target, int incIndex) {
     int targetIndex = indexOf(target);
     assert(targetIndex != -1);
@@ -263,4 +262,3 @@ int szudzik(int a, int b) {
   int y = b.abs();
   return x >= y ? x * x + x + y : x + y * y;
 }
-// <- include-runtime

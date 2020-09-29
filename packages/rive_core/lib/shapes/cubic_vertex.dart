@@ -15,6 +15,10 @@ abstract class CubicVertex extends CubicVertexBase {
   set outPoint(Vec2D value);
   set inPoint(Vec2D value);
 
+  // -> editor-only
+  void swapInOut();
+  // <- editor-only
+
   @override
   Vec2D get renderTranslation => weight?.translation ?? super.renderTranslation;
 

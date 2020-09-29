@@ -490,6 +490,8 @@ class Definition {
       }
     }
 
+    print('Max Field ID is: ${nextFieldId - 1}.');
+
     if (!runGenerator) {
       color('Not running generator due to previous errors.',
           front: Styles.YELLOW);
