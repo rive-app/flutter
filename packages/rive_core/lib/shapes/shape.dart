@@ -101,6 +101,17 @@ class Shape extends ShapeBase with ShapePaintContainer {
 
   // <- editor-only
 
+  @override
+  void onDirty(int mask) {
+    super.onDirty(mask);
+    if (dirt & ComponentDirt.path != 0) {
+      // When we receive path dirt, make sure to update any node in our
+      // hierarchy so that it can update its bounds (this is for edit time
+      // only), part of Node UX.
+      recomputeParentNodeBounds();
+    }
+  }
+
   void _markComposerDirty() {
     _pathComposer?.addDirt(ComponentDirt.path, recurse: true);
     // Stroke effects need to be rebuilt whenever the path composer rebuilds the
@@ -236,22 +247,22 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return worldBounds;
   }
 
-  AABB computeLocalBounds() {
+  AABB computeBounds(Mat2D relativeTo) {
     var boundsPaths = paths.where((path) => path.hasBounds);
     if (boundsPaths.isEmpty) {
       return AABB();
     }
     var path = boundsPaths.first;
 
-    var toShapeTransform = Mat2D();
-    if (!Mat2D.invert(toShapeTransform, worldTransform)) {
-      Mat2D.identity(toShapeTransform);
+    var toTransform = Mat2D();
+    if (!Mat2D.invert(toTransform, relativeTo)) {
+      Mat2D.identity(toTransform);
     }
 
     AABB localBounds = path.preciseComputeBounds(
       Mat2D.multiply(
         Mat2D(),
-        toShapeTransform,
+        toTransform,
         path.pathTransform,
       ),
     );
@@ -263,7 +274,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
         path.preciseComputeBounds(
           Mat2D.multiply(
             Mat2D(),
-            toShapeTransform,
+            toTransform,
             path.pathTransform,
           ),
         ),
@@ -271,6 +282,8 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
     return localBounds;
   }
+
+  AABB computeLocalBounds() => computeBounds(worldTransform);
 
   @override
   void userDataChanged(dynamic from, dynamic to) {

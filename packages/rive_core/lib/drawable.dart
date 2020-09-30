@@ -35,6 +35,17 @@ abstract class Drawable extends DrawableBase {
   int drawOrder = 0;
   int _naturalDrawOrder = 0;
   int get naturalDrawOrder => _naturalDrawOrder;
+
+  // Recompute node bounds when parents change, for Node UX.
+  @override
+  void parentChanged(ContainerComponent from, ContainerComponent to) {
+    super.parentChanged(from, to);
+
+    // Let any old node parent know it needs to re-compute its bounds. Let new
+    // node parents know they need to recompute their bounds.
+    from?.recomputeParentNodeBounds();
+    to?.recomputeParentNodeBounds();
+  }
   // <- editor-only
 
   /// Draw the contents of this drawable component in world transform space.
@@ -66,7 +77,6 @@ abstract class Drawable extends DrawableBase {
   void update(int dirt) {
     super.update(dirt);
     if (dirt & ComponentDirt.clip != 0) {
-      
       // Find clip in parents.
       List<ClippingShape> clippingShapes = [];
       for (ContainerComponent p = this; p != null; p = p.parent) {
