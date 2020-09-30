@@ -26,16 +26,14 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
         var theme = RiveTheme.of(context);
         return ValueListenableBuilder<double>(
           valueListenable: rive.stage.zoomLevelNotifier,
-          builder: (context, value, _) => SizedBox(
-            width: 40,
-            child: Text(
-              PercentageInputConverter.instance.toDisplayValue(value),
-              textAlign: TextAlign.right,
-              style: theme.textStyles.basic.copyWith(
-                color: isHovered
-                    ? theme.colors.toolbarButtonHover
-                    : theme.colors.toolbarButton,
-              ),
+          builder: (context, value, _) => Text(
+            PercentageInputConverter.instance.toDisplayValue(value),
+            textAlign: TextAlign.right,
+            maxLines: 1,
+            style: theme.textStyles.basic.copyWith(
+              color: isHovered
+                  ? theme.colors.toolbarButtonHover
+                  : theme.colors.toolbarButton,
             ),
           ),
         );
