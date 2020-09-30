@@ -173,6 +173,9 @@ class StageNode extends HideableStageItem<Node>
   int _hierarchyDepth = 0;
 
   void _computeBounds() {
+    if (component?.artboard == null) {
+      return;
+    }
     // Compute hierarchy depth to use that to sort against other stage nodes
     // (stage nodes higher in the hierarchy will hit first).
     _hierarchyDepth = 0;
@@ -231,6 +234,12 @@ class StageNode extends HideableStageItem<Node>
     _updateBoundsTimer?.cancel();
     _updateBoundsTimer = Timer(
         Duration(milliseconds: 50 + Random().nextInt(200)), _computeBounds);
+  }
+
+  @override
+  void removedFromStage(Stage stage) {
+    _updateBoundsTimer?.cancel();
+    super.removedFromStage(stage);
   }
 
   @override
