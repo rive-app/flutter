@@ -99,8 +99,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return result;
   }
 
-  // <- editor-only
-
   @override
   void onDirty(int mask) {
     super.onDirty(mask);
@@ -111,6 +109,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
       recomputeParentNodeBounds();
     }
   }
+  // <- editor-only
 
   void _markComposerDirty() {
     _pathComposer?.addDirt(ComponentDirt.path, recurse: true);

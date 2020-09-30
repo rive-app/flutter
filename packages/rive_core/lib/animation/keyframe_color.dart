@@ -6,19 +6,22 @@ import 'package:rive_core/src/generated/animation/keyframe_color_base.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 export 'package:rive_core/src/generated/animation/keyframe_color_base.dart';
 
+void _apply(Core<CoreContext> object, int propertyKey, double mix, int value) {
+  if (mix == 1) {
+    RiveCoreContext.animateColor(object, propertyKey, value);
+  } else {
+    var mixedColor = Color.lerp(
+        Color(RiveCoreContext.getColor(object, propertyKey)),
+        Color(value),
+        mix);
+    RiveCoreContext.animateColor(object, propertyKey, mixedColor.value);
+  }
+}
+
 class KeyFrameColor extends KeyFrameColorBase {
   @override
-  void apply(Core<CoreContext> object, int propertyKey, double mix) {
-    if (mix == 1) {
-      RiveCoreContext.animateColor(object, propertyKey, value);
-    } else {
-      var mixedColor = Color.lerp(
-          Color(RiveCoreContext.getColor(object, propertyKey)),
-          Color(value),
-          mix);
-      RiveCoreContext.animateColor(object, propertyKey, mixedColor.value);
-    }
-  }
+  void apply(Core<CoreContext> object, int propertyKey, double mix) =>
+      _apply(object, propertyKey, mix, value);
 
   @override
   void onAdded() {
@@ -36,19 +39,8 @@ class KeyFrameColor extends KeyFrameColorBase {
       f = interpolator.transform(f);
     }
 
-    var interpolatedValue = Color.lerp(Color(value), Color(nextFrame.value), f);
-
-    if (mix == 1) {
-      RiveCoreContext.animateColor(
-          object, propertyKey, interpolatedValue.value);
-    } else {
-      var mixedColor = Color.lerp(
-          Color(RiveCoreContext.getColor(object, propertyKey)),
-          interpolatedValue,
-          mix);
-
-      RiveCoreContext.animateColor(object, propertyKey, mixedColor.value);
-    }
+    _apply(object, propertyKey, mix,
+        Color.lerp(Color(value), Color(nextFrame.value), f).value);
   }
 
   // -> editor-only
