@@ -32,13 +32,17 @@ class StageNode extends HideableStageItem<Node>
             inWorldSpace: true,
             order: 11,
           ),
-        if (obb != null && hasSelectionFlags)
+        if (shouldDrawBounds)
           StageDrawPass(
             drawBounds,
             inWorldSpace: false,
             order: 10,
           ),
       ];
+
+  bool get shouldDrawBounds {
+    return obb != null && hasSelectionFlags && _boundsValid;
+  }
 
   /// Force set some draw order that supersedes the shape draw order so nodes
   /// always win over shapes.
@@ -227,10 +231,13 @@ class StageNode extends HideableStageItem<Node>
         transform: artboard.transform(component.worldTransform),
       );
     }
+    _boundsValid = true;
   }
 
+  bool _boundsValid = false;
   @override
   void boundsChanged() {
+    _boundsValid = false;
     _updateBoundsTimer?.cancel();
     _updateBoundsTimer = Timer(
         Duration(milliseconds: 50 + Random().nextInt(200)), _computeBounds);
