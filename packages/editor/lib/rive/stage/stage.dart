@@ -560,9 +560,8 @@ class Stage extends Debouncer {
             _mouseDownHit = _hoverItem;
 
             // TODO: CLEAAAAAN ME Node UX...
-            if (isDoubleClick) {
-              if (_mouseDownHit == _lastMouseDownHit &&
-                  _mouseDownHit is StageNode) {
+            if (isDoubleClick && _mouseDownHit == _lastMouseDownHit) {
+              if (_mouseDownHit is StageNode) {
                 clearExpandedNodes();
                 _allExpandedNodes
                     .addAll((_mouseDownHit as StageNode).allParentNodes);
@@ -572,12 +571,15 @@ class Stage extends Debouncer {
 
                 _updateHover();
                 markNeedsRedraw();
+              } else if (_mouseDownHit is StageShape) {
+                file.vertexEditor.activateForSelection(recursivePaths: true);
               }
             }
 
             _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
-            if (!file.selection.isCustomHandled(_hoverItem)) {
+            if (_hoverItem != null &&
+                !file.selection.isCustomHandled(_hoverItem)) {
               if (_hoverItem.isSelected) {
                 if (_mouseDownSelectAppend) {
                   // If the hover item is already selected and we're holding
@@ -590,12 +592,9 @@ class Stage extends Debouncer {
                     append: _mouseDownSelectAppend, skipHandlers: true);
               }
             }
+          } else if (isDoubleClick) {
+            file.vertexEditor.deactivate();
           }
-          /*else if (isDoubleClick && _allExpandedNodes.isNotEmpty) {
-            clearExpandedNodes();
-            _updateHover();
-            markNeedsRedraw();
-          }*/
           _lastHitTime = DateTime.now();
           _lastMouseDownHit = _mouseDownHit;
         }
