@@ -6,7 +6,6 @@ import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/hierarchy.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_widgets/listenable_builder.dart';
