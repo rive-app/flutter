@@ -52,6 +52,8 @@ class AABB {
     ]);
   }
 
+  double get area => width * height;
+
   bool get isEmpty {
     return _buffer[0] == double.maxFinite &&
         _buffer[1] == double.maxFinite &&
@@ -175,6 +177,12 @@ class AABB {
     }
 
     return true;
+  }
+
+  static bool testOverlapPoint(AABB a, Vec2D b) {
+    var x = b[0];
+    var y = b[1];
+    return x >= a[0] && x <= a[2] && y >= a[1] && y <= a[3];
   }
 
   AABB translate(Vec2D vec) => AABB.fromValues(_buffer[0] + vec[0],

@@ -23,6 +23,16 @@ class OBB {
   final Mat2D transform;
   final Float32List poly = Float32List(8);
 
+  Mat2D _inverseTransform;
+  Mat2D get inverseTransform {
+    if (_inverseTransform != null) {
+      return _inverseTransform;
+    }
+    _inverseTransform = Mat2D();
+    Mat2D.invert(_inverseTransform, transform);
+    return _inverseTransform;
+  }
+
   Vec2D get center {
     var center = AABB.center(Vec2D(), bounds);
     return Vec2D.transformMat2D(center, center, transform);
@@ -170,7 +180,7 @@ abstract class StageItem<T> extends SelectableItem
   /// the drawPasses list is the "primary" one. So if you register multiple draw
   /// passes, make sure your most important/top layer is registered first and
   /// shadows/etc are registered second (with lower drawOrder if necessary).
-  int get drawOrder => drawPasses.first.order;
+  int get drawOrder => drawPasses.isEmpty ? -100 : drawPasses.first.order;
 
   // ignore: use_setters_to_change_properties
   /// Invoked whenever the item has been added to the stage. This is usually
@@ -286,12 +296,16 @@ abstract class StageItem<T> extends SelectableItem
         obb.bounds,
       );
     } else {
-      _drawBoundingRectangle(
-        canvas,
-        stage.viewTransform,
-        aabb,
-      );
+      drawAABB(canvas, drawPass);
     }
+  }
+
+  void drawAABB(Canvas canvas, StageDrawPass drawPass) {
+    _drawBoundingRectangle(
+      canvas,
+      stage.viewTransform,
+      aabb,
+    );
   }
 
   /// Called when this item has been selected as a snap target by the snapper.

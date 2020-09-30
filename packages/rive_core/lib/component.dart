@@ -5,6 +5,7 @@ import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -22,6 +23,11 @@ abstract class Component extends ComponentBase<RiveFile>
   dynamic _userData;
 
   // -> editor-only
+  Node _parentNode;
+
+  /// The most immediate parent of type node in the hierarchy.
+  Node get parentNode => _parentNode;
+
   String get timelineName => name;
   // TODO: implement this so things can be renamed in the timeline if this
   // canRename returns true.
@@ -89,10 +95,22 @@ abstract class Component extends ComponentBase<RiveFile>
   /// process to visit ancestors in the tree. This is a good opportunity to
   /// check if we have an ancestor of a specific type. For example, a Path needs
   /// to know which Shape it's within.
-  void visitAncestor(Component ancestor) {}
+  @mustCallSuper
+  void visitAncestor(Component ancestor) {
+    // -> editor-only
+    if (_parentNode == null &&
+        ancestor != this &&
+        ancestor.coreType == NodeBase.typeKey) {
+      _parentNode = ancestor as Node;
+    }
+    // <- editor-only
+  }
 
   /// Find the artboard in the hierarchy.
   bool resolveArtboard() {
+    // -> editor-only
+    _parentNode = null;
+    // <- editor-only
     int sanity = maxTreeDepth;
     for (Component curr = this;
         curr != null && sanity > 0;

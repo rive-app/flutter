@@ -527,6 +527,17 @@ class Stage extends Debouncer {
     _sendMouseMoveToTool();
   }
 
+  final List<StageNode> _allExpandedNodes = [];
+  StageItem _lastMouseDownHit;
+  DateTime _lastHitTime = DateTime.now();
+
+  void clearExpandedNodes() {
+    for (final node in _allExpandedNodes) {
+      node.isExpanded = false;
+    }
+    _allExpandedNodes.clear();
+  }
+
   void mouseDown(int button, double x, double y) {
     // Assume nothing was hit, we'll compute if something was below...
     _mouseDownHit = null;
@@ -543,8 +554,26 @@ class Stage extends Debouncer {
         if (_panHandCursor != null) {
           _isPanning = true;
         } else if (isSelectionEnabled) {
+          bool isDoubleClick =
+              DateTime.now().difference(_lastHitTime).inMilliseconds < 200;
           if (_hoverItem != null) {
             _mouseDownHit = _hoverItem;
+
+            // TODO: CLEAAAAAN ME Node UX...
+            if (isDoubleClick) {
+              if (_mouseDownHit == _lastMouseDownHit &&
+                  _mouseDownHit is StageNode) {
+                clearExpandedNodes();
+                _allExpandedNodes
+                    .addAll((_mouseDownHit as StageNode).allParentNodes);
+                for (final node in _allExpandedNodes) {
+                  node.isExpanded = true;
+                }
+
+                _updateHover();
+                markNeedsRedraw();
+              }
+            }
 
             _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
@@ -562,6 +591,13 @@ class Stage extends Debouncer {
               }
             }
           }
+          /*else if (isDoubleClick && _allExpandedNodes.isNotEmpty) {
+            clearExpandedNodes();
+            _updateHover();
+            markNeedsRedraw();
+          }*/
+          _lastHitTime = DateTime.now();
+          _lastMouseDownHit = _mouseDownHit;
         }
 
         // Always pipe clicks to tools or weird things may happen (see
@@ -794,6 +830,24 @@ class Stage extends Debouncer {
         }
       }
     }
+
+    // Validate that the selection is in the exansion otherwise clear it.
+
+    HashSet<StageNode> parentNodes = HashSet<StageNode>();
+    for (final item in file.selection.items) {
+      if (item is StageItem<Component> && item.component?.parentNode != null) {
+        parentNodes.add(item.component.parentNode.stageItem as StageNode);
+      }
+    }
+    clearExpandedNodes();
+    for (final node in parentNodes) {
+      _allExpandedNodes.addAll(node.allParentNodes);
+    }
+    for (final node in _allExpandedNodes) {
+      node.isExpanded = true;
+    }
+    // TODO: Maybe only update if expanded changed?
+    _updateHover();
   }
 
   bool isValidSoloSelection(StageItem item) {
