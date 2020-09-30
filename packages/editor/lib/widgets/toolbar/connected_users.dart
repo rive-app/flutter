@@ -29,10 +29,13 @@ class ConnectedUsers extends StatelessWidget {
               for (var connectedUser in users)
                 ValueListenableBuilder<RiveUser>(
                   valueListenable: connectedUser.userNotifier,
-                  builder: (context, user, chld) => AvatarView(
-                    color: StageCursor.colorFromPalette(connectedUser.index),
-                    imageUrl: user?.avatar,
-                    name: user?.name ?? user?.username,
+                  builder: (context, user, chld) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: AvatarView(
+                      color: StageCursor.colorFromPalette(connectedUser.index),
+                      imageUrl: user?.avatar,
+                      name: user?.name ?? user?.username,
+                    ),
                   ),
                 ),
             ],

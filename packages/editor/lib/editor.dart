@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rive/rive.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_core/event.dart';
