@@ -56,7 +56,6 @@ void main() {
       stage.tool = translateTool;
       expect(stage.tool, TranslateTool.instance);
 
-      print("MOVE STUFF!");
       // Translate the rectangle by (50, 50)
       stage.mouseDown(1, 150, 150);
       stage.mouseDrag(1, 150, 150);
