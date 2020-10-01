@@ -6,7 +6,9 @@ import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
+import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -41,6 +43,13 @@ class StageJoint extends HideableStageItem<Bone>
   }
 
   Vec2D get worldTranslation => _worldTranslation;
+
+  // StageJoint only draws if the parent node is expanded.
+  @override
+  bool get isSelectable =>
+      ShortcutAction.deepClick.value ||
+      ((component.parentNode?.stageItem as StageNode)?.isExpanded ??
+          super.isSelectable);
 
   @override
   bool hitHiFi(Vec2D worldMouse) {

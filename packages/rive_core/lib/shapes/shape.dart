@@ -253,15 +253,10 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
     var path = boundsPaths.first;
 
-    var toTransform = Mat2D();
-    if (!Mat2D.invert(toTransform, relativeTo)) {
-      Mat2D.identity(toTransform);
-    }
-
     AABB localBounds = path.preciseComputeBounds(
       Mat2D.multiply(
         Mat2D(),
-        toTransform,
+        relativeTo,
         path.pathTransform,
       ),
     );
@@ -273,7 +268,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
         path.preciseComputeBounds(
           Mat2D.multiply(
             Mat2D(),
-            toTransform,
+            relativeTo,
             path.pathTransform,
           ),
         ),
@@ -282,7 +277,13 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return localBounds;
   }
 
-  AABB computeLocalBounds() => computeBounds(worldTransform);
+  AABB computeLocalBounds() {
+    var toTransform = Mat2D();
+    if (!Mat2D.invert(toTransform, worldTransform)) {
+      Mat2D.identity(toTransform);
+    }
+    return computeBounds(toTransform);
+  }
 
   @override
   void userDataChanged(dynamic from, dynamic to) {

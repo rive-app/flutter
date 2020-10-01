@@ -4,9 +4,12 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -197,18 +200,43 @@ class StageNode extends HideableStageItem<Node>
 
     var artboard = component.artboard;
     var worldTransform = component.worldTransform;
+
+    // Transform to get into local space of this node.
+    var inverseWorld = Mat2D();
+    if (!Mat2D.invert(inverseWorld, worldTransform)) {
+      Mat2D.identity(inverseWorld);
+    }
+
     AABB accumulatedBounds;
     component.forEachChild((component) {
       // When we have images we may want to have a generic interface for getting
       // the bounds, but for now we only have shapes.
-      if (component.coreType == ShapeBase.typeKey) {
-        var shape = component as Shape;
-        var bounds = shape.computeBounds(worldTransform);
-        if (accumulatedBounds == null) {
-          accumulatedBounds = bounds;
-        } else {
-          AABB.combine(accumulatedBounds, accumulatedBounds, bounds);
-        }
+      switch (component.coreType) {
+        case ShapeBase.typeKey:
+          var shape = component as Shape;
+          var bounds = shape.computeBounds(inverseWorld);
+          if (accumulatedBounds == null) {
+            accumulatedBounds = bounds;
+          } else {
+            AABB.combine(accumulatedBounds, accumulatedBounds, bounds);
+          }
+          break;
+        case BoneBase.typeKey:
+        case RootBoneBase.typeKey:
+          var bone = component as Bone;
+          var localBoneTranslation = Vec2D.transformMat2D(
+              Vec2D(), bone.worldTranslation, inverseWorld);
+          var localBoneTip = Vec2D.transformMat2D(
+              Vec2D(), bone.tipWorldTranslation, inverseWorld);
+
+          if (accumulatedBounds == null) {
+            accumulatedBounds =
+                AABB.fromPoints([localBoneTranslation, localBoneTip]);
+          } else {
+            accumulatedBounds.expandToPoint(localBoneTranslation);
+            accumulatedBounds.expandToPoint(localBoneTip);
+          }
+          break;
       }
       return true;
     });
