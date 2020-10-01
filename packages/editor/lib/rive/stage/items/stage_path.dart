@@ -24,13 +24,7 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
   void boundsChanged() {
     var artboard = component.artboard;
     aabb = artboard.transformBounds(
-        component.preciseComputeBounds(component.worldTransform));
-
-    var parent = component.parent as Node;
-    var toParentTransform = Mat2D();
-    if (!Mat2D.invert(toParentTransform, parent.worldTransform)) {
-      Mat2D.identity(toParentTransform);
-    }
+        component.preciseComputeBounds(component.pathTransform));
 
     obb = OBB(
       bounds: component.preciseComputeBounds(
