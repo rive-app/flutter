@@ -147,8 +147,13 @@ class LinearAnimation extends LinearAnimationBase {
       BinaryWriter writer, HashMap<int, CoreFieldType> propertyToField,
       [HashMap<Id, int> idLookup]) {
     super.writeRuntime(writer, propertyToField, idLookup);
-    writer.writeVarUint(_keyedObjects.length);
-    for (final keyedObject in _keyedObjects.values) {
+    // Export only objects that actually have keyframes.
+    var exportObjects = _keyedObjects.values.where((object) => object
+        .keyedProperties
+        .where((property) => property.keyframes.isNotEmpty)
+        .isNotEmpty);
+    writer.writeVarUint(exportObjects.length);
+    for (final keyedObject in exportObjects) {
       keyedObject.writeRuntime(writer, propertyToField, idLookup);
     }
   }
