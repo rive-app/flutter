@@ -488,7 +488,7 @@ class Stage extends Debouncer {
           if (isItemSelectable(item) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
-            hover = item.selectionTarget;
+            hover = item;
           }
           return true;
         });
@@ -505,7 +505,7 @@ class Stage extends Debouncer {
           hover = candidates[_hoverOffsetIndex % candidates.length];
         }
       }
-      hover?.isHovered = true;
+      hover?.selectionTarget?.isHovered = true;
       if (hover == null) {
         hoverItem = null;
       }
@@ -683,7 +683,6 @@ class Stage extends Debouncer {
     }
   }
 
-
   void mouseUp(int button, double x, double y) {
     _dragInError = false;
     _isPanning = false;
@@ -716,14 +715,7 @@ class Stage extends Debouncer {
           _updateHover();
           // The expansion caused something else to be hovered, select it.
           if (_hoverItem != _mouseDownHit) {
-            var component = _hoverItem.component as Component;
-            while (component != null) {
-              if ((component.parentNode.stageItem as StageNode).isExpanded) {
-                file.select(component.stageItem);
-                break;
-              }
-              component = component.parentNode;
-            }
+            file.select(StageNode.findNonExpanded(_hoverItem));
           }
           markNeedsRedraw();
         } else if (_mouseDownHit is StageShape) {
