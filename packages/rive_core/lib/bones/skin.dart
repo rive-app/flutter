@@ -4,6 +4,7 @@ import 'package:rive_core/bones/skeletal_component.dart';
 import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 
@@ -146,18 +147,29 @@ class Skin extends SkinBase {
 
   // -> editor-only
 
-  /// Important that this be called at the end of an operation such that  all
+  /// Important that this be called at the end of an operation such that all
   /// the expected tendons have been added removed/added. For example, at the
   /// end of an undo/redo or file load.
   void _validateTendons() {
-    _tendons.sort((a, b) => a.index.compareTo(b.index));
+    // TODO: make this active in a few weeks from 2020-10-01 16:13:39
+    // _tendons.sort((a, b) => a.childOrder.compareTo(b.childOrder));
 
-    // This is here just to patch up old coop files that didn't store the index.
-    // Having the index ensures the undo/redo operations put the tendons back in
-    // order.
-    for (int i = 0; i < _tendons.length; i++) {
-      _tendons[i].index = i;
+    // REMOVE THIS -->
+    if (_tendons.any((tendon) => tendon.index != 0)) {
+      // We had old indices, sort by those and update the childOrder to match.
+      _tendons.sort((a, b) => a.index.compareTo(b.index));
+      ContainerChildren.raw(_tendons).setFractionalIndices();
+      for (final tendon in _tendons) {
+        tendon.index = null;
+      }
+      context.captureJournalEntry(record: false);
+    } else {
+      // All tendons have null indices (good). This is what we want going
+      // forwards.
+      _tendons.sort((a, b) => a.childOrder.compareTo(b.childOrder));
     }
+    //  <-- TO THIS
+
     (parent as Skinnable)?.validateWeights();
   }
 
