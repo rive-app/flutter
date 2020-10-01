@@ -34,12 +34,15 @@ void main() {
       stage.mouseDrag(1, 300, 200);
       stage.mouseUp(1, 300, 200);
 
-      final shape = core.objectsOfType<Rectangle>().first.shape;
+      final rect = core.objectsOfType<Rectangle>().first;
+      final shape = rect.shape;
       final stageShape = shape.stageItem;
 
       // Position of the rectangle's shape should be (100, 100)
       expect(shape.x, 100);
       expect(shape.y, 100);
+      expect(rect.width, 200);
+      expect(rect.height, 100);
 
       // Select the rectangle with the mouse
       stage.mouseMove(1, 150, 150);
@@ -53,6 +56,7 @@ void main() {
       stage.tool = translateTool;
       expect(stage.tool, TranslateTool.instance);
 
+      print("MOVE STUFF!");
       // Translate the rectangle by (50, 50)
       stage.mouseDown(1, 150, 150);
       stage.mouseDrag(1, 150, 150);

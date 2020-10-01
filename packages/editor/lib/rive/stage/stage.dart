@@ -488,7 +488,7 @@ class Stage extends Debouncer {
           if (isItemSelectable(item) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
-            hover = item.selectionTarget;
+            hover = item;
           }
           return true;
         });
@@ -505,7 +505,7 @@ class Stage extends Debouncer {
           hover = candidates[_hoverOffsetIndex % candidates.length];
         }
       }
-      hover?.isHovered = true;
+      hover?.selectionTarget?.isHovered = true;
       if (hover == null) {
         hoverItem = null;
       }
@@ -528,8 +528,8 @@ class Stage extends Debouncer {
   }
 
   final List<StageNode> _allExpandedNodes = [];
-  StageItem _lastMouseDownHit;
-  DateTime _lastHitTime = DateTime.now();
+  StageItem _lastMouseUpHit;
+  DateTime _lastUpTime = DateTime.now();
 
   void clearExpandedNodes() {
     for (final node in _allExpandedNodes) {
@@ -554,30 +554,13 @@ class Stage extends Debouncer {
         if (_panHandCursor != null) {
           _isPanning = true;
         } else if (isSelectionEnabled) {
-          bool isDoubleClick =
-              DateTime.now().difference(_lastHitTime).inMilliseconds < 200;
           if (_hoverItem != null) {
             _mouseDownHit = _hoverItem;
 
-            // TODO: CLEAAAAAN ME Node UX...
-            if (isDoubleClick) {
-              if (_mouseDownHit == _lastMouseDownHit &&
-                  _mouseDownHit is StageNode) {
-                clearExpandedNodes();
-                _allExpandedNodes
-                    .addAll((_mouseDownHit as StageNode).allParentNodes);
-                for (final node in _allExpandedNodes) {
-                  node.isExpanded = true;
-                }
-
-                _updateHover();
-                markNeedsRedraw();
-              }
-            }
-
             _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
-            if (!file.selection.isCustomHandled(_hoverItem)) {
+            if (_hoverItem != null &&
+                !file.selection.isCustomHandled(_hoverItem)) {
               if (_hoverItem.isSelected) {
                 if (_mouseDownSelectAppend) {
                   // If the hover item is already selected and we're holding
@@ -591,13 +574,6 @@ class Stage extends Debouncer {
               }
             }
           }
-          /*else if (isDoubleClick && _allExpandedNodes.isNotEmpty) {
-            clearExpandedNodes();
-            _updateHover();
-            markNeedsRedraw();
-          }*/
-          _lastHitTime = DateTime.now();
-          _lastMouseDownHit = _mouseDownHit;
         }
 
         // Always pipe clicks to tools or weird things may happen (see
@@ -723,6 +699,32 @@ class Stage extends Debouncer {
     // If we didn't complete an operation and nothing was selected, clear
     // selections.
     if (!_completeDrag() && !_mouseDownSelectAppend) {
+      bool isDoubleClick =
+          DateTime.now().difference(_lastUpTime).inMilliseconds < 200;
+
+      if (isDoubleClick &&
+          _mouseDownHit != null &&
+          _mouseDownHit == _lastMouseUpHit) {
+        if (_mouseDownHit is StageNode) {
+          clearExpandedNodes();
+          _allExpandedNodes.addAll((_mouseDownHit as StageNode).allParentNodes);
+          for (final node in _allExpandedNodes) {
+            node.isExpanded = true;
+          }
+
+          _updateHover();
+          // The expansion caused something else to be hovered, select it.
+          if (_hoverItem != _mouseDownHit) {
+            file.select(StageNode.findNonExpanded(_hoverItem));
+          }
+          markNeedsRedraw();
+        } else if (_mouseDownHit is StageShape) {
+          file.vertexEditor.activateForSelection(recursivePaths: true);
+        }
+      } else if (isDoubleClick && tool is AutoTool) {
+        file.vertexEditor.deactivate();
+      }
+
       if (_mouseDownHit == null) {
         file.selection.clear();
       } else {
@@ -733,6 +735,8 @@ class Stage extends Debouncer {
         // file.select(_mouseDownHit);
       }
     }
+    _lastUpTime = DateTime.now();
+    _lastMouseUpHit = _mouseDownHit;
 
     _updateComponents();
   }

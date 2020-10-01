@@ -9,6 +9,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_joint.dart';
+import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -22,8 +23,13 @@ class StageBone extends HideableStageItem<Bone>
   static const double hitDistanceSquared = hitDistance * hitDistance;
 
   @override
+  StageItem get selectionTarget {
+    return StageNode.findNonExpanded(this);
+  }
+
+  @override
   ValueNotifier<bool> get isShownNotifier => stage.showNodesNotifier;
-  
+
   final Path path = Path();
   bool _needsUpdate = true;
   double _worldLength = 0;

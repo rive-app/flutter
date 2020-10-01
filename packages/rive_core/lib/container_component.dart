@@ -41,9 +41,9 @@ abstract class ContainerComponent extends ContainerComponentBase {
 
   // -> editor-only
   void recomputeParentNodeBounds() {
-    for(var p = this; p != null; p = p.parent) {
-      if(p is Node) {
-        p.markBoundsChanged();
+    for (var p = this; p != null; p = p.parent) {
+      if (p.coreType == NodeBase.typeKey) {
+        (p as Node).markBoundsChanged();
       }
     }
   }

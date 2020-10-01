@@ -7,6 +7,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
+import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -42,6 +43,12 @@ class StageJoint extends HideableStageItem<Bone>
 
   Vec2D get worldTranslation => _worldTranslation;
 
+  
+  @override
+  StageItem get selectionTarget {
+    return StageNode.findNonExpanded(this);
+  }
+  
   @override
   bool hitHiFi(Vec2D worldMouse) {
     var zoom = stage.viewZoom;

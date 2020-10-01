@@ -4,12 +4,17 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/bounds_delegate.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -17,6 +22,8 @@ import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_hideable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+
+enum StageNodeDisplay { node, group }
 
 /// A Node component as it's drawn on the stage.
 class StageNode extends HideableStageItem<Node>
@@ -32,18 +39,19 @@ class StageNode extends HideableStageItem<Node>
             inWorldSpace: true,
             order: 11,
           ),
-        if (obb != null && hasSelectionFlags)
+        if (shouldDrawBounds)
           StageDrawPass(
             drawBounds,
             inWorldSpace: false,
             order: 10,
           ),
       ];
+  StageNodeDisplay get display =>
+      obb == null ? StageNodeDisplay.node : StageNodeDisplay.group;
 
-  /// Force set some draw order that supersedes the shape draw order so nodes
-  /// always win over shapes.
-  @override
-  int get drawOrder => drawPasses.isEmpty ? 11 : super.drawOrder;
+  bool get shouldDrawBounds {
+    return obb != null && hasSelectionFlags && _boundsValid;
+  }
 
   @override
   bool intersectsRect(Float32List rectPoly) => true;
@@ -51,7 +59,7 @@ class StageNode extends HideableStageItem<Node>
   bool isExpanded = false;
 
   @override
-  bool get isHoverSelectable => !isExpanded && super.isHoverSelectable;
+  bool get isHoverSelectable => display == StageNodeDisplay.node;
 
   Iterable<StageNode> get allParentNodes {
     List<StageNode> nodes = [this];
@@ -173,6 +181,9 @@ class StageNode extends HideableStageItem<Node>
   int _hierarchyDepth = 0;
 
   void _computeBounds() {
+    if (component?.artboard == null) {
+      return;
+    }
     // Compute hierarchy depth to use that to sort against other stage nodes
     // (stage nodes higher in the hierarchy will hit first).
     _hierarchyDepth = 0;
@@ -182,18 +193,43 @@ class StageNode extends HideableStageItem<Node>
 
     var artboard = component.artboard;
     var worldTransform = component.worldTransform;
+
+    // Transform to get into local space of this node.
+    var inverseWorld = Mat2D();
+    if (!Mat2D.invert(inverseWorld, worldTransform)) {
+      Mat2D.identity(inverseWorld);
+    }
+
     AABB accumulatedBounds;
     component.forEachChild((component) {
       // When we have images we may want to have a generic interface for getting
       // the bounds, but for now we only have shapes.
-      if (component.coreType == ShapeBase.typeKey) {
-        var shape = component as Shape;
-        var bounds = shape.computeBounds(worldTransform);
-        if (accumulatedBounds == null) {
-          accumulatedBounds = bounds;
-        } else {
-          AABB.combine(accumulatedBounds, accumulatedBounds, bounds);
-        }
+      switch (component.coreType) {
+        case ShapeBase.typeKey:
+          var shape = component as Shape;
+          var bounds = shape.computeBounds(inverseWorld);
+          if (accumulatedBounds == null) {
+            accumulatedBounds = bounds;
+          } else {
+            AABB.combine(accumulatedBounds, accumulatedBounds, bounds);
+          }
+          break;
+        case BoneBase.typeKey:
+        case RootBoneBase.typeKey:
+          var bone = component as Bone;
+          var localBoneTranslation = Vec2D.transformMat2D(
+              Vec2D(), bone.worldTranslation, inverseWorld);
+          var localBoneTip = Vec2D.transformMat2D(
+              Vec2D(), bone.tipWorldTranslation, inverseWorld);
+
+          if (accumulatedBounds == null) {
+            accumulatedBounds =
+                AABB.fromPoints([localBoneTranslation, localBoneTip]);
+          } else {
+            accumulatedBounds.expandToPoint(localBoneTranslation);
+            accumulatedBounds.expandToPoint(localBoneTip);
+          }
+          break;
       }
       return true;
     });
@@ -224,13 +260,22 @@ class StageNode extends HideableStageItem<Node>
         transform: artboard.transform(component.worldTransform),
       );
     }
+    _boundsValid = true;
   }
 
+  bool _boundsValid = false;
   @override
   void boundsChanged() {
+    _boundsValid = false;
     _updateBoundsTimer?.cancel();
     _updateBoundsTimer = Timer(
         Duration(milliseconds: 50 + Random().nextInt(200)), _computeBounds);
+  }
+
+  @override
+  void removedFromStage(Stage stage) {
+    _updateBoundsTimer?.cancel();
+    super.removedFromStage(stage);
   }
 
   @override
@@ -242,5 +287,19 @@ class StageNode extends HideableStageItem<Node>
   void addedToStage(Stage stage) {
     super.addedToStage(stage);
     _computeBounds();
+  }
+
+  static StageItem findNonExpanded(StageItem item) {
+    StageItem last = item;
+    for (var node = (item.component as Component).parentNode;
+        node != null;
+        node = node.parentNode) {
+      var stageNode = node.stageItem as StageNode;
+      if (stageNode.isExpanded) {
+        return last;
+      }
+      last = stageNode;
+    }
+    return last;
   }
 }

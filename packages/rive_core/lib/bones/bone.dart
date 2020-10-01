@@ -1,3 +1,4 @@
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/bones/bone_base.dart';
@@ -30,6 +31,27 @@ class Bone extends BoneBase {
     markBoundsChanged();
     // <- editor-only
   }
+
+  // -> editor-only
+  @override
+  void markBoundsChanged() {
+    super.markBoundsChanged();
+    recomputeParentNodeBounds();
+  }
+
+  // Recompute node bounds when parents change, for Node UX. If we keep duping
+  // this code (currently in Drawable and here) we may want to just stick this
+  // in Component...
+  @override
+  void parentChanged(ContainerComponent from, ContainerComponent to) {
+    super.parentChanged(from, to);
+
+    // Let any old node parent know it needs to re-compute its bounds. Let new
+    // node parents know they need to recompute their bounds.
+    from?.recomputeParentNodeBounds();
+    to?.recomputeParentNodeBounds();
+  }
+  // <- editor-only
 
   Bone get firstChildBone {
     for (final child in children) {
