@@ -431,30 +431,36 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       ..stateChanged = connectionStateChanged;
 
     // does this need to return anything?
-    return _client.connect();
+    var connected = await _client.connect();
+    // if we connected successfully lets complete some neccessary steps
+    if (connected.state == ConnectState.connected) {
+      completeConnection();
+    }
+    return connected;
   }
 
   void completeConnection() {
-    if (_client != null) {
-      int maxId = 0;
+    // In test setups _client doesnt always exist.
+    if (_client == null) {
+      return;
+    }
+    int maxId = 0;
 
-      for (final object in _objects.values) {
-        if (object.id.client == _client.clientId) {
-          if (object.id.object >= maxId) {
-            maxId = object.id.object;
-          }
+    for (final object in _objects.values) {
+      if (object.id.client == _client.clientId) {
+        if (object.id.object >= maxId) {
+          maxId = object.id.object;
         }
       }
-      _nextObjectId = Id(_client?.clientId, maxId + 1);
-
-      // Load is complete, we can now process any deferred batch add operations.
-      if (_deferredBatchAdd != null) {
-        var deferred = Set<BatchAddCallback>.from(_deferredBatchAdd);
-        _deferredBatchAdd = null;
-        deferred.forEach(batchAdd);
-      }
     }
+    _nextObjectId = Id(_client.clientId, maxId + 1);
 
+    // Load is complete, we can now process any deferred batch add operations.
+    if (_deferredBatchAdd != null) {
+      var deferred = Set<BatchAddCallback>.from(_deferredBatchAdd);
+      _deferredBatchAdd = null;
+      deferred.forEach(batchAdd);
+    }
     onConnected();
   }
 

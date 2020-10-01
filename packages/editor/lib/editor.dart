@@ -315,22 +315,32 @@ class CountDown extends StatefulWidget {
 
 class _CountDownState extends State<CountDown> {
   Timer _timer;
-  int remainingMillis() {
-    return max(widget.targetTime.difference(DateTime.now()).inMilliseconds, 0);
+  Duration timeout;
+  Duration remainingTimeout() {
+    return Duration(
+      milliseconds: max(
+        widget.targetTime.difference(DateTime.now()).inMilliseconds,
+        0,
+      ),
+    );
   }
 
   @override
   void initState() {
     super.initState();
     startTimer();
+    timeout = remainingTimeout();
   }
 
   void startTimer() {
     _timer = Timer.periodic(
-      // TODO: 20fps probably enough?
-      const Duration(milliseconds: 50),
+      // TODO: 4fps probably enough?
+      // we're only updating every second afterall
+      const Duration(milliseconds: 250),
       (Timer timer) => setState(
-        () {},
+        () {
+          timeout = remainingTimeout();
+        },
       ),
     );
   }
@@ -341,37 +351,59 @@ class _CountDownState extends State<CountDown> {
     super.dispose();
   }
 
+  String padZeros(num number, int targetDigits) {
+    var output = number.toString();
+    if (output.length < targetDigits) {
+      output = '0' * (targetDigits - output.length) + output;
+    }
+    return output;
+  }
+
+  num seconds(int seconds) {
+    return seconds.remainder(Duration.secondsPerMinute);
+  }
+
+  String timeoutString() {
+    if (timeout > const Duration(hours: 1)) {
+      return '> 1 hour';
+    } else if (timeout > const Duration(minutes: 1)) {
+      return '${timeout.inMinutes}:${padZeros(seconds(timeout.inSeconds), 2)}';
+    } else {
+      return '${timeout.inSeconds}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
-    // TODO: implement build
-    var millis = remainingMillis();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'Connection lost, reconnecting in '
-          '${(millis / 1000).toStringAsFixed(1)} seconds',
-          style: const TextStyle(color: Colors.white),
-        ),
-        SizedBox(
-          width: 10,
-        ),
-        FlatIconButton(
-          label: 'Reconnect now',
-          onTap: () {
-            widget.file.reconnect();
-          },
-          color: colors.textButtonLight,
-          textColor: colors.buttonLightText,
-          hoverColor: colors.textButtonLightHover,
-          hoverTextColor: colors.buttonLightText,
-          radius: 20,
-          mainAxisAlignment: MainAxisAlignment.center,
-        )
-      ],
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Connection lost, reconnecting in ${timeoutString()}',
+            style: const TextStyle(color: Colors.white),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          FlatIconButton(
+            label: 'Reconnect now',
+            onTap: () {
+              widget.file.reconnect();
+            },
+            color: colors.textButtonLight,
+            textColor: colors.buttonLightText,
+            hoverColor: colors.textButtonLightHover,
+            hoverTextColor: colors.buttonLightText,
+            radius: 20,
+            mainAxisAlignment: MainAxisAlignment.center,
+          )
+        ],
+      ),
     );
   }
 }
