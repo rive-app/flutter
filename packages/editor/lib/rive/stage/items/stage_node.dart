@@ -59,7 +59,7 @@ class StageNode extends HideableStageItem<Node>
   bool isExpanded = false;
 
   @override
-  bool get isHoverSelectable => false;
+  bool get isHoverSelectable => display == StageNodeDisplay.node;
 
   Iterable<StageNode> get allParentNodes {
     List<StageNode> nodes = [this];
