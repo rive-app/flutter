@@ -92,7 +92,9 @@ abstract class Core<T extends CoreContext> {
 
   /// If an object wishes to delegate specific property key event changes to
   /// another one, override this method to return the appropriate core object
-  /// for the key.
+  /// for the key. Make sure to consistenly return the same object based on
+  /// propertyKey as this will be called multiple times to bind/unbind.
+  // ignore: avoid_returning_this
   Core eventDelegateFor(int propertyKey) => this;
 
   /// Register to receive a notification whenever a property with propertyKey

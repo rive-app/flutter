@@ -1,9 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
-import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
