@@ -528,8 +528,8 @@ class Stage extends Debouncer {
   }
 
   final List<StageNode> _allExpandedNodes = [];
-  StageItem _lastMouseDownHit;
-  DateTime _lastHitTime = DateTime.now();
+  StageItem _lastMouseUpHit;
+  DateTime _lastUpTime = DateTime.now();
 
   void clearExpandedNodes() {
     for (final node in _allExpandedNodes) {
@@ -554,27 +554,8 @@ class Stage extends Debouncer {
         if (_panHandCursor != null) {
           _isPanning = true;
         } else if (isSelectionEnabled) {
-          bool isDoubleClick =
-              DateTime.now().difference(_lastHitTime).inMilliseconds < 200;
           if (_hoverItem != null) {
             _mouseDownHit = _hoverItem;
-
-            // TODO: CLEAAAAAN ME Node UX...
-            if (isDoubleClick && _mouseDownHit == _lastMouseDownHit) {
-              if (_mouseDownHit is StageNode) {
-                clearExpandedNodes();
-                _allExpandedNodes
-                    .addAll((_mouseDownHit as StageNode).allParentNodes);
-                for (final node in _allExpandedNodes) {
-                  node.isExpanded = true;
-                }
-
-                _updateHover();
-                markNeedsRedraw();
-              } else if (_mouseDownHit is StageShape) {
-                file.vertexEditor.activateForSelection(recursivePaths: true);
-              }
-            }
 
             _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
@@ -592,11 +573,7 @@ class Stage extends Debouncer {
                     append: _mouseDownSelectAppend, skipHandlers: true);
               }
             }
-          } else if (isDoubleClick && tool is AutoTool) {
-            file.vertexEditor.deactivate();
           }
-          _lastHitTime = DateTime.now();
-          _lastMouseDownHit = _mouseDownHit;
         }
 
         // Always pipe clicks to tools or weird things may happen (see
@@ -706,6 +683,7 @@ class Stage extends Debouncer {
     }
   }
 
+
   void mouseUp(int button, double x, double y) {
     _dragInError = false;
     _isPanning = false;
@@ -722,6 +700,39 @@ class Stage extends Debouncer {
     // If we didn't complete an operation and nothing was selected, clear
     // selections.
     if (!_completeDrag() && !_mouseDownSelectAppend) {
+      bool isDoubleClick =
+          DateTime.now().difference(_lastUpTime).inMilliseconds < 200;
+
+      if (isDoubleClick &&
+          _mouseDownHit != null &&
+          _mouseDownHit == _lastMouseUpHit) {
+        if (_mouseDownHit is StageNode) {
+          clearExpandedNodes();
+          _allExpandedNodes.addAll((_mouseDownHit as StageNode).allParentNodes);
+          for (final node in _allExpandedNodes) {
+            node.isExpanded = true;
+          }
+
+          _updateHover();
+          // The expansion caused something else to be hovered, select it.
+          if (_hoverItem != _mouseDownHit) {
+            var component = _hoverItem.component as Component;
+            while (component != null) {
+              if ((component.parentNode.stageItem as StageNode).isExpanded) {
+                file.select(component.stageItem);
+                break;
+              }
+              component = component.parentNode;
+            }
+          }
+          markNeedsRedraw();
+        } else if (_mouseDownHit is StageShape) {
+          file.vertexEditor.activateForSelection(recursivePaths: true);
+        }
+      } else if (isDoubleClick && tool is AutoTool) {
+        file.vertexEditor.deactivate();
+      }
+
       if (_mouseDownHit == null) {
         file.selection.clear();
       } else {
@@ -732,6 +743,8 @@ class Stage extends Debouncer {
         // file.select(_mouseDownHit);
       }
     }
+    _lastUpTime = DateTime.now();
+    _lastMouseUpHit = _mouseDownHit;
 
     _updateComponents();
   }

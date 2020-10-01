@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/bounds_delegate.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -52,21 +53,13 @@ class StageNode extends HideableStageItem<Node>
     return obb != null && hasSelectionFlags && _boundsValid;
   }
 
-  /// Force set some draw order that supersedes the shape draw order so nodes
-  /// always win over shapes.
-  @override
-  int get drawOrder => drawPasses.isEmpty ? 11 : super.drawOrder;
-
   @override
   bool intersectsRect(Float32List rectPoly) => true;
 
   bool isExpanded = false;
 
   @override
-  bool get isHoverSelectable =>
-      !isExpanded &&
-      (display == StageNodeDisplay.node || !ShortcutAction.deepClick.value) &&
-      super.isHoverSelectable;
+  bool get isHoverSelectable => false;
 
   Iterable<StageNode> get allParentNodes {
     List<StageNode> nodes = [this];
@@ -294,5 +287,19 @@ class StageNode extends HideableStageItem<Node>
   void addedToStage(Stage stage) {
     super.addedToStage(stage);
     _computeBounds();
+  }
+
+  static StageItem findNonExpanded(StageItem item) {
+    StageItem last = item;
+    for (var node = (item.component as Component).parentNode;
+        node != null;
+        node = node.parentNode) {
+      var stageNode = node.stageItem as StageNode;
+      if (stageNode.isExpanded) {
+        return last;
+      }
+      last = stageNode;
+    }
+    return last;
   }
 }

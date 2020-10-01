@@ -44,13 +44,12 @@ class StageJoint extends HideableStageItem<Bone>
 
   Vec2D get worldTranslation => _worldTranslation;
 
-  // StageJoint only draws if the parent node is expanded.
+  
   @override
-  bool get isSelectable =>
-      ShortcutAction.deepClick.value ||
-      ((component.parentNode?.stageItem as StageNode)?.isExpanded ??
-          super.isSelectable);
-
+  StageItem get selectionTarget {
+    return StageNode.findNonExpanded(this);
+  }
+  
   @override
   bool hitHiFi(Vec2D worldMouse) {
     var zoom = stage.viewZoom;
