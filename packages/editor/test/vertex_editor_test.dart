@@ -61,6 +61,9 @@ void main() {
     expect(file.stage.soloItems.length, 1);
     expect(file.stage.soloItems.first is StagePath, true);
 
+    expect(stage.tool, VectorPenTool.instance,
+        reason: 'PenTool should still be selected');
+
     // Expect vertex editor to be in editingPath mode.
     expect(file.vertexEditor.mode.value, VertexEditorMode.editingPath);
 
@@ -80,8 +83,13 @@ void main() {
         reason: 'Path should be in creation mode.');
 
     stage.mouseMove(1, 100, 200);
+
+    expect(stage.tool, VectorPenTool.instance,
+        reason: 'PenTool should still be selected');
+
     stage.mouseDown(1, 100, 200);
     stage.mouseUp(1, 100, 200);
+
     expect(editingPath.vertices.length, 2,
         reason: 'after second click, path should have two points');
     expect(editingPath.vertices[1].x, 0);
@@ -275,7 +283,6 @@ void main() {
       expect(insertedVertex.outDistance, 25);
     }
   });
-
 
   test('subdivide a rounded corner', () async {
     /// Test for issue #1302.

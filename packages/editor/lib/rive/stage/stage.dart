@@ -592,7 +592,7 @@ class Stage extends Debouncer {
                     append: _mouseDownSelectAppend, skipHandlers: true);
               }
             }
-          } else if (isDoubleClick) {
+          } else if (isDoubleClick && tool is AutoTool) {
             file.vertexEditor.deactivate();
           }
           _lastHitTime = DateTime.now();
