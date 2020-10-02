@@ -82,8 +82,18 @@ class _TabItemState extends State<TabItem> {
         behavior: HitTestBehavior.deferToChild,
         onPointerDown: (_) => widget.select?.call(),
         child: MouseRegion(
-          onEnter: (_) => setState(() => _hover = true),
-          onExit: (_) => setState(() => _hover = false),
+          onEnter: (_) {
+            if (!mounted) {
+              return;
+            }
+            setState(() => _hover = true);
+          },
+          onExit: (_) {
+            if (!mounted) {
+              return;
+            }
+            setState(() => _hover = false);
+          },
           // Can't use gesture detector as we're IgnorePointering the scrolling
           // list that contains this. I thought IgnorePointer would only ignore
           // hit testing on that one item, but it seems to propgate down to

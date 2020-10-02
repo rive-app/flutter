@@ -240,7 +240,7 @@ class Rive {
     // to delay when unhandled keys are pressed too (user might be inputting
     // text or something).
     file.value?.delaySleep();
-    
+
     // First update our pressed set.
     if (isPress) {
       // remove and re-add so it's always at the end.

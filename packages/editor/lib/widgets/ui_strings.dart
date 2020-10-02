@@ -84,6 +84,7 @@ HashMap<String, String> _defaultUIStrings =
   'trimStart': 'Trim Start',
   'trimEnd': 'Trim End',
   'trimOffset': 'Trim Offset',
+  'drawtargetid': 'Draw Rule',
 
   /// Used by the mirrored cubic vertex.
   'distance': 'Length',

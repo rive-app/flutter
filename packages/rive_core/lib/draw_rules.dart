@@ -9,6 +9,8 @@ export 'package:rive_core/src/generated/draw_rules_base.dart';
 class DrawRules extends DrawRulesBase {
   // -> editor-only
   DrawRules parentRules;
+  @override
+  Component get timelineProxy => parent;
   // <- editor-only
   final Set<DrawTarget> _targets = {};
   Set<DrawTarget> get targets => _targets;

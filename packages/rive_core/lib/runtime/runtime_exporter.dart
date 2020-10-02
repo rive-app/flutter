@@ -191,8 +191,8 @@ class RuntimeExporter {
     var headerWriter = BinaryWriter();
     // Write the header, start with fingerprint.
     RuntimeHeader.fingerprint.codeUnits.forEach(headerWriter.writeUint8);
-    headerWriter.writeVarUint(RuntimeHeader.majorVersion);
-    headerWriter.writeVarUint(RuntimeHeader.minorVersion);
+    headerWriter.writeVarUint(riveVersion.major);
+    headerWriter.writeVarUint(riveVersion.minor);
     headerWriter.writeVarUint(info.ownerId);
     headerWriter.writeVarUint(info.fileId);
 

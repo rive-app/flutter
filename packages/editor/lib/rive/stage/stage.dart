@@ -28,6 +28,7 @@ import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
+import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -700,7 +701,7 @@ class Stage extends Debouncer {
     // selections.
     if (!_completeDrag() && !_mouseDownSelectAppend) {
       bool isDoubleClick =
-          DateTime.now().difference(_lastUpTime).inMilliseconds < 200;
+          DateTime.now().difference(_lastUpTime) < doubleClickSpeed;
 
       if (isDoubleClick &&
           _mouseDownHit != null &&
@@ -1414,6 +1415,10 @@ class Stage extends Debouncer {
       for (final item in _soloNotifier.value) {
         item.onSoloChanged(false);
       }
+    }
+    if (value != null) {
+      // Force select the solo items to expand them in the hierarchy.
+      file.selection.selectMultiple(value);
     }
     file.selection.clear();
     _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
