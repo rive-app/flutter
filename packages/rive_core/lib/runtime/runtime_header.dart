@@ -6,10 +6,20 @@ import 'package:utilities/binary_buffer/binary_reader.dart';
 
 import 'exceptions/rive_format_error_exception.dart';
 
+/// Stores the minor and major version of Rive. Versions with the same major
+/// value are backwards and forwards compatible.
+class RuntimeVersion {
+  final int major;
+  final int minor;
+
+  const RuntimeVersion(this.major, this.minor);
+}
+
+const riveVersion = RuntimeVersion(6, 2);
+
 class RuntimeHeader {
-  static const int majorVersion = 6;
-  static const int minorVersion = 0;
   static const String fingerprint = 'RIVE';
+  final RuntimeVersion version;
 
   final int ownerId;
   final int fileId;
@@ -19,6 +29,7 @@ class RuntimeHeader {
   RuntimeHeader({
     @required this.ownerId,
     @required this.fileId,
+    @required this.version,
     this.propertyToFieldIndex,
   });
 
@@ -33,9 +44,9 @@ class RuntimeHeader {
 
     int readMajorVersion = reader.readVarUint();
     int readMinorVersion = reader.readVarUint();
-    if (readMajorVersion > majorVersion) {
-      throw RiveUnsupportedVersionException(
-          majorVersion, minorVersion, readMajorVersion, readMinorVersion);
+    if (readMajorVersion > riveVersion.major) {
+      throw RiveUnsupportedVersionException(riveVersion.major,
+          riveVersion.minor, readMajorVersion, readMinorVersion);
     }
     int ownerId = reader.readVarUint();
     int fileId = reader.readVarUint();
@@ -63,6 +74,7 @@ class RuntimeHeader {
     return RuntimeHeader(
       ownerId: ownerId,
       fileId: fileId,
+      version: RuntimeVersion(readMajorVersion, readMinorVersion),
       propertyToFieldIndex: propertyFields,
     );
   }
