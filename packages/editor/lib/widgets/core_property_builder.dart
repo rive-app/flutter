@@ -32,6 +32,8 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
   T previous;
   T value;
 
+  Core<CoreContext> _eventDelegate;
+
   @override
   Widget build(BuildContext context) {
     return widget.builder(context, value, widget.child);
@@ -58,12 +60,13 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
     assert(currentPropertyValue == null || currentPropertyValue is T,
         'expected $currentPropertyValue to be of type $T');
     value = currentPropertyValue as T;
-    object.addListener(propertyKey, _valueChanged);
+    _eventDelegate = object.eventDelegateFor(propertyKey);
+    _eventDelegate?.addListener(propertyKey, _valueChanged);
   }
 
   @override
   void dispose() {
-    widget.object.removeListener(widget.propertyKey, _valueChanged);
+    _eventDelegate?.removeListener(widget.propertyKey, _valueChanged);
     cancelFrameDebounce(_rebuild);
     super.dispose();
   }

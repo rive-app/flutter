@@ -187,8 +187,11 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       BinaryWriter writer, HashMap<int, CoreFieldType> propertyToField,
       [HashMap<Id, int> idLookup]) {
     super.writeRuntime(writer, propertyToField, idLookup);
-    writer.writeVarUint(_keyedProperties.length);
-    for (final keyedProperty in _keyedProperties.values) {
+    // Export only properties that actually contain keyframes.
+    var exportProperties =
+        keyedProperties.where((property) => property.keyframes.isNotEmpty);
+    writer.writeVarUint(exportProperties.length);
+    for (final keyedProperty in exportProperties) {
       keyedProperty.writeRuntime(writer, propertyToField, idLookup);
     }
   }

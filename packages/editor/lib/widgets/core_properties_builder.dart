@@ -35,10 +35,11 @@ class CorePropertiesBuilder<T, K extends Core> extends StatelessWidget {
       builder: builder,
       getValue: (object) => object.getProperty<T>(propertyKey),
       listenCore: (object, enable, callback) {
+        var eventDelegate = object.eventDelegateFor(propertyKey);
         if (enable) {
-          object.addListener(propertyKey, callback);
+          eventDelegate.addListener(propertyKey, callback);
         } else {
-          object.removeListener(propertyKey, callback);
+          eventDelegate.removeListener(propertyKey, callback);
         }
       },
       child: child,

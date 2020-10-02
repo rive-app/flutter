@@ -11,6 +11,9 @@ class ContainerChildren extends FractionallyIndexedList<Component> {
   @override
   FractionalIndex orderOf(Component value) => value.childOrder;
 
+  ContainerChildren() : super();
+  ContainerChildren.raw(List<Component> values) : super.raw(values);
+
   @override
   void setOrderOf(Component value, FractionalIndex order) {
     value.childOrder = order;

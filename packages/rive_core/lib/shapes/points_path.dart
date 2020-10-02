@@ -28,7 +28,8 @@ class PointsPath extends PointsPathBase with Skinnable {
 
   // When bound to bones inversePathTransform should be the identity.
   @override
-  Mat2D get inversePathTransform => inverseWorldTransform;
+  Mat2D get inversePathTransform =>
+      skin != null ? Mat2D() : inverseWorldTransform;
 
   @override
   List<PathVertex> get vertices => _vertices;
@@ -163,10 +164,10 @@ class PointsPath extends PointsPathBase with Skinnable {
     for (int i = 0; i < order.length; i++) {
       _vertices[1 + order.length - 1 - i].childOrder = order[i];
     }
-    for(final vertex in _vertices) {
-     if(vertex is CubicVertex) {
-       vertex.swapInOut();
-     }
+    for (final vertex in _vertices) {
+      if (vertex is CubicVertex) {
+        vertex.swapInOut();
+      }
     }
 
     _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
