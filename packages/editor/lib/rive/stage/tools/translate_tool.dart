@@ -55,4 +55,7 @@ class TranslateTool extends TransformHandleTool {
   void draw(Canvas canvas, StageDrawPass drawPass) {
     drawTransformers(canvas);
   }
+
+  @override
+  bool validateDrag() => validateClick();
 }

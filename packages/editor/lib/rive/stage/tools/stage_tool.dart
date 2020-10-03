@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/alerts/simple_alert.dart';
 
 abstract class StageTool implements StageDrawable {
   Stage _stage;
@@ -81,6 +83,28 @@ abstract class StageTool implements StageDrawable {
   /// Returns true if the stage should advance after movement.
   bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
     return false;
+  }
+
+  bool validateClick() {
+    if (stage.activeArtboard == null) {
+      // See if we're hovering an artboard, and activate it.
+      stage.forEachHover((item) {
+        if (item is StageArtboard) {
+          item.activate();
+          return false;
+        }
+        return true;
+      });
+
+      // If there's still no active arboard warn the user.
+      if (stage.activeArtboard == null) {
+        stage.file.addAlert(
+          SimpleAlert('No active artboard.'),
+        );
+        return false;
+      }
+    }
+    return true;
   }
 
   void click(Artboard activeArtboard, Vec2D worldMouse) {}

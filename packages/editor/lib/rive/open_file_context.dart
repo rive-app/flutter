@@ -11,6 +11,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
@@ -78,6 +79,9 @@ class OpenFileContext with RiveFileDelegate {
   /// File name
   final ValueNotifier<String> _name;
   ValueListenable<String> get name => _name;
+
+  final _activeArtboard = ValueNotifier<Artboard>(null);
+  Listenable get activeArtboardChanged => _activeArtboard;
 
   // this complains about types as a setter.
   // ignore: use_setters_to_change_properties
@@ -822,6 +826,7 @@ class OpenFileContext with RiveFileDelegate {
   // The active artboard may have changed, sync up the animation managers, or
   // anything that depends on active artboard.
   void _syncActiveArtboard() {
+    _activeArtboard.value = _backboard.activeArtboard;
     // The artboard being animated is determined by whether the mode is animate
     // mode and the backboard has an active artboard.
     var animatingArtboard =

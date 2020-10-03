@@ -215,4 +215,8 @@ class AutoTool extends TransformHandleTool {
         return false;
     }
   }
+
+
+  @override
+  bool validateDrag() => validateClick();
 }

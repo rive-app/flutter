@@ -131,12 +131,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       return;
     }
 
-    if (activeArtboard == null) {
-      stage.file.addAlert(
-        SimpleAlert('Pen tool requires an artboard. Create one first.'),
-      );
-    }
-
     var path = vertexEditor.creatingPath.value ??
         _makeEditingPath(activeArtboard, ghostPointWorld);
 

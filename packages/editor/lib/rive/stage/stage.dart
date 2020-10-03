@@ -30,7 +30,6 @@ import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
@@ -50,7 +49,6 @@ import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
@@ -479,13 +477,21 @@ class Stage extends Debouncer {
       tool.canSelect(item) &&
       (soloItems == null || isValidSoloSelection(item));
 
+  /// [callback] is called with each StageItem that is currently under the
+  /// cursor. No filtering is done for hover/select validation.
+  void forEachHover(bool Function(StageItem) callback) {
+    AABB cursorAABB = AABB.fromValues(
+        _worldMouse[0], _worldMouse[1], _worldMouse[0] + 1, _worldMouse[1] + 1);
+    visTree.query(cursorAABB, (int proxyId, StageItem item) {
+      return callback(item);
+    });
+  }
+
   void _updateHover() {
     if (isSelectionEnabled && _worldMouse != null) {
-      AABB cursorAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
-          _worldMouse[0] + 1, _worldMouse[1] + 1);
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
-        visTree.query(cursorAABB, (int proxyId, StageItem item) {
+        forEachHover((item) {
           if (isItemSelectable(item) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
@@ -495,7 +501,7 @@ class Stage extends Debouncer {
         });
       } else {
         List<StageItem> candidates = [];
-        visTree.query(cursorAABB, (int proxyId, StageItem item) {
+        forEachHover((item) {
           if (isItemSelectable(item) && item.hitHiFi(_worldMouse)) {
             candidates.add(item);
           }
@@ -583,13 +589,15 @@ class Stage extends Debouncer {
         // in click of autoTool and adding a separate clickSelection callback on
         // the tools so tools like the PenTool can still track the intention of
         // a click occurred. if (_mouseDownHit == null) {
-        final artboard = activeArtboard;
         _clickTool = tool;
-        tool.click(
-            artboard,
-            artboard == null
-                ? _worldMouse
-                : tool.mouseWorldSpace(artboard, _worldMouse));
+        if (tool.validateClick()) {
+          final artboard = activeArtboard;
+          tool.click(
+              artboard,
+              artboard == null
+                  ? _worldMouse
+                  : tool.mouseWorldSpace(artboard, _worldMouse));
+        }
         break;
       case 2:
         _isPanning = true;
@@ -640,16 +648,11 @@ class Stage extends Debouncer {
         }
       }
       if (tool is DraggableTool) {
-        var artboard = activeArtboard;
-        if (artboard == null && !(tool is ArtboardTool)) {
-          // Things are going to go boom; warn the user and put the drag
-          // operation into an error state
-          file.addAlert(
-            SimpleAlert('Create an artboard before adding items.'),
-          );
+        if (!(tool as DraggableTool).validateDrag()) {
           _dragInError = true;
           return;
         }
+        var artboard = activeArtboard;
         var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
 
         // [_dragTool] is [null] before dragging operation starts.
@@ -818,6 +821,8 @@ class Stage extends Debouncer {
     file.isActiveListenable.addListener(_fileActiveChanged);
     // Ensure stuff that _fileActiveChanged sets up is et up
     _fileActiveChanged();
+
+    file.activeArtboardChanged.addListener(_activeArtboardChanged);
 
     file.selection.addListener(_fileSelectionChanged);
 
@@ -1007,6 +1012,12 @@ class Stage extends Debouncer {
       _viewZoom = _viewZoomTarget;
     }
     markNeedsAdvance();
+  }
+
+  void _activeArtboardChanged() {
+    // whenever the active artboard changes, send a mouse move to the active
+    // tool.
+    _sendMouseMoveToTool();
   }
 
   /// Deal with the fileContext being activate/de-activated. This happens when a
@@ -1202,6 +1213,7 @@ class Stage extends Debouncer {
     file.selection.removeListener(_fileSelectionChanged);
     file.removeActionHandler(_handleAction);
     file.isActiveListenable.removeListener(_fileActiveChanged);
+    file.activeArtboardChanged.removeListener(_activeArtboardChanged);
     ShortcutAction.pan.removeListener(_panActionChanged);
     ShortcutAction.deepClick.removeListener(_deepClickChanged);
     _panHandCursor?.remove();

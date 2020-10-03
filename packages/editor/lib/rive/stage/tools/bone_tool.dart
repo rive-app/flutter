@@ -308,6 +308,10 @@ class BoneTool extends StageTool {
 
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {
+    if (_ghostPointScreen == null || stage.activeArtboard == null) {
+      _firstJointWorld = null;
+      return;
+    }
     canvas.save();
     canvas.translate(
         _ghostPointScreen[0].round() + 0.5, _ghostPointScreen[1].round() + 0.5);
@@ -342,4 +346,10 @@ class BoneTool extends StageTool {
       canvas.restore();
     }
   }
+
+  @override
+  void endDrag() {}
+
+  @override
+  void updateDrag(Vec2D worldMouse) {}
 }

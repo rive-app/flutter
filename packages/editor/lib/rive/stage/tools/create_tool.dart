@@ -38,7 +38,7 @@ abstract class CreateTool extends StageTool with DraggableTool {
   @override
   void click(Artboard artboard, Vec2D worldMouse) {
     // This is null-conditionaled as some tools (like the arboard create tool)
-    // may not have an active artboard yet. 
+    // may not have an active artboard yet.
     _restoreAutoKey = artboard?.context?.suppressAutoKey();
   }
 
@@ -48,4 +48,7 @@ abstract class CreateTool extends StageTool with DraggableTool {
     stage.tool = AutoTool.instance;
     return true;
   }
+
+  @override
+  bool validateDrag() => validateClick();
 }

@@ -32,6 +32,7 @@ mixin DraggableTool {
     _lastWorldMouse = worldMouse;
   }
 
+  bool validateDrag();
   void updateDrag(Vec2D worldMouse);
   void endDrag();
 }
