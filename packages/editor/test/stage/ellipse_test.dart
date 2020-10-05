@@ -57,9 +57,11 @@ void main() {
       expect(ellipse.width, 200);
       expect(ellipse.height, 100);
 
-      // file.advance(0);
+      // Complete any scheduled operations on the stage.
+      stage.debounceAll(force: true);
 
       stage.tool = AutoTool.instance;
+      
       // Move mouse to trigger hover...
       stage.mouseMove(1, 150, 150);
       expect(stage.hoverItem, shape.stageItem);

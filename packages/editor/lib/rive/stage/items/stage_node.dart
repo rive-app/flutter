@@ -1,19 +1,12 @@
-import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
-import 'package:rive_core/bones/bone.dart';
-import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/bounds_delegate.dart';
-import 'package:rive_core/component.dart';
-import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
-import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_editor/rive/stage/items/stage_expandable.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -26,7 +19,10 @@ enum StageNodeDisplay { node, group }
 
 /// A Node component as it's drawn on the stage.
 class StageNode extends HideableStageItem<Node>
-    with BoundsDelegate, StageTransformableComponent<Node> {
+    with
+        BoundsDelegate,
+        StageTransformableComponent<Node>,
+        StageExpandable<Node> {
   @override
   ValueNotifier<bool> get isShownNotifier => stage.showNodesNotifier;
 
@@ -48,27 +44,28 @@ class StageNode extends HideableStageItem<Node>
   StageNodeDisplay get display =>
       obb == null ? StageNodeDisplay.node : StageNodeDisplay.group;
 
-  bool get shouldDrawBounds {
-    return obb != null && hasSelectionFlags && _boundsValid;
+  @override
+  bool computeBounds() {
+    if (!super.computeBounds()) {
+      // Failed to compute accumulated expandable bounds, we need to compute our
+      // own.
+      obb = null;
+      aabb = AABB
+          .fromValues(
+              component.worldTransform[4] - _halfNodeSize,
+              component.worldTransform[5] - _halfNodeSize,
+              component.worldTransform[4] + _halfNodeSize,
+              component.worldTransform[5] + _halfNodeSize)
+          .translate(component.artboard.originWorld);
+    }
+    return true;
   }
 
   @override
   bool intersectsRect(Float32List rectPoly) => true;
 
-  bool isExpanded = false;
-
   @override
   bool get isHoverSelectable => display == StageNodeDisplay.node;
-
-  Iterable<StageNode> get allParentNodes {
-    List<StageNode> nodes = [this];
-    for (var p = component.parent; p != null; p = p.parent) {
-      if (p.stageItem is StageNode) {
-        nodes.add(p.stageItem as StageNode);
-      }
-    }
-    return nodes;
-  }
 
   @override
   bool hitHiFi(Vec2D worldMouse) {
@@ -168,112 +165,8 @@ class StageNode extends HideableStageItem<Node>
   }();
 
   @override
-  int compareDrawOrderTo(StageItem other) {
-    if (other is StageNode) {
-      return other._hierarchyDepth.compareTo(_hierarchyDepth);
-    } else {
-      return super.compareDrawOrderTo(other);
-    }
-  }
-
-  Timer _updateBoundsTimer;
-  int _hierarchyDepth = 0;
-
-  void _computeBounds() {
-    if (component?.artboard == null) {
-      return;
-    }
-    // Compute hierarchy depth to use that to sort against other stage nodes
-    // (stage nodes higher in the hierarchy will hit first).
-    _hierarchyDepth = 0;
-    for (ContainerComponent p = component; p != null; p = p.parent) {
-      _hierarchyDepth++;
-    }
-
-    var artboard = component.artboard;
-    var worldTransform = component.worldTransform;
-
-    // Transform to get into local space of this node.
-    var inverseWorld = Mat2D();
-    if (!Mat2D.invert(inverseWorld, worldTransform)) {
-      Mat2D.identity(inverseWorld);
-    }
-
-    AABB accumulatedBounds;
-    component.forEachChild((component) {
-      // When we have images we may want to have a generic interface for getting
-      // the bounds, but for now we only have shapes.
-      switch (component.coreType) {
-        case ShapeBase.typeKey:
-          var shape = component as Shape;
-          var bounds = shape.computeBounds(inverseWorld);
-          if (accumulatedBounds == null) {
-            accumulatedBounds = bounds;
-          } else {
-            AABB.combine(accumulatedBounds, accumulatedBounds, bounds);
-          }
-          break;
-        case BoneBase.typeKey:
-        case RootBoneBase.typeKey:
-          var bone = component as Bone;
-          var localBoneTranslation = Vec2D.transformMat2D(
-              Vec2D(), bone.worldTranslation, inverseWorld);
-          var localBoneTip = Vec2D.transformMat2D(
-              Vec2D(), bone.tipWorldTranslation, inverseWorld);
-
-          if (accumulatedBounds == null) {
-            accumulatedBounds =
-                AABB.fromPoints([localBoneTranslation, localBoneTip]);
-          } else {
-            accumulatedBounds.expandToPoint(localBoneTranslation);
-            accumulatedBounds.expandToPoint(localBoneTip);
-          }
-          break;
-      }
-      return true;
-    });
-
-    if (accumulatedBounds == null ||
-        accumulatedBounds.isEmpty ||
-        accumulatedBounds.area == 0) {
-      // No accmulated bounds, show the node icon and use its bounds.
-      obb = null;
-      _hierarchyDepth = -1;
-      aabb = AABB
-          .fromValues(
-              component.worldTransform[4] - _halfNodeSize,
-              component.worldTransform[5] - _halfNodeSize,
-              component.worldTransform[4] + _halfNodeSize,
-              component.worldTransform[5] + _halfNodeSize)
-          .translate(component.artboard.originWorld);
-    } else {
-      // We won't show the icon as we have bounds,
-
-      // accumulatedBounds is in local node space so convert it to world for the
-      // AABB.
-      aabb = accumulatedBounds.transform(artboard.transform(worldTransform));
-
-      // Store an OBB so we can draw and use that for accurate hit detection.
-      obb = OBB(
-        bounds: accumulatedBounds,
-        transform: artboard.transform(component.worldTransform),
-      );
-    }
-    _boundsValid = true;
-  }
-
-  bool _boundsValid = false;
-  @override
-  void boundsChanged() {
-    _boundsValid = false;
-    _updateBoundsTimer?.cancel();
-    _updateBoundsTimer = Timer(
-        Duration(milliseconds: 50 + Random().nextInt(200)), _computeBounds);
-  }
-
-  @override
   void removedFromStage(Stage stage) {
-    _updateBoundsTimer?.cancel();
+    cancelBoundsChanged();
     super.removedFromStage(stage);
   }
 
@@ -285,20 +178,6 @@ class StageNode extends HideableStageItem<Node>
   @override
   void addedToStage(Stage stage) {
     super.addedToStage(stage);
-    _computeBounds();
-  }
-
-  static StageItem findNonExpanded(StageItem item) {
-    StageItem last = item;
-    for (var node = (item.component as Component).parentNode;
-        node != null;
-        node = node.parentNode) {
-      var stageNode = node.stageItem as StageNode;
-      if (stageNode.isExpanded) {
-        return last;
-      }
-      last = stageNode;
-    }
-    return last;
+    computeBounds();
   }
 }

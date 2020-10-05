@@ -98,10 +98,8 @@ abstract class Component extends ComponentBase<RiveFile>
   @mustCallSuper
   void visitAncestor(Component ancestor) {
     // -> editor-only
-    if (_parentNode == null &&
-        ancestor != this &&
-        ancestor.coreType == NodeBase.typeKey) {
-      _parentNode = ancestor as Node;
+    if (_parentNode == null && ancestor != this && ancestor is Node) {
+      _parentNode = ancestor;
     }
     // <- editor-only
   }

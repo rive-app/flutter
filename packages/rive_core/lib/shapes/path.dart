@@ -313,6 +313,13 @@ abstract class Path extends PathBase {
   // -> editor-only
   @override
   AABB get localBounds => _renderPath.preciseComputeBounds();
+  AABB computeBounds(Mat2D relativeTo) => preciseComputeBounds(
+        Mat2D.multiply(
+          Mat2D(),
+          relativeTo,
+          pathTransform,
+        ),
+      );
   AABB preciseComputeBounds(Mat2D transform) =>
       _renderPath.preciseComputeBounds(transform);
   bool get hasBounds => _renderPath.hasBounds;

@@ -44,6 +44,10 @@ void main() {
       expect(rect.width, 200);
       expect(rect.height, 100);
 
+
+      // Complete any scheduled operations on the stage.
+      stage.debounceAll(force: true);
+      
       // Select the rectangle with the mouse
       stage.mouseMove(1, 150, 150);
       stage.mouseDown(1, 150, 150);

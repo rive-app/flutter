@@ -9,8 +9,8 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/items/stage_expandable.dart';
 import 'package:rive_editor/rive/stage/items/stage_joint.dart';
-import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -27,7 +27,7 @@ class StageBone extends HideableStageItem<Bone>
   StageItem get selectionTarget {
     return ShortcutAction.deepClick.value
         ? this
-        : StageNode.findNonExpanded(this);
+        : StageExpandable.findNonExpanded(this);
   }
 
   @override

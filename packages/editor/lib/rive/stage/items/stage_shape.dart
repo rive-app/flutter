@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/rive/stage/items/stage_node.dart';
+import 'package:rive_editor/rive/stage/items/stage_expandable.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -12,34 +12,23 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageShape extends StageItem<Shape>
-    with BoundsDelegate, StageTransformableComponent<Shape> {
+    with
+        BoundsDelegate,
+        StageTransformableComponent<Shape>,
+        StageExpandable<Shape> {
   @override
   void addedToStage(Stage stage) {
     super.addedToStage(stage);
-    boundsChanged();
+    computeBounds();
   }
 
   @override
-  StageItem get selectionTarget =>
-      ShortcutAction.deepClick.value ? this : StageNode.findNonExpanded(this);
+  bool get isHoverSelectable => !isExpanded;
 
   @override
-  void boundsChanged() {
-    var artboard = component.artboard;
-    // We could make an artboardBounds getter on the component, but we should
-    // try to keep the component's logic to what will actually be necessary in a
-    // runtime (this may not be entirely possible, but this one is definitely
-    // not necessary at runtime).
-    // aabb = artboard.transformBounds(component.bounds);
-
-    aabb = artboard.transformBounds(component.worldBounds);
-
-    // Let's also set the obb.
-    obb = OBB(
-      bounds: component.localBounds,
-      transform: artboard.transform(component.worldTransform),
-    );
-  }
+  StageItem get selectionTarget => ShortcutAction.deepClick.value
+      ? this
+      : StageExpandable.findNonExpanded(this);
 
   /// Do a high fidelity hover hit check against the actual path geometry.
   @override
@@ -76,6 +65,12 @@ class StageShape extends StageItem<Shape>
     canvas.drawPath(worldPath, StageItem.selectedPaint);
 
     canvas.restore();
+  }
+
+  @override
+  void removedFromStage(Stage stage) {
+    cancelBoundsChanged();
+    super.removedFromStage(stage);
   }
 
   @override

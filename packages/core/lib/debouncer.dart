@@ -4,7 +4,15 @@ import 'package:core/debounce.dart';
 abstract class Debouncer {
   void onNeedsDebounce();
   final Map<DebounceCallback, DateTime> _debounce = {};
-  bool debounce(DebounceCallback call, {Duration duration = Duration.zero}) {
+
+  /// Call to debounce to ensure high frequency events get processed only once.
+  /// Set [reset] to true to keep debouncing as events keep coming in. Set
+  /// [reset] to false to ensure compute happens every [duration].
+  bool debounce(
+    DebounceCallback call, {
+    Duration duration = Duration.zero,
+    bool reset = false,
+  }) {
     if (_debounce.containsKey(call)) {
       return false;
     }
@@ -23,7 +31,7 @@ abstract class Debouncer {
     return false;
   }
 
-  bool debounceAll() {
+  bool debounceAll({bool force = false}) {
     if (_debounce.isEmpty) {
       return false;
     }
@@ -31,7 +39,7 @@ abstract class Debouncer {
     var remove = <DebounceCallback>[];
     var now = DateTime.now();
     _debounce.forEach((key, value) {
-      if (value.isBefore(now)) {
+      if (force || value.isBefore(now)) {
         remove.add(key);
       }
     });

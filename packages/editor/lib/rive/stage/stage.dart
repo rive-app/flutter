@@ -37,9 +37,11 @@ import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_ellipse.dart';
+import 'package:rive_editor/rive/stage/items/stage_expandable.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
+import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_points_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_radial_gradient.dart';
@@ -534,15 +536,15 @@ class Stage extends Debouncer {
     _sendMouseMoveToTool();
   }
 
-  final List<StageNode> _allExpandedNodes = [];
+  final List<StageExpandable> _allExpanded = [];
   StageItem _lastMouseUpHit;
   DateTime _lastUpTime = DateTime.now();
 
   void clearExpandedNodes() {
-    for (final node in _allExpandedNodes) {
+    for (final node in _allExpanded) {
       node.isExpanded = false;
     }
-    _allExpandedNodes.clear();
+    _allExpanded.clear();
   }
 
   void mouseDown(int button, double x, double y) {
@@ -710,20 +712,21 @@ class Stage extends Debouncer {
       if (isDoubleClick &&
           _mouseDownHit != null &&
           _mouseDownHit == _lastMouseUpHit) {
-        if (_mouseDownHit is StageNode) {
+        if (_mouseDownHit is StageExpandable) {
           clearExpandedNodes();
-          _allExpandedNodes.addAll((_mouseDownHit as StageNode).allParentNodes);
-          for (final node in _allExpandedNodes) {
+          _allExpanded
+              .addAll((_mouseDownHit as StageExpandable).allParentExpandables);
+          for (final node in _allExpanded) {
             node.isExpanded = true;
           }
 
           _updateHover();
           // The expansion caused something else to be hovered, select it.
           if (_hoverItem != _mouseDownHit) {
-            file.select(StageNode.findNonExpanded(_hoverItem));
+            file.select(StageExpandable.findNonExpanded(_hoverItem));
           }
           markNeedsRedraw();
-        } else if (_mouseDownHit is StageShape) {
+        } else if (_mouseDownHit is StagePath) {
           file.vertexEditor.activateForSelection(recursivePaths: true);
         }
       } else if (isDoubleClick && tool is AutoTool) {
@@ -837,18 +840,23 @@ class Stage extends Debouncer {
     }
 
     // Validate that the selection is in the exansion otherwise clear it.
-
-    HashSet<StageNode> parentNodes = HashSet<StageNode>();
+    HashSet<StageExpandable> parentNodes = HashSet<StageExpandable>();
     for (final item in file.selection.items) {
-      if (item is StageItem<Component> && item.component?.parentNode != null) {
-        parentNodes.add(item.component.parentNode.stageItem as StageNode);
+      if (item is StageItem<Component> &&
+          item.component?.parentNode != null &&
+          // There's a case where the parentNode isn't necessarily backed by an
+          // expandable StageItem (Vertices are inside of Paths, Paths do not
+          // have Expandable mixed into their StageItem because the Path
+          // launched the vertex editor when it is double clicked on)
+          item.component.parentNode.stageItem is StageExpandable) {
+        parentNodes.add(item.component.parentNode.stageItem as StageExpandable);
       }
     }
     clearExpandedNodes();
-    for (final node in parentNodes) {
-      _allExpandedNodes.addAll(node.allParentNodes);
+    for (final expandable in parentNodes) {
+      _allExpanded.addAll(expandable.allParentExpandables);
     }
-    for (final node in _allExpandedNodes) {
+    for (final node in _allExpanded) {
       node.isExpanded = true;
     }
     // TODO: Maybe only update if expanded changed?

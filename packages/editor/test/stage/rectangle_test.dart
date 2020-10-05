@@ -71,6 +71,9 @@ void main() {
       stage.mouseMove(1, 1000, 1000);
       expect(stage.hoverItem, null);
 
+      // Complete any scheduled operations on the stage.
+      stage.debounceAll(force: true);
+
       // Move mouse to trigger hover...
       stage.mouseMove(1, 150, 150);
       expect(stage.hoverItem, shape.stageItem);
