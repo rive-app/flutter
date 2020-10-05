@@ -560,43 +560,43 @@ class Stage extends Debouncer {
         debounceAccelerate(_updatePanIcon);
         if (_panHandCursor != null) {
           _isPanning = true;
-        } else if (isSelectionEnabled) {
-          if (_hoverItem != null) {
-            _mouseDownHit = _hoverItem;
+        } else if (isSelectionEnabled && _hoverItem != null) {
+          _mouseDownHit = _hoverItem;
 
-            _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
+          _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
-            if (_hoverItem != null &&
-                !file.selection.isCustomHandled(_hoverItem)) {
-              if (_hoverItem.isSelected) {
-                if (_mouseDownSelectAppend) {
-                  // If the hover item is already selected and we're holding
-                  // multi-select, then we need to toggle selection off for the
-                  // hoveritem.
-                  file.selection.deselect(_hoverItem);
-                }
-              } else {
-                file.select(_hoverItem,
-                    append: _mouseDownSelectAppend, skipHandlers: true);
+          if (_hoverItem != null &&
+              !file.selection.isCustomHandled(_hoverItem)) {
+            if (_hoverItem.isSelected) {
+              if (_mouseDownSelectAppend) {
+                // If the hover item is already selected and we're holding
+                // multi-select, then we need to toggle selection off for the
+                // hoveritem.
+                file.selection.deselect(_hoverItem);
               }
+            } else {
+              file.select(_hoverItem,
+                  append: _mouseDownSelectAppend, skipHandlers: true);
             }
           }
         }
 
-        // Always pipe clicks to tools or weird things may happen (see
-        // VectorPenTool's click). If for some reason we want to filter this
-        // based on whether _mouseDownHit or not, then consider altering logic
-        // in click of autoTool and adding a separate clickSelection callback on
-        // the tools so tools like the PenTool can still track the intention of
-        // a click occurred. if (_mouseDownHit == null) {
-        _clickTool = tool;
-        if (tool.validateClick()) {
-          final artboard = activeArtboard;
-          tool.click(
-              artboard,
-              artboard == null
-                  ? _worldMouse
-                  : tool.mouseWorldSpace(artboard, _worldMouse));
+        if (!_isPanning) {
+          // Always pipe clicks when not panning to tools or weird things may
+          // happen (see VectorPenTool's click). If for some reason we want to
+          // filter clicks based on whether _mouseDownHit or not, then consider
+          // altering logic in click of autoTool and adding a separate
+          // clickSelection callback on the tools so tools like the PenTool can
+          // still track the intention of a click occurred.
+          _clickTool = tool;
+          if (tool.validateClick()) {
+            final artboard = activeArtboard;
+            tool.click(
+                artboard,
+                artboard == null
+                    ? _worldMouse
+                    : tool.mouseWorldSpace(artboard, _worldMouse));
+          }
         }
         break;
       case 2:
@@ -688,6 +688,7 @@ class Stage extends Debouncer {
   }
 
   void mouseUp(int button, double x, double y) {
+    var wasPanning = _isPanning;
     _dragInError = false;
     _isPanning = false;
     _rightClickHandCursor?.remove();
@@ -729,14 +730,8 @@ class Stage extends Debouncer {
         file.vertexEditor.deactivate();
       }
 
-      if (_mouseDownHit == null) {
+      if (_mouseDownHit == null && !wasPanning) {
         file.selection.clear();
-      } else {
-        // TODO: what's the case where we needed this? Luigi removed this for
-        // Node UX (command click was clearing).
-
-        // just select the hit item
-        // file.select(_mouseDownHit);
       }
     }
     _lastUpTime = DateTime.now();
