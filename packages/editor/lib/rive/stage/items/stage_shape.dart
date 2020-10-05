@@ -20,9 +20,8 @@ class StageShape extends StageItem<Shape>
   }
 
   @override
-  StageItem get selectionTarget {
-    return StageNode.findNonExpanded(this);
-  }
+  StageItem get selectionTarget =>
+      ShortcutAction.deepClick.value ? this : StageNode.findNonExpanded(this);
 
   @override
   void boundsChanged() {
@@ -95,7 +94,4 @@ class StageShape extends StageItem<Shape>
       path.stageItem.onSoloChanged(isSolo);
     }
   }
-
-  @override
-  bool get isSelectable => !ShortcutAction.deepClick.value;
 }
