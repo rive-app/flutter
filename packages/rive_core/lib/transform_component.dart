@@ -32,6 +32,16 @@ abstract class TransformComponent extends TransformComponentBase {
     _delegate?.boundsChanged();
   }
 
+  void recomputeParentExpandableBounds() {
+    for (ContainerComponent p = this; p != null; p = p.parent) {
+      if (p.isExpandable) {
+        // N.B. Hard assumption an expandable is a TransformComponent.
+        assert(p is TransformComponent);
+        (p as TransformComponent).markBoundsChanged();
+      }
+    }
+  }
+
   BoundsDelegate _delegate;
   @override
   void userDataChanged(dynamic from, dynamic to) {
@@ -267,7 +277,7 @@ abstract class TransformComponent extends TransformComponentBase {
       // -> editor-only
       drawRules.parentRules = rules;
       // <- editor-only
-      
+
       // ignore: parameter_assignments
       rules = drawRules;
       allRules.add(rules);

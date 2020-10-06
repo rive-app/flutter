@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 
-import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -42,7 +41,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
   // with constraints eventually).
   AABB _worldBounds;
   AABB _localBounds;
-  BoundsDelegate _delegate;
 
   @override
   AABB get worldBounds => _worldBounds ??= computeWorldBounds();
@@ -54,7 +52,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
   /// need to rebuild the cached bounds.
   void markBoundsDirty() {
     _worldBounds = _localBounds = null;
-    _delegate?.boundsChanged();
+    markBoundsChanged();
     for (final path in paths) {
       path.markBoundsDirty();
     }
@@ -97,17 +95,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
     // added/removed.
     artboard?.rebuildClippingShapeDependencies();
     return result;
-  }
-
-  @override
-  void onDirty(int mask) {
-    super.onDirty(mask);
-    if (dirt & ComponentDirt.path != 0) {
-      // When we receive path dirt, make sure to update any node in our
-      // hierarchy so that it can update its bounds (this is for edit time
-      // only), part of Node UX.
-      recomputeParentNodeBounds();
-    }
   }
   // <- editor-only
 
@@ -283,15 +270,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
       Mat2D.identity(toTransform);
     }
     return computeBounds(toTransform);
-  }
-
-  @override
-  void userDataChanged(dynamic from, dynamic to) {
-    if (to is BoundsDelegate) {
-      _delegate = to;
-    } else {
-      _delegate = null;
-    }
   }
   // <- editor-only
 

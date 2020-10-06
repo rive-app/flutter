@@ -251,13 +251,15 @@ abstract class StageItem<T> extends SelectableItem
           inWorldSpace: true,
           order: 1,
         ),
-        if (isSelected)
+        if (shouldDrawBounds)
           StageDrawPass(
             drawBounds,
             inWorldSpace: false,
             order: 10,
           ),
       ];
+
+  bool get shouldDrawBounds => isSelected;
 
   @override
   void draw(Canvas canvas, StageDrawPass pass) {}

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_editor/packed_icon.dart';
@@ -170,5 +171,62 @@ void main() {
     // Root bone should now be at (150, 150)
     expect(rootBone.x, 150);
     expect(rootBone.y, 150);
+  });
+
+  /// This test makes sure that when an artbord is deleted and the bone tool is
+  /// clicked over another artboard, that other artboard is activated just in
+  /// time to create the bone on that artboard.
+  test('Bone tool activates artboard', () async {
+    final file = await makeFile(); // also makes an artboard
+    final core = file.core;
+    final stage = file.stage;
+
+    var originalActiveArtboard = core.backboard.activeArtboard;
+    expect(originalActiveArtboard != null, true,
+        reason: 'an artboard should be active after makeFile');
+
+    Artboard secondArtboard;
+    core.batchAdd(() {
+      secondArtboard = Artboard()
+        ..name = 'Second Artboard'
+        ..x = 2000
+        ..y = 2000
+        ..width = 100
+        ..height = 100;
+
+      core.addObject(secondArtboard);
+    });
+    core.backboard.activeArtboard = secondArtboard;
+    core.captureJournalEntry();
+    expect(core.backboard.activeArtboard, secondArtboard);
+
+    core.backboard.activeArtboard.removeRecursive();
+    core.captureJournalEntry();
+    expect(core.backboard.activeArtboard, null,
+        reason: 'Deleting the active artboard leaves no artboard active.');
+
+    // select the bone tool
+    stage.tool = instance;
+
+    // click at (100, 100)
+    stage.mouseMove(1, 100, 100);
+    stage.mouseDown(1, 100, 100);
+    stage.mouseUp(1, 100, 100);
+
+    // click at (200, 200)
+    stage.mouseMove(1, 200, 200);
+    stage.mouseDown(1, 200, 200);
+    stage.mouseUp(1, 200, 200);
+
+    // the tool should still be the bone tool when mouse is released
+    expect(stage.tool, BoneTool.instance);
+
+    // we should now have a root bone
+    expect(core.objectsOfType<RootBone>().length, 1,
+        reason: 'a root bone should have been created');
+
+    expect(core.backboard.activeArtboard, originalActiveArtboard,
+        reason: 'First artboard has been re-activated as the bone tool '
+            'hovered and clicked on it.');
   });
 }

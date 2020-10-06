@@ -8,7 +8,9 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:utilities/dependency_sorter.dart';
 import 'package:utilities/tops.dart';
 export 'package:rive_core/src/generated/component_base.dart';
@@ -23,10 +25,19 @@ abstract class Component extends ComponentBase<RiveFile>
   dynamic _userData;
 
   // -> editor-only
-  Node _parentNode;
+  TransformComponent _parentExpandable;
+
+  bool get isExpandable {
+    switch (coreType) {
+      case NodeBase.typeKey:
+      case ShapeBase.typeKey:
+        return true;
+    }
+    return false;
+  }
 
   /// The most immediate parent of type node in the hierarchy.
-  Node get parentNode => _parentNode;
+  TransformComponent get parentExpandable => _parentExpandable;
 
   String get timelineName => name;
   // TODO: implement this so things can be renamed in the timeline if this
@@ -98,10 +109,12 @@ abstract class Component extends ComponentBase<RiveFile>
   @mustCallSuper
   void visitAncestor(Component ancestor) {
     // -> editor-only
-    if (_parentNode == null &&
+    if (_parentExpandable == null &&
         ancestor != this &&
-        ancestor.coreType == NodeBase.typeKey) {
-      _parentNode = ancestor as Node;
+        ancestor.isExpandable) {
+      // N.B. Hard assumption an expandable is a TransformComponent.
+      assert(ancestor is TransformComponent);
+      _parentExpandable = ancestor as TransformComponent;
     }
     // <- editor-only
   }
@@ -109,7 +122,7 @@ abstract class Component extends ComponentBase<RiveFile>
   /// Find the artboard in the hierarchy.
   bool resolveArtboard() {
     // -> editor-only
-    _parentNode = null;
+    _parentExpandable = null;
     // <- editor-only
     int sanity = maxTreeDepth;
     for (Component curr = this;

@@ -29,6 +29,13 @@ class ArtboardTool extends CreateTool {
   bool get inArtboardSpace => false;
 
   @override
+  bool validateClick() {
+    // Artboard tool can always be clicked, regardless of whether or not there's
+    // an artboard (see super.validateClick).
+    return true;
+  }
+
+  @override
   bool activate(Stage stage) {
     if (!super.activate(stage)) {
       return false;

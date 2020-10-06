@@ -42,6 +42,9 @@ void main() {
 
     final shape = core.objectsOfType<Shape>().first;
 
+    // Complete any scheduled operations on the stage.
+    stage.debounceAll(force: true);
+
     // Move the mouse over the rectangle
     // No hover if mouse isn't over anything
     stage.mouseMove(1, 150, 150);

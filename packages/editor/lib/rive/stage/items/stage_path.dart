@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path.dart' as core;
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/items/stage_expandable.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -44,11 +44,15 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
     return component.uiPath.contains(Offset(localMouse[0], localMouse[1]));
   }
 
+  @override
+  StageItem get selectionTarget => StageExpandable.findNonExpanded(this);
+
   /// A StagePath cannot be directly clicked on in the stage. It can be selected
   /// via the hierarchy. This is because clicking over a path effectively
   /// selects the shape (in the stage).
   @override
-  bool get isSelectable => ShortcutAction.deepClick.value;
+  bool get isSelectable =>
+      (component.shape.stageItem as StageExpandable).isExpanded;
 
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {
