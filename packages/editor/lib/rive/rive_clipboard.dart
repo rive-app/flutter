@@ -336,7 +336,7 @@ class _RiveHierarchyClipboard extends RiveClipboard {
                 object.parentId = pasteDestinationParent.id;
               } else {
                 var shape = ShapeTool.makeShape(targetArtboard, object as Path,
-                    appendToArtboard: false);
+                    addToParent: false);
                 shape.parentId = pasteDestinationParent.id;
                 var niceName = object.name
                     .replaceAll(RegExp('path', caseSensitive: false), '')
