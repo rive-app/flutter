@@ -32,6 +32,13 @@ abstract class ContainerComponent extends ContainerComponentBase {
     child.parent = this;
   }
 
+  void prependChild(Component child) {
+    // -> editor-only
+    children.moveToStart(child);
+    // <- editor-only
+    child.parent = this;
+  }
+
   @mustCallSuper
   void childAdded(Component child) {
     // -> editor-only

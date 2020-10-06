@@ -268,6 +268,19 @@ abstract class StageItem<T> extends SelectableItem
   void onSoloChanged(bool isSolo) {}
 
   void _drawBoundingRectangle(Canvas canvas, Mat2D transform, AABB bounds) {
+    var boundsPath = makeBoundsPath(transform, bounds);
+
+    canvas.drawPath(
+      boundsPath,
+      StageItem.boundsShadow,
+    );
+    canvas.drawPath(
+      boundsPath,
+      StageItem.boundsPaint,
+    );
+  }
+
+  static Path makeBoundsPath(Mat2D transform, AABB bounds) {
     var tl = Vec2D.transformMat2D(Vec2D(), bounds.topLeft, transform);
     var tr = Vec2D.transformMat2D(Vec2D(), bounds.topRight, transform);
     var br = Vec2D.transformMat2D(Vec2D(), bounds.bottomRight, transform);
@@ -279,15 +292,7 @@ abstract class StageItem<T> extends SelectableItem
       ..lineTo(br[0].roundToDouble() + 0.5, br[1].roundToDouble() + 0.5)
       ..lineTo(bl[0].roundToDouble() + 0.5, bl[1].roundToDouble() + 0.5)
       ..close();
-
-    canvas.drawPath(
-      boundsPath,
-      StageItem.boundsShadow,
-    );
-    canvas.drawPath(
-      boundsPath,
-      StageItem.boundsPaint,
-    );
+    return boundsPath;
   }
 
   void drawBounds(Canvas canvas, StageDrawPass drawPass) {
