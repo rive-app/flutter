@@ -28,7 +28,14 @@ abstract class StageExpandable<T extends Node> {
   bool _boundsValid = false;
 
   void boundsChanged() {
+    if (stage == null) {
+      // This can happen if items are deleted in one op and one dependent item
+      // tells the other to update its bounds while this item is also being
+      // deleted.
+      return;
+    }
     _boundsValid = false;
+
     stage.debounce(computeBounds,
         duration: Duration(
             milliseconds:
@@ -45,10 +52,8 @@ abstract class StageExpandable<T extends Node> {
 
   bool computeBounds() {
     if (component?.artboard == null) {
-      print('early out');
       return false;
     }
-
     var artboard = component.artboard;
     var worldTransform = component.worldTransform;
 
@@ -135,9 +140,9 @@ abstract class StageExpandable<T extends Node> {
 
   static StageItem findNonExpanded(StageItem item) {
     StageItem last = item;
-    for (var node = (item.component as Component).parentNode;
+    for (var node = (item.component as Component).parentExpandable;
         node != null;
-        node = node.parentNode) {
+        node = node.parentExpandable) {
       var stageExpandable = node.stageItem as StageExpandable;
       if (stageExpandable.isExpanded) {
         return last;

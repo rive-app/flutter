@@ -3,7 +3,6 @@ import 'package:core/core.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/draw_rules.dart';
 import 'package:rive_core/drawable.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 
 // -> editor-only
@@ -41,16 +40,6 @@ abstract class ContainerComponent extends ContainerComponentBase {
   }
 
   void childRemoved(Component child) {}
-
-  // -> editor-only
-  void recomputeParentNodeBounds() {
-    for (var p = this; p != null; p = p.parent) {
-      if (p.coreType == NodeBase.typeKey) {
-        (p as Node).markBoundsChanged();
-      }
-    }
-  }
-  // <- editor-only
 
   // Make sure that the current function can be applied to the current
   // [Component], before descending onto all the children.

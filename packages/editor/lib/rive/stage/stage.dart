@@ -840,20 +840,21 @@ class Stage extends Debouncer {
     }
 
     // Validate that the selection is in the exansion otherwise clear it.
-    HashSet<StageExpandable> parentNodes = HashSet<StageExpandable>();
+    HashSet<StageExpandable> parentExpandables = HashSet<StageExpandable>();
     for (final item in file.selection.items) {
       if (item is StageItem<Component> &&
-          item.component?.parentNode != null &&
-          // There's a case where the parentNode isn't necessarily backed by an
-          // expandable StageItem (Vertices are inside of Paths, Paths do not
-          // have Expandable mixed into their StageItem because the Path
+          item.component?.parentExpandable != null &&
+          // There's a case where the parentExpandable isn't necessarily backed
+          // by an expandable StageItem (Vertices are inside of Paths, Paths do
+          // not have Expandable mixed into their StageItem because the Path
           // launched the vertex editor when it is double clicked on)
-          item.component.parentNode.stageItem is StageExpandable) {
-        parentNodes.add(item.component.parentNode.stageItem as StageExpandable);
+          item.component.parentExpandable.stageItem is StageExpandable) {
+        parentExpandables
+            .add(item.component.parentExpandable.stageItem as StageExpandable);
       }
     }
     clearExpandedNodes();
-    for (final expandable in parentNodes) {
+    for (final expandable in parentExpandables) {
       _allExpanded.addAll(expandable.allParentExpandables);
     }
     for (final node in _allExpanded) {

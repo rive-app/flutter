@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/circle_constant.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -14,6 +15,7 @@ import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
+import 'package:rive_core/transform_component.dart';
 export 'package:rive_core/src/generated/shapes/path_base.dart';
 
 /// An abstract low level path that gets implemented by parametric and point
@@ -67,6 +69,21 @@ abstract class Path extends PathBase {
       _delegate = null;
     }
   }
+
+  // Recompute node bounds when parents change, for Node UX.
+  @override
+  void parentChanged(ContainerComponent from, ContainerComponent to) {
+    super.parentChanged(from, to);
+
+    // Let any old node parent know it needs to re-compute its bounds. Let new
+    // node parents know they need to recompute their bounds.
+    if (from is TransformComponent) {
+      from.recomputeParentExpandableBounds();
+    }
+    if (to is TransformComponent) {
+      to.recomputeParentExpandableBounds();
+    }
+  }
   // <- editor-only
 
   @override
@@ -91,11 +108,17 @@ abstract class Path extends PathBase {
     // We're no longer a child of the shape we may have been under, make sure to
     // let it know we're gone.
     _changeShape(null);
+    // -> editor-only
+    recomputeParentExpandableBounds();
+    // <- editor-only
     super.onRemoved();
   }
 
   @override
   void updateWorldTransform() {
+    // -> editor-only
+    recomputeParentExpandableBounds();
+    // <- editor-only
     super.updateWorldTransform();
     _shape?.pathChanged(this);
 
@@ -128,6 +151,10 @@ abstract class Path extends PathBase {
     addDirt(ComponentDirt.path);
     _isValid = false;
     _shape?.pathChanged(this);
+
+    // -> editor-only
+    recomputeParentExpandableBounds();
+    // <- editor-only
   }
 
   List<PathVertex> get vertices;
