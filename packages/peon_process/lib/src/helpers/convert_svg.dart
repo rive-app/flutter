@@ -542,14 +542,16 @@ Shape getClippingShape(
     ..name = clipPath.id
     ..x = 0
     ..y = 0;
-  // we do not do this here, as the color already contains this?
-  // ..opacity = drawableShape.style.groupOpacity;
 
   var composer = PathComposer();
   file.addObject(composer);
   file.addObject(clipShape);
   clipShape.appendChild(composer);
-  parent.artboard.appendChild(clipShape);
+
+  // Note: Clip Paths are extracted by our svg parser, and plucked out of the
+  //        svg hierarchy, we re-attach them to the main artboard, but we
+  //        may want to see about putting them back into their proper place
+  file.artboards.first.appendChild(clipShape);
 
   if (clipPath.transform != null) {
     // need to unpack the transform into rotation, scale and transform
