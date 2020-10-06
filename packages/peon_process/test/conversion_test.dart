@@ -35,8 +35,8 @@ void main() {
               xml.parseEvents(electricitySvgWithId), 'rive_key', svgPathFuncs)
           .parse();
       var output = createFromSvg(drawable);
-      expect(output.artboards.first.children.first.name, 'polygon_one');
-      expect(output.artboards.first.children.last.name, 'path_one');
+      expect(output.artboards.first.children.last.name, 'polygon_one');
+      expect(output.artboards.first.children.first.name, 'path_one');
     });
     test('Test filip', () async {
       var drawable = await SvgParserStateRived(
@@ -63,6 +63,29 @@ void main() {
           core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
       exporter.export();
     });
+
+    test('test clip test svg', () async {
+      var drawable = await SvgParserStateRived(
+              xml.parseEvents(clipTest), 'rive_key', svgPathFuncs)
+          .parse();
+
+      RiveFile _riveFile = createFromSvg(drawable);
+
+      var exporter = RuntimeExporter(
+          core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
+      exporter.export();
+    });
+    test('alt clip test svg', () async {
+      var drawable = await SvgParserStateRived(
+              xml.parseEvents(altClipTest), 'rive_key', svgPathFuncs)
+          .parse();
+
+      RiveFile _riveFile = createFromSvg(drawable);
+
+      var exporter = RuntimeExporter(
+          core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
+      exporter.export();
+    });
   });
 
   const flareRevisionFiles = [
@@ -80,7 +103,7 @@ void main() {
   ];
 
   void convertFlareRevision(String filename) {
-    // Make sure that resources are properly fetched when running tests 
+    // Make sure that resources are properly fetched when running tests
     // with VSCode or with /dev/test_all.sh
     final prefix = Directory.current.path.endsWith('/test') ? '..' : '.';
     final fileString =
