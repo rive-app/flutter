@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:hashids2/hashids2.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
@@ -14,6 +15,7 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/frame_debounce.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/platform/nomad.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/image_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -24,6 +26,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
+import 'package:slugify2/slugify.dart';
 
 enum HomeSection { files, notifications, community, recents, getStarted }
 
@@ -47,7 +50,14 @@ class Rive {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
   RiveClipboard _clipboard;
-  Rive({this.imageCache}) : api = RiveApi() {
+
+  final Nomad nomad;
+  final HashIds _hashIds;
+
+  Rive({this.imageCache})
+      : api = RiveApi(),
+        nomad = Nomad.make(),
+        _hashIds = HashIds(salt: 'pepper') {
     _focusNode = FocusNode(
         canRequestFocus: true,
         skipTraversal: true,
@@ -58,9 +68,43 @@ class Rive {
         });
 
     _filesApi = FileApi(api);
+
+    nomad.route('/files', _traveledHome);
+    nomad.route('/file/:name/:hash', _traveledFile);
   }
 
-  /// Available tabs in the editor
+  void _traveledHome(Trip trip) {
+    print("TRAVEL HOME");
+    _changeActiveTab(systemTab);
+  }
+
+  Future<void> _traveledFile(Trip trip) async {
+    print("TRAVEL FILE");
+    var name = trip.parameters['name'] as String;
+    var hash = trip.parameters['hash'] as String;
+    var ids = _hashIds.decode(hash);
+    if (ids.length == 2) {
+      int ownerId = ids[0];
+
+      var context =
+          await _openFile(File(fileOwnerId: ids[0], id: ids[1], name: name));
+
+      // Kind of sucky to need to get the name with this branch. Also sucky to
+      // get the name at all, but this allows it to work when deeplinked in.
+      if (ownerId == _me.ownerId) {
+        var details = await _filesApi.myFileDetails([ids[1]]);
+        if (details.length == 1) {
+          context.tabName = details[0].name;
+        }
+      } else {
+        var details = await _filesApi.teamFileDetails([ids[1]], ownerId);
+        if (details.length == 1) {
+          context.tabName = details[0].name;
+        }
+      }
+    }
+  }
+
   final List<RiveTabItem> fileTabs = [];
   final Event fileTabsChanged = Event();
 
@@ -73,6 +117,7 @@ class Rive {
 
   final RiveApi api;
   FileApi _filesApi;
+  Me _me;
 
   final RiveImageCache imageCache;
   FocusNode _focusNode;
@@ -94,9 +139,19 @@ class Rive {
       return;
     }
 
-    // Deal with current user (if any), or send to login page.
-    Plumber().getStream<Me>().listen(_onNewMe);
+    // Load user first time without subscribing yet as the first run does some
+    // special logic.
     await UserManager().loadMe();
+    var meStream = Plumber().getStream<Me>();
+    var firstMe = await meStream.first;
+    _onNewMe(firstMe, travel: false);
+    if(!nomad.makeFirstTrip()) {
+      // Attempt going to files page
+      nomad.travel('/files');
+    }
+
+    // Deal with current user (if any), or send to login page.
+    meStream.listen(_onNewMe);
 
     // Start the frame callback loop.
     SchedulerBinding.instance.addPersistentFrameCallback(_drawFrame);
@@ -121,7 +176,11 @@ class Rive {
     }
   }
 
-  void _onNewMe(Me me) {
+  void _onNewMe(Me me, {bool travel = true}) {
+    if (_me == me) {
+      return;
+    }
+    _me = me;
     if (me == null || me.isEmpty) {
       // Signed out.
       // Walk list backwards as we're removing elements.
@@ -145,7 +204,9 @@ class Rive {
 
     Settings.setString(Preferences.spectreToken, api.cookies['spectre']);
 
-    selectTab(systemTab);
+    if (travel) {
+      nomad.travel('/files');
+    }
   }
 
   void closeTab(RiveTabItem value) {
@@ -166,7 +227,12 @@ class Rive {
     fileTabsChanged.notify();
     if (value == selectedTab.value) {
       // TODO: make this nicer, maybe select the closest tab...
-      selectTab(fileTabs.isEmpty ? systemTab : fileTabs.last);
+      if (fileTabs.isEmpty) {
+        nomad.travel('/files');
+      } else {
+        var fileContext = fileTabs.last.file;
+        open(fileContext.file);
+      }
     }
 
     // This is kind of gross, but we do this to ensure the UI has had time to
@@ -190,6 +256,15 @@ class Rive {
 
   void selectTab(RiveTabItem value) {
     if (value == systemTab) {
+      print("SELECT TAB ONE");
+      nomad.travel('/files');
+    } else {
+      open(value.file.file);
+    }
+  }
+
+  void _changeActiveTab(RiveTabItem value) {
+    if (value == systemTab) {
       _changeActiveFile(null);
     } else if (value.file != null) {
       _changeActiveFile(value.file);
@@ -202,9 +277,9 @@ class Rive {
       severity: CrumbSeverity.info,
       data: value.file != null
           ? {
-              "ownerId": value.file.ownerId.toString(),
-              "fileId": value.file.fileId.toString(),
-              "name": value.file.name.value,
+              'ownerId': value.file.ownerId.toString(),
+              'fileId': value.file.fileId.toString(),
+              'name': value.file.name.value,
             }
           : {},
     );
@@ -349,8 +424,16 @@ class Rive {
     // TODO: save open tabs
   }
 
+  void open(File file) {
+    var slugger = Slugify();
+    nomad.travel('/file/${slugger.slugify(file.name)}/${_hashIds.encodeList([
+      file.ownerId,
+      file.id
+    ])}');
+  }
+
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<OpenFileContext> open(File file, {bool makeActive = true}) async {
+  Future<OpenFileContext> _openFile(File file, {bool makeActive = true}) async {
     // see if it's already open
     var openFileTab = fileTabs.firstWhere(
         (tab) =>
