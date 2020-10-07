@@ -339,7 +339,7 @@ packages:
       name: js
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.3-nullsafety"
+    version: "0.6.3-nullsafety.1"
   local_data:
     dependency: transitive
     description:
@@ -479,7 +479,7 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.10.0-nullsafety"
+    version: "1.10.0-nullsafety.1"
   platform:
     dependency: transitive
     description:
@@ -507,7 +507,7 @@ packages:
       name: pool
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.0-nullsafety"
+    version: "1.5.0-nullsafety.1"
   process:
     dependency: transitive
     description:
@@ -535,7 +535,7 @@ packages:
       path: "../../submodules/rive-flutter"
       relative: true
     source: path
-    version: "0.6.1"
+    version: "0.6.2"
   rive_api:
     dependency: "direct main"
     description:
@@ -652,14 +652,14 @@ packages:
       name: source_map_stack_trace
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0-nullsafety.1"
+    version: "2.1.0-nullsafety.2"
   source_maps:
     dependency: transitive
     description:
       name: source_maps
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.10.10-nullsafety"
+    version: "0.10.10-nullsafety.1"
   source_span:
     dependency: transitive
     description:
@@ -899,5 +899,5 @@ packages:
     source: hosted
     version: "2.2.0"
 sdks:
-  dart: ">=2.10.0-110 <2.10.0"
+  dart: ">=2.10.0-110 <2.11.0"
   flutter: ">=1.20.0 <2.0.0"
