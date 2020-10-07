@@ -107,6 +107,18 @@ class FileApi {
     }
   }
 
+  /// This is a hack, kill me soon.
+  Future<int> teamIdFromProjectId(int maybeProjectId) async {
+    final res = await api.get('${api.host}/api/projects/$maybeProjectId/team');
+
+    try {
+      return int.tryParse(res.body);
+    } on FormatException catch (e) {
+      _log.severe('Error formatting teamIdFromProjectId response', e);
+    }
+    return 0;
+  }
+
   Future<FileDM> createFile(int folderId, [int projectId]) async {
     FileDM newFile;
     if (projectId != null) {

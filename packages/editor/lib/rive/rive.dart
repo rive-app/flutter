@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:hashids2/hashids2.dart';
+import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
@@ -27,6 +28,8 @@ import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 import 'package:slugify2/slugify.dart';
+
+final _log = Logger('Rive');
 
 enum HomeSection { files, notifications, community, recents, getStarted }
 
@@ -71,37 +74,107 @@ class Rive {
 
     nomad.route('/files', _traveledHome);
     nomad.route('/file/:name/:hash', _traveledFile);
+    nomad.route('/login', _traveledLogin);
   }
 
-  void _traveledHome(Trip trip) {
-    print("TRAVEL HOME");
+  void _traveledLogin(Trip trip) {
+    Plumber().message<AppState>(AppState.login);
+  }
+
+  Future<bool> _papersPlease() async {
+    // Don't go to the home section if we're not signed in.
+    var meStream = Plumber().getStream<Me>();
+    var me = await meStream.first;
+    if (!me.signedIn) {
+      nomad.travel('/login', replace: true);
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _traveledHome(Trip trip) async {
+    // Don't go to the home section if we're not signed in.
+    if (!await _papersPlease()) {
+      return;
+    }
+    Plumber().message<AppState>(AppState.home);
     _changeActiveTab(systemTab);
   }
 
   Future<void> _traveledFile(Trip trip) async {
-    print("TRAVEL FILE");
+    if (!await _papersPlease()) {
+      return;
+    }
+
     var name = trip.parameters['name'] as String;
     var hash = trip.parameters['hash'] as String;
     var ids = _hashIds.decode(hash);
-    if (ids.length == 2) {
-      int ownerId = ids[0];
+    File file;
+    switch (ids.length) {
+      case 2:
+        file = File(fileOwnerId: ids[0], id: ids[1], name: name);
+        break;
+      case 3:
+        file =
+            File(ownerId: ids[0], fileOwnerId: ids[1], id: ids[2], name: name);
+        break;
+      default:
+        break;
+    }
+    if (file != null) {
+      // Make sure we're on the right view.
+      Plumber().message<AppState>(AppState.home);
 
-      var context =
-          await _openFile(File(fileOwnerId: ids[0], id: ids[1], name: name));
+      var context = await _openFile(file);
+      // Kind of sucky to need to get the real file name. Also sucky to get the
+      // name at all, but this allows it to work when deeplinked in.
 
-      // Kind of sucky to need to get the name with this branch. Also sucky to
-      // get the name at all, but this allows it to work when deeplinked in.
-      if (ownerId == _me.ownerId) {
-        var details = await _filesApi.myFileDetails([ids[1]]);
-        if (details.length == 1) {
-          context.tabName = details[0].name;
+      FileDM fileDetails;
+      // Poopy way to deal with #1427
+      try {
+        if (file.ownerId == _me.ownerId) {
+          var details = await _filesApi.myFileDetails([file.id]);
+          if (details.length == 1) {
+            fileDetails = details.first;
+          }
+        } else {
+          var details =
+              await _filesApi.teamFileDetails([file.id], file.ownerId);
+          if (details.length == 1) {
+            fileDetails = details.first;
+          }
         }
-      } else {
-        var details = await _filesApi.teamFileDetails([ids[1]], ownerId);
-        if (details.length == 1) {
-          context.tabName = details[0].name;
+      } on Exception catch (_) {
+        // We got an error attempting to load file metadata, let's see if it's
+        // because the ownerId we have for the file is actually a project owner
+        // id. Because the teamFileDetails needs a team owner id, we can try to
+        // resolve that and retry to load the data with that id.
+        try {
+          var teamOwnerId = await _filesApi.teamIdFromProjectId(file.ownerId);
+          var details = await _filesApi.teamFileDetails([file.id], teamOwnerId);
+          if (details.length == 1) {
+            fileDetails = details.first;
+          }
+        } on Exception catch (error) {
+          _log.warning('error: $error when trying to load file details');
         }
       }
+
+      if (fileDetails != null) {
+        context.tabName = fileDetails.name;
+      } else {
+        // Failed to load details for this file, presumalby we don't have access
+        // to it.
+        var tab = fileTabs.firstWhere((tab) => tab.file == context,
+            orElse: () => null);
+        if (tab != null) {
+          closeTab(tab);
+        }
+      }
+    } else {
+      // Bad route, just travel home (we know we're logged in and replace
+      // previous destination).
+      nomad.travel('/files', replace: true);
     }
   }
 
@@ -145,9 +218,12 @@ class Rive {
     var meStream = Plumber().getStream<Me>();
     var firstMe = await meStream.first;
     _onNewMe(firstMe, travel: false);
-    if(!nomad.makeFirstTrip()) {
-      // Attempt going to files page
-      nomad.travel('/files');
+    if (!nomad.makeFirstTrip()) {
+      if (firstMe.signedIn) {
+        nomad.travel('/files', replace: true);
+      } else {
+        nomad.travel('/login', replace: true);
+      }
     }
 
     // Deal with current user (if any), or send to login page.
@@ -188,13 +264,13 @@ class Rive {
         closeTab(fileTabs[i]);
       }
 
-      Plumber().message<AppState>(AppState.login);
+      if (travel) {
+        nomad.travel('/login');
+      }
       return;
     }
 
     // Logging in.
-    Plumber().message<AppState>(AppState.home);
-
     // Track the currently logged in user. Any error report will include the
     // currently logged in user for context.
     ErrorLogger.instance.user = ErrorLogUser(
@@ -256,7 +332,6 @@ class Rive {
 
   void selectTab(RiveTabItem value) {
     if (value == systemTab) {
-      print("SELECT TAB ONE");
       nomad.travel('/files');
     } else {
       open(value.file.file);
@@ -426,10 +501,17 @@ class Rive {
 
   void open(File file) {
     var slugger = Slugify();
-    nomad.travel('/file/${slugger.slugify(file.name)}/${_hashIds.encodeList([
-      file.ownerId,
-      file.id
-    ])}');
+
+    // Ugh something to do with fileOwnerId and ownerId nuances (need to ask
+    // Max).
+    List<int> args;
+    if (file.ownerId == file.fileOwnerId) {
+      args = [file.ownerId, file.id];
+    } else {
+      args = [file.ownerId, file.fileOwnerId, file.id];
+    }
+    nomad.travel(
+        '/file/${slugger.slugify(file.name)}/${_hashIds.encodeList(args)}');
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.

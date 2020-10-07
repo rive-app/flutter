@@ -23,7 +23,7 @@ app.use("/", function (req, res, next) {
             }
         });
     } else {
-console.log("NO EXIST", path + req.path);
+
         res.sendFile('/index.html', options, function (err) {
             if (err) {
                 next(err);
@@ -34,7 +34,7 @@ console.log("NO EXIST", path + req.path);
     }
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3004;
 app.listen(port, function () {
     console.log("web dev listening on port " + port + "!");
 });

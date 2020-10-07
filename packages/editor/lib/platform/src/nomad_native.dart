@@ -19,7 +19,9 @@ class NomadNative extends Nomad {
     if (replace) {
       index -= 1;
     }
-    _log.removeRange(index, _log.length);
+    if (_log.isNotEmpty) {
+      _log.removeRange(index, _log.length);
+    }
     _log.add(trip);
     _logIndex = _log.length;
 
@@ -30,7 +32,6 @@ class NomadNative extends Nomad {
 
   @override
   void go(int steps) {
-
     var index = _logIndex + steps - 1;
     if (index >= 0 && index < _log.length) {
       _logIndex = index;
