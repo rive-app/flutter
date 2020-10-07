@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -19,12 +20,18 @@ import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/ellipse.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
+import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
+import 'package:rive_core/shapes/paint/linear_gradient.dart'
+    as rive_linear_gradient;
+import 'package:rive_core/shapes/paint/radial_gradient.dart'
+    as rive_radial_gradient;
 import 'package:xml/xml_events.dart' hide parseEvents;
 
 typedef _PathFunc = Path Function(List<XmlEventAttribute> attributes);
@@ -376,7 +383,6 @@ void addArtboard(RiveFile file, DrawableRoot root) {
     file.addObject(artboard);
   });
 
-  // root.definitions.
   file.batchAdd(() {
     for (var i = root.children.length - 1; i >= 0; i--) {
       addChild(root, file, artboard, root.children[i], clippingRefs);
@@ -431,6 +437,19 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
             fill.blendMode = drawableShape.style.blendMode;
             node.blendMode = drawableShape.style.blendMode;
           }
+          if (drawableShape.style.fill.shader != null) {
+            // we *should* have a gradient
+            var gradientRef = drawableShape.attributes
+                .firstWhere((element) => element.name == 'fill')
+                .value;
+
+            addGradient(
+              root.definitions.getGradient(gradientRef),
+              file,
+              fill,
+              drawableShape.bounds,
+            );
+          }
         }
         if (drawableShape.style.stroke != null &&
             drawableShape.style.stroke.color != null) {
@@ -456,12 +475,13 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
 
         if (!clippingRefs.containsKey(clipAttr)) {
           clippingRefs[clipAttr] = getClippingShape(
-              drawableShape.style.clipPath,
-              root,
-              file,
-              parent,
-              drawable,
-              clippingRefs);
+            drawableShape.style.clipPath,
+            root,
+            file,
+            parent,
+            drawable,
+            clippingRefs,
+          );
         }
 
         var clipper = ClippingShape();
@@ -507,12 +527,13 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
 
         if (!clippingRefs.containsKey(clipAttr)) {
           clippingRefs[clipAttr] = getClippingShape(
-              drawableGroup.style.clipPath,
-              root,
-              file,
-              parent,
-              drawable,
-              clippingRefs);
+            drawableGroup.style.clipPath,
+            root,
+            file,
+            parent,
+            drawable,
+            clippingRefs,
+          );
         }
 
         var clipper = ClippingShape();
@@ -522,7 +543,13 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
       }
 
       for (var i = drawableGroup.children.length - 1; i >= 0; i--) {
-        addChild(root, file, node, drawableGroup.children[i], clippingRefs);
+        addChild(
+          root,
+          file,
+          node,
+          drawableGroup.children[i],
+          clippingRefs,
+        );
       }
 
       break;
@@ -531,13 +558,89 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
   }
 }
 
+void addGradient(
+  DrawableGradient gradient,
+  RiveFile file,
+  ShapePaint paint,
+  Rect bounds,
+) {
+  rive_linear_gradient.LinearGradient tmp;
+
+  double _translate(
+      double originalValue, double scaleValue, double translateValue) {
+    return translateValue + originalValue * scaleValue;
+  }
+
+  if (gradient is DrawableLinearGradient) {
+    tmp = rive_linear_gradient.LinearGradient();
+
+    tmp.startX = _translate(
+      gradient.from.dx,
+      bounds.width,
+      bounds.left,
+    );
+    tmp.startY = _translate(
+      gradient.from.dy,
+      bounds.height,
+      bounds.top,
+    );
+    tmp.endX = _translate(
+      gradient.to.dx,
+      bounds.width,
+      bounds.left,
+    );
+    tmp.endY = _translate(
+      gradient.to.dy,
+      bounds.height,
+      bounds.top,
+    );
+  } else if (gradient is DrawableRadialGradient) {
+    tmp = rive_radial_gradient.RadialGradient();
+
+    var offset = sqrt(pow(gradient.radius, 2) / 2);
+
+    tmp.startX = _translate(
+      gradient.center.dx,
+      bounds.width,
+      bounds.left,
+    );
+    tmp.startY = _translate(
+      gradient.center.dy,
+      bounds.height,
+      bounds.top,
+    );
+    tmp.endX = _translate(
+      gradient.center.dx - offset,
+      bounds.width,
+      bounds.left,
+    );
+    tmp.endY = _translate(
+      gradient.center.dy - offset,
+      bounds.height,
+      bounds.top,
+    );
+  }
+  file.addObject(tmp);
+  var i = 0;
+  while (i < gradient.offsets.length) {
+    var stop = GradientStop();
+    stop.color = gradient.colors[i];
+    stop.position = gradient.offsets[i];
+    file.addObject(stop);
+    tmp.appendChild(stop);
+    i += 1;
+  }
+  paint.appendChild(tmp);
+}
+
 Shape getClippingShape(
-    ClipPath clipPath,
-    DrawableRoot root,
-    RiveFile file,
-    ContainerComponent parent,
-    Drawable drawable,
-    Map<String, Shape> clippingRefs) {
+  ClipPath clipPath,
+  DrawableRoot root,
+  RiveFile file,
+  ContainerComponent parent,
+  Drawable drawable,
+  Map<String, Shape> clippingRefs,
+) {
   var clipShape = Shape()
     ..name = clipPath.id
     ..x = 0

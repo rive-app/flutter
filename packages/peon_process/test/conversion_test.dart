@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
 import 'package:peon_process/src/helpers/flare_to_rive.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
+import 'package:rive_core/shapes/paint/linear_gradient.dart';
+import 'package:rive_core/shapes/paint/radial_gradient.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
 import 'package:flutter_svg/src/svg/parser_state.dart';
 
@@ -86,6 +89,37 @@ void main() {
           core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
       exporter.export();
     });
+    test('gradient test svg', () async {
+      var drawable = await SvgParserStateRived(
+              xml.parseEvents(gradientTest), 'rive_key', svgPathFuncs)
+          .parse();
+
+      RiveFile _riveFile = createFromSvg(drawable);
+      expect(_riveFile.artboards.first.children.length, 3);
+
+      var linearGradients =
+          getChildrenOfType<LinearGradient>(_riveFile.artboards.first).toList();
+      var radialGradients =
+          getChildrenOfType<RadialGradient>(_riveFile.artboards.first).toList();
+
+      // (all radial gradients are also linear gradiens)
+      expect(linearGradients.length, 3);
+      expect(radialGradients.length, 2);
+      expect(linearGradients.first.startX, 10.0);
+      expect(linearGradients.first.startY, 230.0);
+      expect(linearGradients.first.endX, 10.0);
+      expect(linearGradients.first.endY, 330.0);
+
+      expect(radialGradients.first.startX, 35.0);
+      expect(radialGradients.first.startY, 145.0);
+
+      expect(radialGradients[1].startX, 60.0);
+      expect(radialGradients[1].startY, 60.0);
+
+      var exporter = RuntimeExporter(
+          core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
+      exporter.export();
+    });
   });
 
   const flareRevisionFiles = [
@@ -124,4 +158,18 @@ void main() {
   test('Converts all test files', () {
     flareRevisionFiles.forEach(convertFlareRevision);
   });
+}
+
+Iterable<T> getChildrenOfType<T>(ContainerComponent component) sync* {
+  var queue = <ContainerComponent>[component];
+  while (queue.isNotEmpty) {
+    var next = queue.removeAt(0);
+    for (var i = 0; i < next.children.length; i++) {
+      var child = next.children[i];
+      if (child is ContainerComponent) {
+        queue.add(child);
+      }
+      if (child is T) yield child as T;
+    }
+  }
 }
