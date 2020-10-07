@@ -615,7 +615,14 @@ class OpenFileContext with RiveFileDelegate {
         }
         break;
       default:
-        stateChanged.notify();
+        // This happens on disconnect, we should not notify if we're
+        // intentionally disconnecting to sleep (we don't want to darken the
+        // screen as soon as we disconnect for sleep). We want the user to be
+        // able to refer back to this window and see unaltered content until
+        // they interact with it again.
+        if (_state != OpenFileState.sleeping) {
+          stateChanged.notify();
+        }
         break;
     }
   }
