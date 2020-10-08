@@ -356,8 +356,21 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     return success;
   }
 
+  bool get isCardInputValid {
+    // gotta run all checks individually, cant just do &&
+    // as that will early out if one is false
+    isCardNrValid;
+    isZipValid;
+    isExpirationValid;
+    isCcvValid;
+    return isCardNrValid && isZipValid && isExpirationValid && isCcvValid;
+  }
+
   Future<bool> _updateCard() async {
     // Track that everything went fine.
+    if (!isCardInputValid) {
+      return false;
+    }
     bool success = false;
     try {
       var publicKey = await StripeApi(api).getStripePublicKey();
