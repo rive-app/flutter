@@ -17,9 +17,11 @@ class SettingsHeader extends StatefulWidget {
   final String avatarPath;
   final bool avatarUploading;
   final VoidCallback changeAvatar;
+  final bool isTeam;
 
   const SettingsHeader(
       {@required this.name,
+      @required this.isTeam,
       this.teamSize,
       this.avatarPath,
       this.changeAvatar,
@@ -30,7 +32,6 @@ class SettingsHeader extends StatefulWidget {
 }
 
 class _SettingsHeaderState extends State<SettingsHeader> {
-  bool get isTeam => widget.teamSize > 0;
   bool _isSigningOut = false;
 
   Widget _trailing() {
@@ -38,13 +39,13 @@ class _SettingsHeaderState extends State<SettingsHeader> {
     final textStyles = theme.textStyles;
     final colors = theme.colors;
     final teamSize = widget.teamSize;
-    if (isTeam) {
+    if (widget.isTeam) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            '$teamSize ${teamSize > 1 ? 'members' : 'member'}',
+            '$teamSize ${teamSize != 1 ? 'paid members' : 'paid member'}',
             style: textStyles.fileGreyTextLarge
                 .copyWith(fontSize: 13, height: 1.3),
           ),
@@ -112,7 +113,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
                   widget.name,
                   style: textStyles.fileGreyTextLarge,
                 ),
-                if (isTeam) ...[
+                if (widget.isTeam) ...[
                   const SizedBox(height: 2),
                   Text(
                     'Studio Plan',

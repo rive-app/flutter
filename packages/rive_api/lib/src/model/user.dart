@@ -42,6 +42,7 @@ class User extends Owner {
 }
 
 class TeamMember extends Owner {
+  final bool free;
   const TeamMember({
     @required int ownerId,
     @required String name,
@@ -49,6 +50,7 @@ class TeamMember extends Owner {
     @required String avatarUrl,
     @required this.status,
     @required this.permission,
+    @required this.free,
   }) : super(ownerId, name, username, avatarUrl);
 
   final TeamInviteStatus status;
@@ -58,13 +60,13 @@ class TeamMember extends Owner {
       teamMembers.map((teamMember) => TeamMember.fromDM(teamMember)).toList();
 
   factory TeamMember.fromDM(TeamMemberDM teamMember) => TeamMember(
-        ownerId: teamMember.ownerId,
-        name: teamMember.name,
-        username: teamMember.username,
-        avatarUrl: teamMember.avatarUrl,
-        status: teamMember.status,
-        permission: TeamRoleExtension.teamRoleFromString(teamMember.permission),
-      );
+      ownerId: teamMember.ownerId,
+      name: teamMember.name,
+      username: teamMember.username,
+      avatarUrl: teamMember.avatarUrl,
+      status: teamMember.status,
+      permission: TeamRoleExtension.teamRoleFromString(teamMember.permission),
+      free: teamMember.free);
 
   @override
   String toString() =>

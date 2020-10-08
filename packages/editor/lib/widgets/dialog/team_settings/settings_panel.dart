@@ -157,6 +157,7 @@ class _SettingsState extends State<Settings> {
       final teamMembers = Plumber().peek<List<TeamMember>>(team.hashCode);
       return teamMembers
           .where((element) => element.status == TeamInviteStatus.accepted)
+          .where((element) => !element.free)
           .length;
     }
 
@@ -184,6 +185,7 @@ class _SettingsState extends State<Settings> {
                       : newAvatarPath,
                   changeAvatar: changeAvatar,
                   teamSize: teamSize,
+                  isTeam: widget.owner is Team,
                 ),
                 Separator(color: colors.fileLineGrey),
                 Expanded(child: screens[_selectedIndex].builder(context)),
