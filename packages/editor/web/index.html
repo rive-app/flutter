@@ -7,6 +7,8 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Rive app">
 
+  <base href="/" target="_self">
+
   <link rel="icon" type="image/png" sizes="32x32" href="https://rive.app/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="https://rive.app/favicon-16x16.png">
 
@@ -48,13 +50,13 @@
         switch (event.keyCode) {
           case 187: // '=' for zoom in
           case 189: // '-' for zoom out
-          case 90:  // 'z' for preventing opening a previous tab in Safari
-          // Needs to be removed as it kills text copy
-          // case 67:  // 'c' for preventing negative beep on Safari
+          case 90: // 'z' for preventing opening a previous tab in Safari
+            // Needs to be removed as it kills text copy
+            // case 67:  // 'c' for preventing negative beep on Safari
             event.preventDefault();
             break;
-          // default:
-          //   console.log('Keycode pressed: ' + event.keyCode);
+            // default:
+            //   console.log('Keycode pressed: ' + event.keyCode);
         }
       }
       // Suppress backspace triggering a navigate back action.
@@ -191,6 +193,24 @@
     }
   </script>
   <script src="main.dart.js?v=DEPLOYMENTVERSION" type="application/javascript"></script>
+  <script>
+    window._flutter_web_set_location_strategy(null);
+
+    function getLocation() {
+      return document.location.pathname;
+    }
+    
+    window.onpopstate = function (event) {
+      if (typeof travel != 'undefined') {
+        travel(document.location.pathname);
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+  </script>
+</body>
+</body>
 </body>
 
 </html>

@@ -79,6 +79,9 @@ class OpenFileContext with RiveFileDelegate {
   /// File name
   final ValueNotifier<String> _name;
   ValueListenable<String> get name => _name;
+  
+  String get tabName => _name.value;
+  set tabName(String value) => _name.value = value;
 
   final _activeArtboard = ValueNotifier<Artboard>(null);
   Listenable get activeArtboardChanged => _activeArtboard;

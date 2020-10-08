@@ -24,9 +24,14 @@ class TopNav extends StatelessWidget {
     final riveColors = RiveTheme.of(context).colors;
     final styles = RiveTheme.of(context).textStyles;
     final children = <Widget>[];
-    final currentFolder =
-        folders.firstWhere((folder) => folder.id == currentDirectory.folder.id);
-    if (owner != null && currentFolder.id == 1) {
+    final currentFolder = folders.firstWhere(
+        (folder) => folder.id == currentDirectory.folder.id,
+        orElse: () => null);
+    if (currentFolder == null) {
+      // TODO: fix #1426
+      return const SizedBox();
+    }
+    if (owner != null && currentFolder?.id == 1) {
       children.add(
         AvatarView(
           diameter: 30,

@@ -1,0 +1,14 @@
+{
+  "name": "web_dev_server",
+  "version": "1.0.0",
+  "description": "2Dimensions.com",
+  "repository": "git@github.com:2d-inc/2dimensions.git",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {}
+}
