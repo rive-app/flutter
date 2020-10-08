@@ -450,7 +450,7 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
     const _minTeamNameLength = 4;
 
     /// Regex for valid team names
-    final _legalNameMatch = RegExp(r'^[A-Za-z0-9]+$');
+    final _legalNameMatch = RegExp(r'^[A-Za-z0-9 ]+$');
 
     if (name == null) {
       // never entered a name... lets ignore it
