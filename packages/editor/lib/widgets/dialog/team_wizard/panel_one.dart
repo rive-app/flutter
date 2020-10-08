@@ -5,8 +5,8 @@ import 'package:rive_api/models/billing.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/rive_text_field.dart';
+import 'package:rive_editor/widgets/dialog/shared/subscription_package.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 

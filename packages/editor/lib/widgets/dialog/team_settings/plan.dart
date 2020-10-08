@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
@@ -13,13 +12,14 @@ import 'package:rive_editor/widgets/common/currency.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
-import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
+import 'package:rive_editor/widgets/dialog/shared/credit_card_fields.dart';
+import 'package:rive_editor/widgets/dialog/shared/subscription_package.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/panel_two.dart';
+
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
+
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -988,17 +988,7 @@ class CreditCardForm extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 12),
-      RiveTextField(
-        initialValue: sub.cardNumber,
-        formatters: <TextInputFormatter>[
-          WhitelistingTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(16),
-          CardNumberFormatter()
-        ],
-        hintText: '0000 0000 0000 0000',
-        onChanged: (cardNumber) => sub.cardNumber = cardNumber,
-        errorText: sub.cardValidationError,
-      )
+      creditCardField(context, sub)
     ]);
   }
 
@@ -1019,16 +1009,7 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              RiveTextField(
-                initialValue: sub.ccv,
-                formatters: <TextInputFormatter>[
-                  WhitelistingTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(4),
-                ],
-                hintText: '3-4 digits',
-                onChanged: (ccv) => sub.ccv = ccv,
-                errorText: sub.ccvError,
-              ),
+              cvcField(context, sub),
             ],
           ),
         ),
@@ -1043,18 +1024,7 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              RiveTextField(
-                initialValue: sub.expiration,
-                formatters: <TextInputFormatter>[
-                  WhitelistingTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(4),
-                  DateTextInputFormatter(),
-                  DateTextRegexCheck()
-                ],
-                hintText: 'MM/YY',
-                onChanged: (expiration) => sub.expiration = expiration,
-                errorText: sub.expirationError,
-              ),
+              expirationField(context, sub),
             ],
           ),
         ),
@@ -1069,17 +1039,7 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              RiveTextField(
-                initialValue: sub.zip,
-                formatters: <TextInputFormatter>[
-                  // Field lengths : the longest postal code currently
-                  // in use in the world is 10 digits long.
-                  LengthLimitingTextInputFormatter(10),
-                ],
-                hintText: '90210',
-                onChanged: (zip) => sub.zip = zip,
-                errorText: sub.zipError,
-              )
+              postcodeField(context, sub),
             ],
           ),
         ),

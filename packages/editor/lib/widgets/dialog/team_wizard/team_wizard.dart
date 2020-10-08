@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/dialog/shared/subscription_package.dart';
 
 import 'package:rive_editor/widgets/dialog/team_wizard/panel_two.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
+
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/panel_one.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
