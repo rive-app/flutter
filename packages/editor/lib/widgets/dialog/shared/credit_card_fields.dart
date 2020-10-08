@@ -9,7 +9,7 @@ Widget cvcField(BuildContext context, SubscriptionPackage sub) {
     initialValue: sub.ccv,
     errorAlignment: MainAxisAlignment.start,
     formatters: <TextInputFormatter>[
-      WhitelistingTextInputFormatter.digitsOnly,
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
       LengthLimitingTextInputFormatter(4),
     ],
     enabled: !sub.processing,
@@ -42,7 +42,7 @@ Widget creditCardField(BuildContext context, SubscriptionPackage sub) {
     initialValue: sub.cardNumber,
     errorAlignment: MainAxisAlignment.start,
     formatters: <TextInputFormatter>[
-      WhitelistingTextInputFormatter.digitsOnly,
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
       LengthLimitingTextInputFormatter(16),
       CardNumberFormatter()
     ],
@@ -58,7 +58,7 @@ Widget expirationField(BuildContext context, SubscriptionPackage sub) {
     initialValue: sub.expiration,
     errorAlignment: MainAxisAlignment.start,
     formatters: <TextInputFormatter>[
-      WhitelistingTextInputFormatter.digitsOnly,
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
       LengthLimitingTextInputFormatter(4),
       DateTextInputFormatter(),
       DateTextRegexCheck()
