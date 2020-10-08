@@ -105,7 +105,7 @@ abstract class SubscriptionPackage with ChangeNotifier {
       return false;
     }
 
-    if (!RegExp(r'^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$')
+    if (!RegExp(r'^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{2,4}$')
         .hasMatch(_cardNumber)) {
       _cardValidationError = 'Card number format mismatch';
       return false;
