@@ -1,5 +1,4 @@
 import 'dart:js' as js;
-import 'dart:html';
 
 import 'package:rive_editor/platform/nomad.dart';
 

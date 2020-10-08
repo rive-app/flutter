@@ -8,7 +8,6 @@ class Me extends User {
   const Me({
     @required int ownerId,
     @required String name,
-    @required this.signedIn,
     @required this.id,
     String username,
     String avatarUrl,
@@ -19,6 +18,7 @@ class Me extends User {
     this.notice,
     this.socialLink,
     this.isFirstRun,
+    this.signedIn = false,
   }) : super(
           ownerId: ownerId,
           name: name,
@@ -37,7 +37,8 @@ class Me extends User {
   final bool isFirstRun;
 
   factory Me.fromDM(MeDM me) => Me(
-        signedIn: me?.signedIn,
+        // lets not let signedIn be null
+        signedIn: me?.signedIn ?? false,
         id: me?.id,
         ownerId: me?.ownerId,
         name: me?.name,
