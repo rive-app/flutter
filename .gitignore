@@ -11,6 +11,7 @@
 !packages/admin/pubspec.lock
 !packages/editor/pubspec.lock
 !packages/peon_process/pubspec.lock
+!packages/coop_server_process/pubspec.lock
 
 dev/bin/
 
