@@ -462,6 +462,7 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
               file,
               fill,
               drawableShape.bounds,
+              shapeOffset,
             );
           }
         }
@@ -572,12 +573,8 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
   }
 }
 
-void addGradient(
-  DrawableGradient gradient,
-  RiveFile file,
-  ShapePaint paint,
-  Rect bounds,
-) {
+void addGradient(DrawableGradient gradient, RiveFile file, ShapePaint paint,
+    Rect bounds, Offset shapeOffset) {
   rive_linear_gradient.LinearGradient tmp;
 
   double _translate(
@@ -591,22 +588,22 @@ void addGradient(
     tmp.startX = _translate(
       gradient.from.dx,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.startY = _translate(
       gradient.from.dy,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
     tmp.endX = _translate(
       gradient.to.dx,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.endY = _translate(
       gradient.to.dy,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
   } else if (gradient is DrawableRadialGradient) {
     tmp = rive_radial_gradient.RadialGradient();
@@ -616,22 +613,22 @@ void addGradient(
     tmp.startX = _translate(
       gradient.center.dx,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.startY = _translate(
       gradient.center.dy,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
     tmp.endX = _translate(
       gradient.center.dx - offset,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.endY = _translate(
       gradient.center.dy - offset,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
   }
   file.addObject(tmp);
