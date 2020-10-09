@@ -13,7 +13,8 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class SettingsHeader extends StatefulWidget {
   final String name;
-  final int teamSize;
+  final int teamMemberCount;
+  final int teamMemberPaidCount;
   final String avatarPath;
   final bool avatarUploading;
   final VoidCallback changeAvatar;
@@ -22,7 +23,8 @@ class SettingsHeader extends StatefulWidget {
   const SettingsHeader(
       {@required this.name,
       @required this.isTeam,
-      this.teamSize,
+      this.teamMemberCount,
+      this.teamMemberPaidCount,
       this.avatarPath,
       this.changeAvatar,
       this.avatarUploading});
@@ -38,17 +40,24 @@ class _SettingsHeaderState extends State<SettingsHeader> {
     final theme = RiveTheme.of(context);
     final textStyles = theme.textStyles;
     final colors = theme.colors;
-    final teamSize = widget.teamSize;
+    final teamMemberCount = widget.teamMemberCount;
+    final teamMemberPaidCount = widget.teamMemberPaidCount;
     if (widget.isTeam) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            '$teamSize ${teamSize != 1 ? 'paid members' : 'paid member'}',
+            '$teamMemberCount ${teamMemberCount != 1 ? 'members' : 'member'}',
             style: textStyles.fileGreyTextLarge
                 .copyWith(fontSize: 13, height: 1.3),
           ),
+          if (teamMemberPaidCount != teamMemberCount)
+            Text(
+              ' ($teamMemberPaidCount billed)',
+              style: textStyles.fileGreyTextLarge
+                  .copyWith(fontSize: 13, height: 1.3),
+            ),
         ],
       );
     } else {

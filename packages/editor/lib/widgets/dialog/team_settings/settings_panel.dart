@@ -152,7 +152,17 @@ class _SettingsState extends State<Settings> {
         child: child);
   }
 
-  int get teamSize {
+  int get teamMemberCount {
+    if (widget.owner is Team) {
+      final teamMembers = Plumber().peek<List<TeamMember>>(team.hashCode);
+      return teamMembers
+          .where((element) => element.status == TeamInviteStatus.accepted)
+          .length;
+    }
+    return 0;
+  }
+
+  int get teamMemberPaidCount {
     if (widget.owner is Team) {
       final teamMembers = Plumber().peek<List<TeamMember>>(team.hashCode);
       return teamMembers
@@ -184,7 +194,8 @@ class _SettingsState extends State<Settings> {
                       ? widget.owner.avatarUrl
                       : newAvatarPath,
                   changeAvatar: changeAvatar,
-                  teamSize: teamSize,
+                  teamMemberCount: teamMemberCount,
+                  teamMemberPaidCount: teamMemberPaidCount,
                   isTeam: widget.owner is Team,
                 ),
                 Separator(color: colors.fileLineGrey),
