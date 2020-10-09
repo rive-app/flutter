@@ -44,6 +44,16 @@ class Stroke extends StrokeBase {
   // -> editor-only
   @override
   String get timelineParentGroup => 'strokes';
+
+  @override
+  String get defaultName {
+    var strokeIndex =
+        shapePaintContainer?.strokes?.toList()?.indexOf(this) ?? -1;
+    if (strokeIndex == -1) {
+      return 'Stroke';
+    }
+    return 'Stroke ${strokeIndex + 1}';
+  }
   // <- editor-only
 
   StrokeCap get strokeCap => StrokeCap.values[cap];

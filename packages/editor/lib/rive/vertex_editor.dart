@@ -235,7 +235,6 @@ class VertexEditor with RiveFileDelegate {
           var parent = parametricPath.parent;
           parametricPath.remove();
           var pointsPath = PointsPath()
-            ..name = parametricPath.name
             ..translation = parametricPath.translation
             ..rotation = parametricPath.rotation
             ..scale = parametricPath.scale

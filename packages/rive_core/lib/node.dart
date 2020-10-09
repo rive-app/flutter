@@ -25,5 +25,8 @@ class Node extends NodeBase {
   // -> editor-only
   @override
   bool validate() => super.validate() && artboard != null;
+
+  @override
+  String get defaultName => 'Group';
   // <- editor-only
 }

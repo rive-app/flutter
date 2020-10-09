@@ -43,5 +43,13 @@ class Fill extends FillBase {
 
   // -> editor-only
   bool get isTranslucent => paintMutator.isTranslucent;
+  @override
+  String get defaultName {
+    var fillIndex = shapePaintContainer?.fills?.toList()?.indexOf(this) ?? -1;
+    if (fillIndex == -1) {
+      return 'Fill';
+    }
+    return 'Fill ${fillIndex + 1}';
+  }
   // <- editor-only
 }

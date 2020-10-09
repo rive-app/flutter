@@ -36,7 +36,6 @@ abstract class ShapeTool extends CreateTool {
   bool _dragging = false;
 
   ParametricPath makePath();
-  String get shapeName;
   Shape _shape;
   ParametricPath _path;
 
@@ -103,7 +102,6 @@ abstract class ShapeTool extends CreateTool {
         Vec2D.transformMat2D(Vec2D(), worldMouse, _parentWorldInverse);
 
     _shape = makeShape(parent, (_path = makePath()))
-      ..name = shapeName
       ..x = localMouse[0]
       ..y = localMouse[1];
   }
@@ -117,7 +115,7 @@ abstract class ShapeTool extends CreateTool {
 
       final composer = PathComposer();
       final solidColor = SolidColor();
-      final fill = Fill()..name = 'Fill 1';
+      final fill = Fill();
 
       file.addObject(shape);
       file.addObject(fill);

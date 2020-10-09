@@ -9,10 +9,7 @@ class EllipseTool extends ShapeTool {
   EllipseTool._();
 
   @override
-  String get shapeName => 'Ellipse';
-
-  @override
-  ParametricPath makePath() => Ellipse()..name = 'Ellipse Path';
+  ParametricPath makePath() => Ellipse();
 
   @override
   Iterable<PackedIcon> get icon => PackedIcon.toolEllipse;
