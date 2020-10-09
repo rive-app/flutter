@@ -51,6 +51,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   /// Event notified whenever the animations list changes.
   final Event animationsChanged = Event();
+
+  @override
+  String get defaultName => 'New Artboard';
   // <- editor-only
 
   /// Artboard are one of the few (only?) components that can be orphaned.

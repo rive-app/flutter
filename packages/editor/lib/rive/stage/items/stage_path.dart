@@ -4,6 +4,7 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/rive/stage/items/stage_expandable.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -82,6 +83,9 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
     if (other is StagePath) {
       return component.shape.drawOrder
           .compareTo(other.component.shape.drawOrder);
+    } else if (other is StageShape) {
+      return component.shape.drawOrder
+          .compareTo(other.component.drawOrder);
     } else {
       return super.compareDrawOrderTo(other);
     }

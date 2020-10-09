@@ -53,9 +53,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       }
     }
 
-    var path = PointsPath()..name = 'Path';
+    var path = PointsPath();
     if (shape == null) {
-      shape = ShapeTool.makeShape(activeArtboard, path)..name = 'Shape';
+      shape = ShapeTool.makeShape(activeArtboard, path);
       // We're making a new shape, so set the translation of the path to 0,0 and
       // the shape to the world translation.
       shape.x = translation[0];

@@ -23,6 +23,7 @@ import 'package:rive_editor/rive/managers/websocket_comms_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
@@ -45,6 +46,8 @@ import 'package:rive_editor/widgets/stage_late_view.dart';
 import 'package:rive_editor/widgets/stage_view.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_widgets/listenable_builder.dart';
+
+import 'widgets/popup/popup.dart';
 
 void _configureLogging() {
   Logger.root.onRecord.listen((r) {
@@ -414,6 +417,21 @@ class StagePanel extends StatelessWidget {
                   : StageView(
                       file: file,
                       stage: stage,
+                      showContextMenu: (event) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var globalPosition =
+                            getBox.localToGlobal(event.position);
+                        ListPopup<PopupContextItem>.show(
+                          context,
+                          showArrow: false,
+                          position: globalPosition,
+                          width: 200,
+                          itemBuilder: (popupContext, item, isHovered) =>
+                              item.itemBuilder(popupContext, isHovered),
+                          items: event.items,
+                        );
+                      },
                     ),
             ),
             Positioned.fill(

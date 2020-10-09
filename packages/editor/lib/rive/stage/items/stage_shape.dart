@@ -4,6 +4,7 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_expandable.dart';
+import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -78,6 +79,8 @@ class StageShape extends StageItem<Shape>
     if (other is StageShape) {
       // check drawable order
       return component.drawOrder.compareTo(other.component.drawOrder);
+    } else if (other is StagePath) {
+      return component.drawOrder.compareTo(other.component.shape.drawOrder);
     } else {
       return super.compareDrawOrderTo(other);
     }

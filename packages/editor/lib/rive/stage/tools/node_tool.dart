@@ -43,7 +43,6 @@ class NodeTool extends CreateTool {
     final core = stage.file.core;
 
     final node = Node()
-      ..name = 'Node'
       ..x = position[0]
       ..y = position[1];
 

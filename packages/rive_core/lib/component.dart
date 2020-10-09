@@ -47,7 +47,13 @@ abstract class Component extends ComponentBase<RiveFile>
   String get defaultName => 'Component';
 
   @override
-  String get name => super.name ?? defaultName;
+  String get name {
+    var realName = super.name;
+    if (realName != null && realName != '') {
+      return realName;
+    }
+    return defaultName;
+  }
   // <- editor-only
 
   /// Override to true if you want some object inheriting from Component to not
