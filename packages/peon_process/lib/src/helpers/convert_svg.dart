@@ -371,7 +371,6 @@ void addArtboard(RiveFile file, DrawableRoot root) {
   file.batchAdd(() {
     backboard = Backboard();
     artboard = Artboard()
-      ..name = 'MainArtboard'
       ..x = 0
       ..y = 0
       ..originX = 0
@@ -403,8 +402,10 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
         node = Shape();
       }
       node.name = attrOrDefault(drawableShape.attributes, 'id', null);
-      node.x = 0;
-      node.y = 0;
+
+      var shapeOffset = getShapeOffset(file, drawableShape.path as RivePath);
+      node.x = shapeOffset.dx;
+      node.y = shapeOffset.dy;
       // we do not do this here, as the color already contains this?
       // ..opacity = drawableShape.style.groupOpacity;
 
@@ -412,20 +413,33 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
       file.addObject(composer);
       file.addObject(node);
       node.appendChild(composer);
-      parent.appendChild(node);
+
+      var nodeParent = parent;
 
       if (drawableShape.transform != null) {
         // need to unpack the transform into rotation, scale and transform
+        var transformNode = Node();
         var transform = TransformComponents();
         Mat2D.decompose(Mat2D.fromMat4(drawableShape.transform), transform);
-        node.rotation += transform.rotation;
-        node.x += transform.x;
-        node.y += transform.y;
-        node.scaleX *= transform.scaleX;
-        node.scaleY *= transform.scaleY;
-      }
 
-      var paths = getPaths(file, drawableShape.path as RivePath);
+        transformNode.x = transform.x;
+        transformNode.y = transform.y;
+        transformNode.rotation += transform.rotation;
+        transformNode.scaleX *= transform.scaleX;
+        transformNode.scaleY *= transform.scaleY;
+        if (transform.x != 0 ||
+            transform.y != 0 ||
+            transform.rotation != 0 ||
+            transform.scaleX != 1 ||
+            transform.scaleY != 1) {
+          file.addObject(transformNode);
+          parent.appendChild(transformNode);
+          nodeParent = transformNode;
+        }
+      }
+      nodeParent.appendChild(node);
+
+      var paths = getPaths(file, drawableShape.path as RivePath, shapeOffset);
       paths.forEach((path) {
         node.appendChild(path);
       });
@@ -448,6 +462,7 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
               file,
               fill,
               drawableShape.bounds,
+              shapeOffset,
             );
           }
         }
@@ -494,7 +509,7 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
     case DrawableGroup:
       var drawableGroup = drawable as DrawableGroup;
       var node = Node()
-        ..name = attrOrDefault(drawableGroup.attributes, 'id', 'Node')
+        ..name = attrOrDefault(drawableGroup.attributes, 'id', null)
         ..x = 0
         ..y = 0;
 
@@ -558,12 +573,8 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
   }
 }
 
-void addGradient(
-  DrawableGradient gradient,
-  RiveFile file,
-  ShapePaint paint,
-  Rect bounds,
-) {
+void addGradient(DrawableGradient gradient, RiveFile file, ShapePaint paint,
+    Rect bounds, Offset shapeOffset) {
   rive_linear_gradient.LinearGradient tmp;
 
   double _translate(
@@ -577,22 +588,22 @@ void addGradient(
     tmp.startX = _translate(
       gradient.from.dx,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.startY = _translate(
       gradient.from.dy,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
     tmp.endX = _translate(
       gradient.to.dx,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.endY = _translate(
       gradient.to.dy,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
   } else if (gradient is DrawableRadialGradient) {
     tmp = rive_radial_gradient.RadialGradient();
@@ -602,22 +613,22 @@ void addGradient(
     tmp.startX = _translate(
       gradient.center.dx,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.startY = _translate(
       gradient.center.dy,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
     tmp.endX = _translate(
       gradient.center.dx - offset,
       bounds.width,
-      bounds.left,
+      bounds.left - shapeOffset.dx,
     );
     tmp.endY = _translate(
       gradient.center.dy - offset,
       bounds.height,
-      bounds.top,
+      bounds.top - shapeOffset.dy,
     );
   }
   file.addObject(tmp);
@@ -680,7 +691,73 @@ Shape getClippingShape(
   return clipShape;
 }
 
-List<Component> getPaths(RiveFile file, RivePath rivePath) {
+Offset getShapeOffset(RiveFile file, RivePath rivePath) {
+  var minX = double.infinity;
+  var minY = double.infinity;
+  var maxX = 0.0;
+  var maxY = 0.0;
+  for (var i = 0; i < rivePath.instructions.length; i++) {
+    dynamic instruction = rivePath.instructions[i];
+    switch (instruction[0] as pathFuncs) {
+      case pathFuncs.addOval:
+        var rect = instruction[1] as Rect;
+        minX = min(minX, rect.left);
+        minY = min(minY, rect.top);
+        maxX = max(maxX, rect.left + rect.width);
+        maxY = max(maxY, rect.top + rect.height);
+        break;
+      case pathFuncs.lineTo:
+        minX = min(minX, instruction[1] as double);
+        minY = min(minY, instruction[2] as double);
+        maxX = max(maxX, instruction[1] as double);
+        maxY = max(maxY, instruction[2] as double);
+        break;
+      case pathFuncs.moveTo:
+        minX = min(minX, instruction[1] as double);
+        minY = min(minY, instruction[2] as double);
+        maxX = max(maxX, instruction[1] as double);
+        maxY = max(maxY, instruction[2] as double);
+        break;
+      case pathFuncs.cubicTo:
+        minX = min(minX, instruction[1] as double);
+        minY = min(minY, instruction[2] as double);
+        minX = min(minX, instruction[3] as double);
+        minY = min(minY, instruction[4] as double);
+        minX = min(minX, instruction[5] as double);
+        minY = min(minY, instruction[6] as double);
+        maxX = max(maxX, instruction[1] as double);
+        maxY = max(maxY, instruction[2] as double);
+        maxX = max(maxX, instruction[3] as double);
+        maxY = max(maxY, instruction[4] as double);
+        maxX = max(maxX, instruction[5] as double);
+        maxY = max(maxY, instruction[6] as double);
+        break;
+      case pathFuncs.addRect:
+        var rect = instruction[1] as Rect;
+        minX = min(minX, rect.left);
+        minY = min(minY, rect.top);
+        maxX = max(maxX, rect.left + rect.width);
+        maxY = max(maxY, rect.top + rect.height);
+        break;
+      case pathFuncs.addRRect:
+        var rect = instruction[1] as RRect;
+        minX = min(minX, rect.left);
+        minY = min(minY, rect.top);
+        maxX = max(maxX, rect.left + rect.width);
+        maxY = max(maxY, rect.top + rect.height);
+        break;
+      case pathFuncs.transform:
+        // DO NOT apply transforms to these paths
+        // these transforms get applied to the shapes
+        break;
+      default:
+        break;
+    }
+  }
+  return Offset((minX + maxX) / 2, (minY + maxY) / 2);
+}
+
+List<Component> getPaths(RiveFile file, RivePath rivePath, Offset shapeOffset) {
   // moveTo gets a maybevertex, multiple moves get ignored.
   dynamic moveInstruction;
   dynamic firstVertexInstruction;
@@ -693,7 +770,6 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
         if (vertices.isNotEmpty) {
           var path = PointsPath()
             ..isClosed = false
-            ..name = 'Points Path'
             ..x = 0
             ..y = 0;
           file.addObject(path);
@@ -713,8 +789,8 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
         }
         var rect = instruction[1] as Rect;
         var ellipse = Ellipse()
-          ..x = rect.left + rect.width / 2
-          ..y = rect.top + rect.height / 2
+          ..x = rect.left + rect.width / 2 - shapeOffset.dx
+          ..y = rect.top + rect.height / 2 - shapeOffset.dy
           ..width = rect.width
           ..height = rect.height;
         file.addObject(ellipse);
@@ -724,23 +800,24 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
         firstVertexInstruction ??= instruction;
         if (moveInstruction != null) {
           var moveVertex = StraightVertex()
-            ..x = moveInstruction[1] as double
-            ..y = moveInstruction[2] as double;
+            ..x = (moveInstruction[1] as double) - shapeOffset.dx
+            ..y = (moveInstruction[2] as double) - shapeOffset.dy;
           vertices.add(moveVertex);
         }
         var vertex = StraightVertex()
-          ..x = instruction[1] as double
-          ..y = instruction[2] as double;
+          ..x = (instruction[1] as double) - shapeOffset.dx
+          ..y = (instruction[2] as double) - shapeOffset.dy;
         vertices.add(vertex);
         moveInstruction = null;
         break;
       case pathFuncs.cubicTo:
         if (moveInstruction != null) {
           var moveVertex = CubicDetachedVertex()
-            ..x = moveInstruction[1] as double
-            ..y = moveInstruction[2] as double
+            ..x = (moveInstruction[1] as double) - shapeOffset.dx
+            ..y = (moveInstruction[2] as double) - shapeOffset.dy
             ..outPoint = Vec2D.fromValues(
-                instruction[1] as double, instruction[2] as double);
+                (instruction[1] as double) - shapeOffset.dx,
+                (instruction[2] as double) - shapeOffset.dy);
           vertices.add(moveVertex);
         }
 
@@ -755,16 +832,20 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
             ..x = vertices.last.x
             ..y = vertices.last.y
             ..outPoint = Vec2D.fromValues(
-                instruction[1] as double, instruction[2] as double);
+              (instruction[1] as double) - shapeOffset.dx,
+              (instruction[2] as double) - shapeOffset.dy,
+            );
           if (inPoint != null) {
             (vertices.last as CubicDetachedVertex).inPoint = inPoint;
           }
         }
         var vertex = CubicDetachedVertex()
-          ..x = instruction[5] as double
-          ..y = instruction[6] as double
+          ..x = (instruction[5] as double) - shapeOffset.dx
+          ..y = (instruction[6] as double) - shapeOffset.dy
           ..inPoint = Vec2D.fromValues(
-              instruction[3] as double, instruction[4] as double);
+            (instruction[3] as double) - shapeOffset.dx,
+            (instruction[4] as double) - shapeOffset.dy,
+          );
         vertices.add(vertex);
         moveInstruction = null;
         break;
@@ -772,7 +853,6 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
         if (vertices.isNotEmpty) {
           var path = PointsPath()
             ..isClosed = true
-            ..name = 'Path'
             ..x = 0
             ..y = 0;
           file.addObject(path);
@@ -792,8 +872,8 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
       case pathFuncs.addRect:
         var rect = instruction[1] as Rect;
         var rectangle = Rectangle()
-          ..x = rect.left + rect.width / 2
-          ..y = rect.top + rect.height / 2
+          ..x = rect.left + rect.width / 2 - shapeOffset.dx
+          ..y = rect.top + rect.height / 2 - shapeOffset.dy
           ..width = rect.width
           ..height = rect.height;
         file.addObject(rectangle);
@@ -820,8 +900,8 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
         }
 
         var rectangle = Rectangle()
-          ..x = rect.left + rect.width / 2
-          ..y = rect.top + rect.height / 2
+          ..x = rect.left + rect.width / 2 - shapeOffset.dx
+          ..y = rect.top + rect.height / 2 - shapeOffset.dy
           ..width = rect.width
           ..height = rect.height
           ..cornerRadius = radiusSet.first;
@@ -842,7 +922,6 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
   if (vertices.isNotEmpty) {
     var path = PointsPath()
       ..isClosed = false
-      ..name = 'Path'
       ..x = 0
       ..y = 0;
     file.addObject(path);

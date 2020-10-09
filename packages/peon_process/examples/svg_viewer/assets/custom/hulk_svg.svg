@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="254px" height="531px" viewBox="0 0 254 531" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <polygon id="path-1" points="11 47 12 19 50.5 0 53.5 13 96.5 25 131 54.5 149 104 117 181 118 211 46.5 230.5 27.5 171.5 0 125.5 6 87.5 28 63.5"></polygon>
+        <polygon id="path-3" points="151 0 169.5 28 165.5 56.5 147 80 120 121 122 134.5 148.75 167 141.5 225 157.5 247 153 267.5 5 267.5 0 261 1 253 43 247 77.5 219 70 189 47 150 38 134.5 43 121 47 66.5 86.5 16"></polygon>
+        <polygon id="path-5" points="116 0 136.5 30 132.5 58.5 115 83 92 123 91.5 131.5 68.5 127 43.5 130.5 27 116 0 122 7 68.5 40.0414011 23.3443812 39.5 13"></polygon>
+        <polygon id="path-7" points="131.5 19.5 138.5 60.5 131.5 127 104.497931 177.394165 74 206.5 59 254.5 45 261.5 36.7955565 259.540296 29.4989306 258.506827 19.9619936 258.419493 14.06329 253.558299 9 253.5 0 234 9 206.5 30 190.5 45 144 70 116.5 59 90.5 50.5 24.5 65.75 0 86.5 0 112 0"></polygon>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group">
+            <path d="M194.072968,380.242537 L195,386.5 L221.75,419 L214.5,477 L230.5,499 L226,519.5 L78,519.5 L73,513 L74,505 L116,499 L150.5,471 L143,441 L120,402 L111,386.5 L116,373 L116.190674,370.402073 L109,372 L116,318.5 L149.041401,273.344381 L148.5,263 L225,250 L245.5,280 L241.5,308.5 L224,333 L201,373 L200.5,381.5 L194.072968,380.242537 Z" id="Back-Leg" fill="#333333"></path>
+            <polygon id="Back-Arm" fill="#333333" points="222.5 101.5 229.5 142.5 222.5 209 195.497931 259.394165 165 288.5 150 336.5 136 343.5 127.795557 341.540296 120.498931 340.506827 110.961994 340.419493 105.06329 335.558299 100 335.5 91 316 100 288.5 121 272.5 136 226 161 198.5 150 172.5 141.5 106.5 156.75 82 203 82"></polygon>
+            <polygon id="Shadow" fill="#000000" opacity="0.204483696" points="0 521 100.606458 509.864707 185.5 508 232.951842 515.502659 252 521 235.5 525 185.5 530.5 102.012277 529.324211"></polygon>
+            <g id="Body" transform="translate(105.000000, 39.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <use id="Mask" fill="#A2B683" xlink:href="#path-1"></use>
+                <polygon id="Path-2-Copy" fill="#B4CA91" mask="url(#mask-2)" points="30.5 116 -14.5 131 7 86.5 29 73.5 29 99"></polygon>
+                <polygon id="Path-2-Copy" fill="#B4CA91" mask="url(#mask-2)" points="56.5 26 55.5 0 138.5 0 141.5 13 186.5 25 221 54.5 238 104 206 181 207 211 136.5 230.5 99.5 138 106 58.5"></polygon>
+            </g>
+            <g id="Front-Leg" transform="translate(73.000000, 250.000000)">
+                <g id="Path-3" transform="translate(0.000000, 2.000000)">
+                    <mask id="mask-4" fill="white">
+                        <use xlink:href="#path-3"></use>
+                    </mask>
+                    <use id="Mask" fill="#A2B683" xlink:href="#path-3"></use>
+                    <path d="M221,0 L239.5,28 L235.5,56.5 L217,80 L190,121 L190,134.5 L216.75,167 L209.5,225 C196.161321,225.432799 187.327987,225.432799 183,225 C178.672013,224.567201 167.505346,222.567201 149.5,219 L142,189 L119,150 L124,134.5 L149.5,127 L117,66.5 L156.5,16 L221,0 Z" fill="#B4CA91" mask="url(#mask-4)"></path>
+                    <polygon fill="#B4CA91" mask="url(#mask-4)" points="51 154.5 71.5 214 104.5 251.5 78.5 243.5 53.2915333 252.662546 -41.5 270 -33 243.5 -29 235 -20 234 -16.5 195 -24 165 -47 126"></polygon>
+                </g>
+                <g id="Path-3" transform="translate(36.000000, 0.000000)">
+                    <mask id="mask-6" fill="white">
+                        <use xlink:href="#path-5"></use>
+                    </mask>
+                    <use id="Mask" fill="#8A6C8F" xlink:href="#path-5"></use>
+                    <polygon fill="#99789E" mask="url(#mask-6)" points="37.5 6.5 146.5 -15.5 144.904093 14.0242711 143.628357 37.6253926 142.5 58.5 152 81.5 116.5 21 103 14.5 96.5 -4.5 44.5 -0.5 52.5 26 -5 135 -25 101"></polygon>
+                    <polygon id="Rectangle-3" fill="#99789E" mask="url(#mask-6)" points="-42 107 -11.5 127.126828 26.5 110 65.0426762 142 71.5 135.5 93.5 142 150 177 -42 177"></polygon>
+                    <polygon fill="#99789E" mask="url(#mask-6)" points="91 117 85.5 122.5 68.5 117 54.5 104 80.7431951 116.05922"></polygon>
+                </g>
+            </g>
+            <g id="Front-Arm" transform="translate(91.000000, 82.000000)">
+                <mask id="mask-8" fill="white">
+                    <use xlink:href="#path-7"></use>
+                </mask>
+                <use id="Mask" fill="#B4CA91" xlink:href="#path-7"></use>
+                <polygon id="Path-4" stroke="#B4CA8D" stroke-width="3" fill="#A2B683" mask="url(#mask-8)" points="156.433655 25.4268421 168.5 61.5 161.5 128 104 207.5 89 255.5 74.5 264.5 50 264.5 39 255.5 31 245 -5.5 238 3.5 212.5 10 224 29 232 60 212.5 60 191.5 86.4375618 142.590511 100 117.5 89 91.5 94.5 38 126 1 142 1"></polygon>
+            </g>
+            <polygon id="Line" fill="#A2B683" points="100.5 72.5 104.5 73.5 104.5 76.5 97 73.5"></polygon>
+            <g id="Head" transform="translate(85.000000, 0.000000)">
+                <polygon id="Path-5" stroke="#B4CA8D" stroke-width="3" fill="#B4CA91" points="70.5 35.5 63.5 18.5 46.5 3 15 7 3 24 4.5 29 2 47.5 7 52 5.5 59.5 9.5 60.5 14.5 73.5 12.2801393 74.6538519 16 88.5 23.5 91.5 52.5 76 52.5 55"></polygon>
+                <polygon id="Path-5" fill="#333333" points="72.5 36.5 67.5 16 46.5 0 13 5 0 20 2.5 29 20 19.5 41.5 40 55 33 65 44"></polygon>
+                <polygon id="Path-6" fill="#A2B683" points="1 48 7.95446774 47.7102305 25 47 11 54 8 58.5 5.5 52.75"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>
