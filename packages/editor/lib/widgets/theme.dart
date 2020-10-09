@@ -335,7 +335,7 @@ class TextStyles {
 
   TextStyle get hyperLinkSubtext => const TextStyle(
       fontFamily: 'Roboto-Regular',
-      color: Color(0xFF888888),
+      color: Color(0xFF333333),
       fontSize: 13,
       letterSpacing: 0,
       decoration: TextDecoration.underline);

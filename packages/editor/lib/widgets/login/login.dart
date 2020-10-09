@@ -19,6 +19,7 @@ import 'package:rive_editor/widgets/login/validators.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
+import 'package:rive_editor/external_url.dart';
 
 enum LoginPage { login, register, recover, link }
 typedef AuthAction = Future<AuthResponse> Function();
@@ -458,6 +459,33 @@ class _LoginState extends State<Login> {
             mainAxisAlignment: MainAxisAlignment.center,
           ),
         ),
+       Padding(
+         padding: const EdgeInsets.only(top: 20.0),
+         child: RichText(
+            text: TextSpan(
+              style: styles.loginText,
+              children: <TextSpan>[
+                TextSpan(text: 'By clicking Sign Up you agree to our '),
+                TextSpan(
+                    text: 'Terms of Service',
+                    style: styles.hyperLinkSubtext,
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchTermsUrl();
+                      }),
+                TextSpan(text: ' and '),
+                TextSpan(
+                    text: 'Privacy Policy',
+                    style: styles.hyperLinkSubtext,
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchPrivacyUrl();
+                      }),
+                TextSpan(text: '.'),
+              ],
+            ),
+          ),
+       ),
       ],
     );
   }
