@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // .where((String key) => !key.contains('club'))
         // .where((String key) => key.contains('blob.'))
         // .where((String key) => key.contains('.svg'))
-        .where((String key) => key.contains('krank'))
+        // .where((String key) => key.contains('krank'))
         .where((String key) => key.contains('.svg'))
         .toList();
 
