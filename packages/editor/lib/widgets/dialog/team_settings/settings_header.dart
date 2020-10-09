@@ -47,17 +47,19 @@ class _SettingsHeaderState extends State<SettingsHeader> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            '$teamMemberCount ${teamMemberCount != 1 ? 'members' : 'member'}',
-            style: textStyles.fileGreyTextLarge
-                .copyWith(fontSize: 13, height: 1.3),
-          ),
-          if (teamMemberPaidCount != teamMemberCount)
-            Text(
-              ' ($teamMemberPaidCount billed)',
+          RichText(
+            text: TextSpan(
               style: textStyles.fileGreyTextLarge
                   .copyWith(fontSize: 13, height: 1.3),
+              children: <TextSpan>[
+                if (teamMemberCount != 1)
+                  TextSpan(text: '$teamMemberCount members'),
+                if (teamMemberCount == 1) const TextSpan(text: '1 member'),
+                if (teamMemberPaidCount != teamMemberCount)
+                  TextSpan(text: ' ($teamMemberPaidCount billed)'),
+              ],
             ),
+          ),
         ],
       );
     } else {
