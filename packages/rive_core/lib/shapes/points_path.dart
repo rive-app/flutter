@@ -1,4 +1,5 @@
 import 'package:rive_core/bones/skinnable.dart';
+import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -170,6 +171,21 @@ class PointsPath extends PointsPathBase with Skinnable {
       }
     }
 
+    _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
+    markPathDirty();
+  }
+
+  void makeFirst(PathVertex<Weight> vertex) {
+    var order = _vertices.map((v) => v.childOrder).toList();
+
+    var start = _vertices.indexOf(vertex);
+    if (start == -1) {
+      return;
+    }
+    var length = _vertices.length;
+    for (int i = 0; i < length; i++) {
+      _vertices[(i + start) % length].childOrder = order[i];
+    }
     _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
     markPathDirty();
   }

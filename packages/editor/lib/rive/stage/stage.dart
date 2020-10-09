@@ -13,6 +13,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -49,6 +50,7 @@ import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
+import 'package:rive_editor/rive/stage/stage_context_menu_launcher.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
@@ -59,6 +61,7 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
+import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:utilities/restorer.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:utilities/utilities.dart';
@@ -123,6 +126,11 @@ class Stage extends Debouncer {
   StageItem _mouseDownHit;
   bool _mouseDownSelectAppend = false;
 
+  // We track the mouse down button as on release we don't get the id of the
+  // button released but the state of the set of buttons, so we need to track it
+  // ourselves on press.
+  int _mouseDownButton = 0;
+
   /// Returns true if the last click operation resulted in a selection.
   StageItem get mouseDownHit => _mouseDownHit;
 
@@ -165,6 +173,11 @@ class Stage extends Debouncer {
   LateDrawViewDelegate lateDrawDelegate;
 
   StageDelegate _delegate;
+  final DetailedEvent<StageContextMenuDetails> _showContextMenu =
+      DetailedEvent<StageContextMenuDetails>();
+  DetailListenable<StageContextMenuDetails> get showContextMenu =>
+      _showContextMenu;
+
   final ValueNotifier<StageTool> _toolNotifier = ValueNotifier<StageTool>(null);
   ValueListenable<StageTool> get toolListenable => _toolNotifier;
 
@@ -555,6 +568,7 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
+    _mouseDownButton = button;
     switch (button) {
       case 1:
         // If the user clicks while an updatePanIcon is scheduled, accelerate it
@@ -603,13 +617,20 @@ class Stage extends Debouncer {
         break;
       case 2:
         _isPanning = true;
-        _rightClickHandCursor?.remove();
-        _rightClickHandCursor = showCustomCursor(PackedIcon.cursorHand);
+        // Delay showing pan cursor in case right click is quick and should
+        // trigger context menu.
+        debounce(_showPanningCursor, duration: const Duration(seconds: 1));
         break;
       default:
     }
 
     _updateComponents();
+  }
+
+  void _showPanningCursor() {
+    cancelDebounce(_showPanningCursor);
+    _rightClickHandCursor?.remove();
+    _rightClickHandCursor = showCustomCursor(PackedIcon.cursorHand);
   }
 
   void mouseDrag(int button, double x, double y) {
@@ -623,6 +644,9 @@ class Stage extends Debouncer {
     // _dragTool so we can know if we were already dragging.
     StageTool dragTool;
     if (_isPanning) {
+      if (_rightClickHandCursor == null) {
+        _showPanningCursor();
+      }
       double dx = x - _lastMousePosition[0];
       double dy = y - _lastMousePosition[1];
 
@@ -689,9 +713,10 @@ class Stage extends Debouncer {
     }
   }
 
-  void mouseUp(int button, double x, double y) {
+  void mouseUp(int buttons, double x, double y) {
     var wasPanning = _isPanning;
     _dragInError = false;
+    cancelDebounce(_showPanningCursor);
     _isPanning = false;
     _rightClickHandCursor?.remove();
     _rightClickHandCursor = null;
@@ -699,8 +724,14 @@ class Stage extends Debouncer {
 
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
-    if (button == 2 && _rightMouseMoveAccum < 5) {
+    if (_mouseDownButton == 2 && _rightMouseMoveAccum < 5) {
       // show a popup.
+      if (_hoverItem is StageContextMenuLauncher) {
+        var items = (_hoverItem as StageContextMenuLauncher).contextMenuItems;
+        if (items != null && items.isNotEmpty) {
+          _showContextMenu.notify(StageContextMenuDetails(items, x, y));
+        }
+      }
     }
 
     // If we didn't complete an operation and nothing was selected, clear

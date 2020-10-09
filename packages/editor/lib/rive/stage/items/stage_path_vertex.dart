@@ -7,15 +7,19 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_context_menu_launcher.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_core/shapes/path.dart' as core;
+import 'package:rive_editor/widgets/popup/context_popup.dart';
 
 /// Implementation of StageVertex for CubicVertex and StraightVertex.
-class StagePathVertex extends StageVertex<PathVertex> {
+class StagePathVertex extends StageVertex<PathVertex>
+    with StageContextMenuLauncher {
   StageControlVertex _in, _out;
   StagePathControlLine _lineIn, _lineOut;
 
@@ -153,6 +157,23 @@ class StagePathVertex extends StageVertex<PathVertex> {
   set weights(int value) {
     assert(component.weight != null);
     component.weight.values = value;
+  }
+
+  @override
+  List<PopupContextItem> get contextMenuItems {
+    if (component.path is PointsPath) {
+      var path = component.path as PointsPath;
+      return [
+        PopupContextItem(
+          'Make First Vertex',
+          select: () {
+            path.makeFirst(component);
+            path.context.captureJournalEntry();
+          },
+        ),
+      ];
+    }
+    return null;
   }
 }
 
