@@ -120,6 +120,17 @@ void main() {
           core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
       exporter.export();
     });
+    test('hulk mask test', () async {
+      var drawable = await SvgParserStateRived(
+              xml.parseEvents(mini_hulk), 'rive_key', svgPathFuncs)
+          .parse();
+
+      RiveFile _riveFile = createFromSvg(drawable);
+
+      var exporter = RuntimeExporter(
+          core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
+      exporter.export();
+    });
   });
 
   const flareRevisionFiles = [
