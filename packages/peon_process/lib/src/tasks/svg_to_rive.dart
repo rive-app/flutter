@@ -77,11 +77,15 @@ class SvgToRiveTask extends PeonTask {
         inPath,
         outPath
       ]);
-      if (output.exitCode == 0) {
+      if (output.exitCode == 0 &&
+          output.stderr.toString().contains('Your image is')) {
+        // svg cleaner exits with code 0, but can fail!
+        // all output is going to stderr
         var outFile = File(outPath);
         cleaned = await outFile.readAsString();
       } else {
         _log.severe('Problem running svgcleaner for $taskId'
+            '\nexitCode: ${output.exitCode}'
             '\nstdout:\n${output.stdout.toString().split('\n')}'
             '\nstderr:\n${output.stderr.toString().split('\n')}');
       }
