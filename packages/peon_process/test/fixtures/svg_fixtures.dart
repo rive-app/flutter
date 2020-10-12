@@ -1431,3 +1431,16 @@ var gradientTest = """<?xml version="1.0" standalone="no"?>
   <rect x="10" y="120" rx="15" ry="15" width="100" height="100" fill="url(#RadialGradient2)"/> 
 <ellipse cx="60" cy="280" rx="50" ry="50" fill="url(#grad2)" />
 </svg>""";
+
+var mini_hulk = """<?xml version="1.0" encoding="UTF-8"?>
+<svg width="254px" height="531px" viewBox="0 0 254 531" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <polygon id="path-1" points="11 47 12 19 50.5 0 53.5 13 96.5 25 131 54.5 149 104 117 181 118 211 46.5 230.5 27.5 171.5 0 125.5 6 87.5 28 63.5"></polygon>
+    </defs>
+    <mask id="mask-2" fill="white">
+        <use xlink:href="#path-1"></use>
+    </mask>
+    <use id="Mask" fill="#A2B683" xlink:href="#path-1"></use>
+    <polygon id="Path-2-Copy" fill="#B4CA91" mask="url(#mask-2)" points="30.5 116 -14.5 131 7 86.5 29 73.5 29 99"></polygon>
+    <polygon id="Path-2-Copy" fill="#B4CA91" mask="url(#mask-2)" points="56.5 26 55.5 0 138.5 0 141.5 13 186.5 25 221 54.5 238 104 206 181 207 211 136.5 230.5 99.5 138 106 58.5"></polygon>
+</svg>""";

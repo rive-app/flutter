@@ -367,7 +367,7 @@ class RivePathProxy extends FlutterPathProxy {
 void addArtboard(RiveFile file, DrawableRoot root) {
   Backboard backboard;
   Artboard artboard;
-  var clippingRefs = <String, Shape>{};
+  var clippingRefs = <String, Node>{};
   file.batchAdd(() {
     backboard = Backboard();
     artboard = Artboard()
@@ -389,9 +389,15 @@ void addArtboard(RiveFile file, DrawableRoot root) {
   });
 }
 
-void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
-    Drawable drawable, Map<String, Shape> clippingRefs,
-    {bool forceNode = false}) {
+void addChild(
+  DrawableRoot root,
+  RiveFile file,
+  ContainerComponent parent,
+  Drawable drawable,
+  Map<String, Node> clippingRefs, {
+  bool forceNode = false,
+  bool mask = false,
+}) {
   switch (drawable.runtimeType) {
     case DrawableShape:
       var drawableShape = drawable as DrawableShape;
@@ -401,7 +407,8 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
       } else {
         node = Shape();
       }
-      node.name = attrOrDefault(drawableShape.attributes, 'id', null);
+      var id = attrOrDefault(drawableShape.attributes, 'id', null);
+      node.name = id;
 
       var shapeOffset = getShapeOffset(file, drawableShape.path as RivePath);
       node.x = shapeOffset.dx;
@@ -443,7 +450,7 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
       paths.forEach((path) {
         node.appendChild(path);
       });
-      if (node is Shape && drawableShape.style != null) {
+      if (!mask && node is Shape && drawableShape.style != null) {
         if (drawableShape.style.fill != null &&
             drawableShape.style.fill.color != null) {
           var fill = node.createFill(drawableShape.style.fill.color);
@@ -505,11 +512,35 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
         node.appendChild(clipper);
       }
 
+      if (drawableShape.style.mask != null) {
+        var clipAttr = drawableShape.attributes
+            .firstWhere((element) =>
+                element.name == 'mask' || element.value.contains('mask'))
+            .value;
+        clipAttr = clipAttr.split(':').last;
+
+        if (!clippingRefs.containsKey(clipAttr)) {
+          clippingRefs[clipAttr] = getMaskingShape(
+            drawableShape.style.mask as DrawableGroup,
+            root,
+            file,
+            parent,
+            drawable,
+            clippingRefs,
+          );
+        }
+
+        var clipper = ClippingShape();
+        file.addObject(clipper);
+        clipper.source = clippingRefs[clipAttr];
+        node.appendChild(clipper);
+      }
       break;
     case DrawableGroup:
       var drawableGroup = drawable as DrawableGroup;
+      var id = attrOrDefault(drawableGroup.attributes, 'id', null);
       var node = Node()
-        ..name = attrOrDefault(drawableGroup.attributes, 'id', null)
+        ..name = id
         ..x = 0
         ..y = 0;
 
@@ -558,13 +589,8 @@ void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
       }
 
       for (var i = drawableGroup.children.length - 1; i >= 0; i--) {
-        addChild(
-          root,
-          file,
-          node,
-          drawableGroup.children[i],
-          clippingRefs,
-        );
+        addChild(root, file, node, drawableGroup.children[i], clippingRefs,
+            mask: mask);
       }
 
       break;
@@ -650,7 +676,7 @@ Shape getClippingShape(
   RiveFile file,
   ContainerComponent parent,
   Drawable drawable,
-  Map<String, Shape> clippingRefs,
+  Map<String, Node> clippingRefs,
 ) {
   var clipShape = Shape()
     ..name = clipPath.id
@@ -689,6 +715,52 @@ Shape getClippingShape(
     );
   });
   return clipShape;
+}
+
+Node getMaskingShape(
+  DrawableGroup mask,
+  DrawableRoot root,
+  RiveFile file,
+  ContainerComponent parent,
+  Drawable drawable,
+  Map<String, Node> clippingRefs,
+) {
+  var id = attrOrDefault(mask.attributes, 'id', null);
+  var maskShape = Node()
+    ..name = id
+    ..x = 0
+    ..y = 0;
+
+  var composer = PathComposer();
+  file.addObject(composer);
+  file.addObject(maskShape);
+  maskShape.appendChild(composer);
+
+  parent.appendChild(maskShape);
+
+  if (mask.transform != null) {
+    // need to unpack the transform into rotation, scale and transform
+    var transform = TransformComponents();
+    Mat2D.decompose(Mat2D.fromMat4(mask.transform), transform);
+    maskShape.rotation += transform.rotation;
+    maskShape.x += transform.x;
+    maskShape.y += transform.y;
+    maskShape.scaleX *= transform.scaleX;
+    maskShape.scaleY *= transform.scaleY;
+  }
+
+  mask.children.forEach((child) {
+    addChild(
+      root,
+      file,
+      maskShape,
+      child,
+      clippingRefs,
+      forceNode: true,
+      mask: true,
+    );
+  });
+  return maskShape;
 }
 
 Offset getShapeOffset(RiveFile file, RivePath rivePath) {
