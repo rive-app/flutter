@@ -61,7 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     var imagePaths = manifestMap.keys
         // .where((String key) => key.contains('other'))
-        // .where((String key) => !key.contains('club'))
+        // .where((String key) => key.contains('custom'))
+        // .where((String key) => key.contains('sde'))
+        // .where((String key) => key.contains('club'))
         // .where((String key) => key.contains('blob.'))
         // .where((String key) => key.contains('.svg'))
         // .where((String key) => key.contains('krank'))
