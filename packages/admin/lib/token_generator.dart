@@ -23,7 +23,8 @@ class _TokenGeneratorState extends State<TokenGenerator> {
       );
 
   void _validateEmailAddresses() {
-    final emails = _multipleEmailValidator.allMatches(_email.text);
+    final emails =
+        _multipleEmailValidator.allMatches(_email.text.toLowerCase());
     setState(() {
       emails.forEach((element) {
         final email = element.group(0); // First group contains the full match
