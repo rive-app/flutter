@@ -31,6 +31,8 @@ abstract class Debouncer {
     return false;
   }
 
+  void clearDebounce() => _debounce.clear();
+  
   bool debounceAll({bool force = false}) {
     if (_debounce.isEmpty) {
       return false;
