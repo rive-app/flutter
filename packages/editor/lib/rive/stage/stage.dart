@@ -500,12 +500,13 @@ class Stage extends Debouncer {
     });
   }
 
-  void _updateHover() {
+  void _updateHover({bool Function(StageItem) filter}) {
     if (isSelectionEnabled && _worldMouse != null) {
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         forEachHover((item) {
-          if (isItemSelectable(item) &&
+          if ((filter?.call(item) ?? true) &&
+              isItemSelectable(item) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
             hover = item;
@@ -515,7 +516,9 @@ class Stage extends Debouncer {
       } else {
         List<StageItem> candidates = [];
         forEachHover((item) {
-          if (isItemSelectable(item) && item.hitHiFi(_worldMouse)) {
+          if ((filter?.call(item) ?? true) &&
+              isItemSelectable(item) &&
+              item.hitHiFi(_worldMouse)) {
             candidates.add(item);
           }
           return true;
@@ -749,10 +752,15 @@ class Stage extends Debouncer {
             node.isExpanded = true;
           }
 
-          _updateHover();
+          // Only hit items that have backing components when expanding.
+          _updateHover(filter: (item) => item.component != null);
+
           // The expansion caused something else to be hovered, select it.
           if (_hoverItem != _mouseDownHit) {
-            file.select(StageExpandable.findNonExpanded(_hoverItem));
+            var nonExpanded = StageExpandable.findNonExpanded(_hoverItem);
+            if (nonExpanded != null) {
+              file.select(nonExpanded);
+            }
           }
           markNeedsRedraw();
         } else if (_mouseDownHit is StagePath) {
