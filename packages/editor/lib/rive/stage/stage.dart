@@ -61,7 +61,6 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
-import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:utilities/restorer.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:utilities/utilities.dart';
@@ -415,11 +414,10 @@ class Stage extends Debouncer {
     markNeedsAdvance();
   }
 
-  void mouseWheel(double x, double y, double dx, double dy) {
-    _lastMousePosition[0] = x;
-    _lastMousePosition[1] = y;
-    if (ShortcutAction.mouseWheelZoom.value) {
-      zoomTo(x, y, _viewZoomTarget - dy / 30);
+  void mouseWheel(double dx, double dy, bool forceZoom) {
+    if (ShortcutAction.mouseWheelZoom.value || forceZoom) {
+      zoomTo(_lastMousePosition[0], _lastMousePosition[1],
+          _viewZoomTarget - dy / 100);
     } else {
       _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
       _viewTranslationTarget[0] -= dx;

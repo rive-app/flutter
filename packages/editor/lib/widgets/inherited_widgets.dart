@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/image_cache.dart';
@@ -10,6 +13,7 @@ import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
 import 'package:rive_editor/widgets/theme.dart';
+import 'package:window_utils/window_utils.dart';
 
 /// Inherited widget that will pass the theme down the tree
 /// To access the theme data anywhere in a Flutter context, use:
@@ -215,12 +219,6 @@ class _KeyPressProviderState extends State<KeyPressProvider> {
     var isRelease = (code & (1 << 18)) != 0;
     var isRepeat = (code & (1 << 17)) != 0;
     var keyCode = code & ~(1 << 18 | 1 << 17);
-    // print('KEY: ${keyForCode(keyCode)}');
-    // if (isRelease) {
-    //   print('Released: $keyCode');
-    // } else {
-    //   print('Pressed: $keyCode $isRepeat');
-    // }
     var key = keyForCode(keyCode);
     if (key != null) {
       widget.listener?.call(key, !isRelease, isRepeat);
@@ -229,4 +227,58 @@ class _KeyPressProviderState extends State<KeyPressProvider> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+typedef MouseWheelCallback = void Function(MouseWheelDetails details);
+
+class MouseWheelProvider extends StatefulWidget {
+  const MouseWheelProvider({@required this.listener, this.child});
+  final Widget child;
+  final MouseWheelCallback listener;
+
+  @override
+  _MouseWheelProviderState createState() => _MouseWheelProviderState();
+}
+
+class _MouseWheelProviderState extends State<MouseWheelProvider> {
+  StreamSubscription _subscription;
+  @override
+  void initState() {
+    if (kIsWeb) {
+      _subscription =
+          WindowUtilsPlatform.instance.scrollMouseWheel.listen(_onWheelEvent);
+    }
+    super.initState();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  void _onWheelEvent(MouseWheelDetails details) {
+    widget.listener?.call(details);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb) {
+      /// On the web our EventChannel handles scroll wheel events for us.
+      return widget.child;
+    }
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerSignal: (details) {
+        if (details is PointerScrollEvent) {
+          widget.listener?.call(MouseWheelDetails(details.scrollDelta, false));
+        }
+      },
+    );
+  }
 }

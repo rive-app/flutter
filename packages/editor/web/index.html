@@ -192,6 +192,7 @@
       });
     }
   </script>
+  <script src="assets/assets/web/mouse-wheel.js" type="application/javascript"></script>
   <script src="main.dart.js?v=DEPLOYMENTVERSION" type="application/javascript"></script>
   <script>
     window._flutter_web_set_location_strategy(null);
@@ -199,7 +200,7 @@
     function getLocation() {
       return document.location.pathname;
     }
-    
+
     window.onpopstate = function (event) {
       if (typeof travel != 'undefined') {
         travel(document.location.pathname);
@@ -209,8 +210,6 @@
       event.stopPropagation();
     };
   </script>
-</body>
-</body>
 </body>
 
 </html>

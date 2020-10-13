@@ -17,6 +17,12 @@ class DroppedFile {
   String toString() => 'DroppedFile: $filename ${bytes.length}';
 }
 
+class MouseWheelDetails {
+  final Offset delta;
+  final bool forceZoom;
+
+  MouseWheelDetails(this.delta, this.forceZoom);
+}
 /// A callback invoked when the window gets a set of acceptable files dropped
 /// onto it.
 typedef DroppedFilesCallback = void Function(Iterable<DroppedFile> files);
@@ -33,6 +39,8 @@ abstract class WindowUtilsPlatform extends PlatformInterface {
   WindowUtilsPlatform() : super(token: _token);
 
   static DroppedFilesCallback filesDropped;
+
+  Stream<MouseWheelDetails> get scrollMouseWheel => null;
 
   static final Object _token = Object();
 
