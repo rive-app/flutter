@@ -467,37 +467,35 @@ class StagePanel extends StatelessWidget {
                         var local = getBox.globalToLocal(details.position);
                         stage.mouseMove(details.buttons, local.dx, local.dy);
                       },
-                      child: MouseWheelProvider(
-                        listener: (details) {
-                          stage.mouseWheel(
-                            details.delta.dx,
-                            details.delta.dy,
-                            details.forceZoom,
-                          );
+                      child: Listener(
+                        behavior: HitTestBehavior.deferToChild,
+                        onPointerDown: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseDown(details.buttons, local.dx, local.dy);
+                          file.rive.startDragOperation();
                         },
-                        child: Listener(
-                          behavior: HitTestBehavior.opaque,
-                          onPointerDown: (details) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseDown(
-                                details.buttons, local.dx, local.dy);
-                            file.rive.startDragOperation();
-                          },
-                          onPointerUp: (details) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseUp(details.buttons, local.dx, local.dy);
-                            file.rive.endDragOperation();
-                          },
-                          onPointerMove: (details) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseDrag(
-                                details.buttons, local.dx, local.dy);
+                        onPointerUp: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseUp(details.buttons, local.dx, local.dy);
+                          file.rive.endDragOperation();
+                        },
+                        onPointerMove: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseDrag(details.buttons, local.dx, local.dy);
+                        },
+                        child: MouseWheelProvider(
+                          listener: (details) {
+                            stage.mouseWheel(
+                              details.delta.dx,
+                              details.delta.dy,
+                              details.forceZoom,
+                            );
                           },
                         ),
                       ),
