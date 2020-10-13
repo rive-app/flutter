@@ -270,7 +270,7 @@ class _MouseWheelProviderState extends State<MouseWheelProvider> {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       /// On the web our EventChannel handles scroll wheel events for us.
-      return widget.child;
+      return widget.child ?? const Listener(behavior: HitTestBehavior.opaque);
     }
     return Listener(
       behavior: HitTestBehavior.opaque,
