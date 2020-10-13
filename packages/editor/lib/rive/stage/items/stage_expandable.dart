@@ -139,6 +139,10 @@ abstract class StageExpandable<T extends Node> {
   }
 
   static StageItem findNonExpanded(StageItem item) {
+    if (item.component == null) {
+      return null;
+    }
+
     StageItem last = item;
     for (var node = (item.component as Component).parentExpandable;
         node != null;

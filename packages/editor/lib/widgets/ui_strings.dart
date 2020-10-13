@@ -66,6 +66,7 @@ HashMap<String, String> _defaultUIStrings =
   'position.y': 'Y',
   'end.endX': 'X',
   'end.endY': 'Y',
+  'r': 'Rotation',
   'end': 'Gradient End',
   'start': 'Gradient Start',
   'start.startX': 'X',

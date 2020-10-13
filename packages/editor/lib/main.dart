@@ -5,7 +5,6 @@ import 'package:core/error_logger/error_logger.dart';
 import 'package:core/error_logger/native_error_logger.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -469,16 +468,7 @@ class StagePanel extends StatelessWidget {
                         stage.mouseMove(details.buttons, local.dx, local.dy);
                       },
                       child: Listener(
-                        behavior: HitTestBehavior.opaque,
-                        onPointerSignal: (details) {
-                          if (details is PointerScrollEvent) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseWheel(local.dx, local.dy,
-                                details.scrollDelta.dx, details.scrollDelta.dy);
-                          }
-                        },
+                        behavior: HitTestBehavior.deferToChild,
                         onPointerDown: (details) {
                           RenderBox getBox =
                               context.findRenderObject() as RenderBox;
@@ -499,6 +489,15 @@ class StagePanel extends StatelessWidget {
                           var local = getBox.globalToLocal(details.position);
                           stage.mouseDrag(details.buttons, local.dx, local.dy);
                         },
+                        child: MouseWheelProvider(
+                          listener: (details) {
+                            stage.mouseWheel(
+                              details.delta.dx,
+                              details.delta.dy,
+                              details.forceZoom,
+                            );
+                          },
+                        ),
                       ),
                     ),
             ),

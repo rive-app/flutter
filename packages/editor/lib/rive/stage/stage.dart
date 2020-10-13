@@ -61,7 +61,6 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
-import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:utilities/restorer.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:utilities/utilities.dart';
@@ -415,11 +414,10 @@ class Stage extends Debouncer {
     markNeedsAdvance();
   }
 
-  void mouseWheel(double x, double y, double dx, double dy) {
-    _lastMousePosition[0] = x;
-    _lastMousePosition[1] = y;
-    if (ShortcutAction.mouseWheelZoom.value) {
-      zoomTo(x, y, _viewZoomTarget - dy / 30);
+  void mouseWheel(double dx, double dy, bool forceZoom) {
+    if (ShortcutAction.mouseWheelZoom.value || forceZoom) {
+      zoomTo(_lastMousePosition[0], _lastMousePosition[1],
+          _viewZoomTarget - dy / 100);
     } else {
       _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
       _viewTranslationTarget[0] -= dx;
@@ -502,12 +500,13 @@ class Stage extends Debouncer {
     });
   }
 
-  void _updateHover() {
+  void _updateHover({bool Function(StageItem) filter}) {
     if (isSelectionEnabled && _worldMouse != null) {
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         forEachHover((item) {
-          if (isItemSelectable(item) &&
+          if ((filter?.call(item) ?? true) &&
+              isItemSelectable(item) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
             hover = item;
@@ -517,7 +516,9 @@ class Stage extends Debouncer {
       } else {
         List<StageItem> candidates = [];
         forEachHover((item) {
-          if (isItemSelectable(item) && item.hitHiFi(_worldMouse)) {
+          if ((filter?.call(item) ?? true) &&
+              isItemSelectable(item) &&
+              item.hitHiFi(_worldMouse)) {
             candidates.add(item);
           }
           return true;
@@ -751,10 +752,15 @@ class Stage extends Debouncer {
             node.isExpanded = true;
           }
 
-          _updateHover();
+          // Only hit items that have backing components when expanding.
+          _updateHover(filter: (item) => item.component != null);
+
           // The expansion caused something else to be hovered, select it.
           if (_hoverItem != _mouseDownHit) {
-            file.select(StageExpandable.findNonExpanded(_hoverItem));
+            var nonExpanded = StageExpandable.findNonExpanded(_hoverItem);
+            if (nonExpanded != null) {
+              file.select(nonExpanded);
+            }
           }
           markNeedsRedraw();
         } else if (_mouseDownHit is StagePath) {
@@ -1225,6 +1231,7 @@ class Stage extends Debouncer {
 
   /// Clear out all stage items. Normally called when the file is also wiped.
   void wipe() {
+    clearDebounce();
     _soloNotifier.value = null;
     _drawPasses.clear();
 

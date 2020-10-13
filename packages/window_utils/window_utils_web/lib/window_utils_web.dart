@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:js' as js;
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:js' as js;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -11,10 +11,17 @@ import 'package:window_utils_web/browser.dart' as browser;
 
 /// The web implementation of [WindowUtilsPlatform].
 ///
-/// This class implements (or stubs out) `package:window_utils` functionality for the web.
+/// This class implements (or stubs out) `package:window_utils` functionality
+/// for the web.
 class WindowUtilsPlugin extends WindowUtilsPlatform {
+  final _scrollMouseWheel = StreamController<MouseWheelDetails>();
+
+  @override
+  Stream<MouseWheelDetails> get scrollMouseWheel => _scrollMouseWheel.stream;
+
   final BinaryMessenger messenger;
   static const String keyChannelName = 'plugins.rive.app/key_press';
+  static const String wheelChannelName = 'plugins.rive.app/mouse_wheel';
 
   /// Registers this class as the default instance of [UrlLauncherPlatform].
   static void registerWith(Registrar registrar) {
@@ -94,6 +101,12 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
   @override
   Future<bool> initInputHelper() async {
     js.context.callMethod('initInputHelper');
+    js.context['scrolledMouseWheel'] =
+        (dynamic x, dynamic y, dynamic forceZoom) {
+      if (x is double && y is double && forceZoom is bool) {
+        _scrollMouseWheel.add(MouseWheelDetails(Offset(x, y), forceZoom));
+      }
+    };
     js.context['keyPressed'] = (dynamic test) {
       if (test is int) {
         var codec = const StandardMethodCodec();
@@ -107,7 +120,7 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
         return;
       }
       List<DroppedFile> droppedFiles = [];
-      for (final item in (test as js.JsArray)) {
+      for (final item in test as js.JsArray) {
         if (item is! js.JsObject) {
           continue;
         }
