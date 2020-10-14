@@ -14,7 +14,7 @@ import 'package:window_utils_web/browser.dart' as browser;
 /// This class implements (or stubs out) `package:window_utils` functionality
 /// for the web.
 class WindowUtilsPlugin extends WindowUtilsPlatform {
-  final _scrollMouseWheel = StreamController<MouseWheelDetails>();
+  final _scrollMouseWheel = StreamController<MouseWheelDetails>.broadcast();
 
   @override
   Stream<MouseWheelDetails> get scrollMouseWheel => _scrollMouseWheel.stream;
