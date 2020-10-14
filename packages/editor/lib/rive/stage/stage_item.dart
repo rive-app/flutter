@@ -321,6 +321,9 @@ abstract class StageItem<T> extends SelectableItem
   void addSnapTarget(SnappingAxes axes) {
     if (obb != null) {
       var poly = obb.poly;
+      if (obb.bounds.isEmpty) {
+        return;
+      }
       axes.addPoint(poly[0], poly[1]);
       axes.addPoint(poly[2], poly[3]);
       axes.addPoint(poly[4], poly[5]);
