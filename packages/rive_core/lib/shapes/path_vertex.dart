@@ -171,7 +171,8 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
 
   bool validateWeight(int tendonCount) {
     if (weight == null) {
-      return true;
+      initWeight();
+      return false;
     }
     var helpers = weightedVertices;
     bool wasValid = true;
