@@ -54,6 +54,9 @@ class SnappingAxes {
   }
 
   void addAABB(AABB bounds) {
+    if (bounds.isEmpty) {
+      return;
+    }
     var center = AABB.center(Vec2D(), bounds);
     //tl
     addPoint(bounds[0], bounds[1]);
