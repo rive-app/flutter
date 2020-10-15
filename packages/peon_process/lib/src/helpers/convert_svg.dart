@@ -548,6 +548,11 @@ void addChild(
       if (drawableGroup.style.groupOpacity != null) {
         node.opacity = drawableGroup.style.groupOpacity;
       }
+      if (drawableGroup.style.fill != null &&
+          drawableGroup.style.fill.color != null &&
+          drawableGroup.style.fill.color.alpha != 255) {
+        node.opacity = drawableGroup.style.fill.color.alpha / 255;
+      }
 
       if (drawableGroup.transform != null) {
         // need to unpack the transform into rotation, scale and transform
@@ -574,6 +579,30 @@ void addChild(
         if (!clippingRefs.containsKey(clipAttr)) {
           clippingRefs[clipAttr] = getClippingShape(
             drawableGroup.style.clipPath,
+            root,
+            file,
+            parent,
+            drawable,
+            clippingRefs,
+          );
+        }
+
+        var clipper = ClippingShape();
+        file.addObject(clipper);
+        clipper.source = clippingRefs[clipAttr];
+        node.appendChild(clipper);
+      }
+
+      if (drawableGroup.style.mask != null) {
+        var clipAttr = drawableGroup.attributes
+            .firstWhere((element) =>
+                element.name == 'mask' || element.value.contains('mask'))
+            .value;
+        clipAttr = clipAttr.split(':').last;
+
+        if (!clippingRefs.containsKey(clipAttr)) {
+          clippingRefs[clipAttr] = getMaskingShape(
+            drawableGroup.style.mask as DrawableGroup,
             root,
             file,
             parent,
