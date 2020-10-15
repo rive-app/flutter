@@ -192,6 +192,7 @@ class CoopClient extends CoopReader {
             _connectionCompleter?.complete(ConnectResult(
                 ConnectState.networkError,
                 info: error.toString()));
+            _connectionCompleter = null;
             if (_allowReconnect) {
               _reconnect();
             }
