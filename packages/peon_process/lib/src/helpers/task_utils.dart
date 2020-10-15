@@ -15,17 +15,25 @@ abstract class PeonTask with Task {
   @override
   Future<bool> execute() async {
     bool success = false;
+    String error;
     try {
       success = await peonExecute();
+    } on Exception catch (e) {
+      error = e.toString();
+      rethrow;
+      // ignore: avoid_catching_errors
+    } on Error catch (e) {
+      error = e.toString();
+      rethrow;
     } finally {
       // make sure we update our task if we're completed here...
-      await completeTask(this, success);
+      await completeTask(this, success, error);
     }
     return success;
   }
 }
 
-Future<void> completeTask(PeonTask task, bool success) async {
+Future<void> completeTask(PeonTask task, bool success, String message) async {
   var client = ConsoleClient();
   try {
     var queue = await getJSQueue(client);
@@ -34,7 +42,8 @@ Future<void> completeTask(PeonTask task, bool success) async {
       json.encode({
         'work': work,
         'taskId': task.taskId,
-        'payload': task.originalTaskData
+        'payload': task.originalTaskData,
+        'message': message
       }),
       region: defaultRegion,
       service: 'sqs',
