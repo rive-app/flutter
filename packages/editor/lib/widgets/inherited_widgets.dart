@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -263,14 +262,30 @@ class _MouseWheelProviderState extends State<MouseWheelProvider> {
   }
 
   void _onWheelEvent(MouseWheelDetails details) {
-    widget.listener?.call(details);
+    if (_isOver) {
+      widget.listener?.call(details);
+    }
   }
+
+  bool _isOver = false;
 
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
       /// On the web our EventChannel handles scroll wheel events for us.
-      return widget.child ?? const Listener(behavior: HitTestBehavior.opaque);
+      return MouseRegion(
+        opaque: true,
+        child: widget.child,
+        onEnter: (_) {
+          _isOver = true;
+        },
+        onExit: (_) {
+          _isOver = false;
+        },
+        onHover: (_) {
+          _isOver = true;
+        },
+      );
     }
     return Listener(
       behavior: HitTestBehavior.opaque,

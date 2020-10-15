@@ -513,9 +513,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     return disconnectResult;
   }
 
-  Future<bool> forceReconnect() async {
-    return _client.forceReconnect();
-  }
+  void reconnect({bool now = false}) => _client.reconnect(now);
 
   Object getObjectProperty(Core object, int propertyKey);
 
