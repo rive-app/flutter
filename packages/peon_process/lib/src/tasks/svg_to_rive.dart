@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
+import 'package:peon_process/src/helpers/svg_utils/paths.dart';
 import 'package:peon_process/src/helpers/task_utils.dart';
 
 import 'package:rive_core/rive_file.dart';
