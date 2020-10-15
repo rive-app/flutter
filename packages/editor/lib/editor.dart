@@ -105,26 +105,34 @@ class _EditorState extends State<Editor> {
 
       var completer =
           TaskManager().notifyTasks(taskIds, (TaskCompleted result) async {
-        try {
-          var rivBytes = await taskApi.taskData(result.taskId);
-          var importer = RuntimeImporter(core: activeFile.core);
-          if (importer.import(rivBytes)) {
-            activeFile.addAlert(SimpleAlert(
-                'Imported ${backendConverting[result.taskId].filename}.'));
+        if (result.success) {
+          try {
+            var rivBytes = await taskApi.taskData(result.taskId);
+            var importer = RuntimeImporter(core: activeFile.core);
+            if (importer.import(rivBytes)) {
+              activeFile.addAlert(SimpleAlert(
+                  'Imported ${backendConverting[result.taskId].filename}.'));
+            }
+            activeFile.core.captureJournalEntry();
+          } on ApiException {
+            activeFile.addAlert(SimpleAlert('Error converting '
+                '${backendConverting[result.taskId].filename}.'));
+            rethrow;
+            // ignore: avoid_catching_errors
+          } on UnsupportedError {
+            activeFile.addAlert(
+                SimpleAlert('${backendConverting[result.taskId].filename} '
+                    'is unsupported.'));
+            rethrow;
           }
-          activeFile.core.captureJournalEntry();
-        } on ApiException {
-          activeFile.addAlert(SimpleAlert('Error converting '
-              '${backendConverting[result.taskId].filename}.'));
-          rethrow;
-        } on UnsupportedError {
-          activeFile.addAlert(SimpleAlert(
-              '${backendConverting[result.taskId].filename} is unsupported.'));
-          rethrow;
+        } else {
+          activeFile.addAlert(SimpleAlert('Could not convert '
+              '${backendConverting[result.taskId].filename}. '
+              'Please contact Rive if the problem persists.'));
         }
       });
 
-      await completer.future.timeout(const Duration(seconds: 10),
+      await completer.future.timeout(const Duration(seconds: 30),
           onTimeout: () {
         activeFile.addAlert(SimpleAlert('Timed out converting files.'));
         return null;

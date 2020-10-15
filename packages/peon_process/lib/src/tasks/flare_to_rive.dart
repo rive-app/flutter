@@ -44,7 +44,7 @@ class FlareToRiveTask extends PeonTask {
   }
 
   @override
-  Future<bool> execute() async {
+  Future<bool> peonExecute() async {
     var data = await getS3Key(sourceLocation);
 
     final converter = FlareToRive(taskId)..toFile(String.fromCharCodes(data));
@@ -56,7 +56,6 @@ class FlareToRiveTask extends PeonTask {
     var bytes = exporter.export();
 
     await putS3Key(targetLocation, bytes);
-    await completeTask(this);
 
     return true;
   }

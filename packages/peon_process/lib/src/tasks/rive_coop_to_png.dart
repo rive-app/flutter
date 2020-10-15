@@ -94,7 +94,7 @@ class RiveCoopToPng extends PeonTask {
   }
 
   @override
-  Future<bool> execute() async {
+  Future<bool> peonExecute() async {
     // FML
     var data = await getS3Key(sourceLocation, 'us-east-1');
     var riveFile = RiveFile(fileId.toString(), localDataPlatform: null);
@@ -115,7 +115,6 @@ class RiveCoopToPng extends PeonTask {
     }
 
     await putS3Key(targetLocation, svgdata, 'us-east-1');
-    await completeTask(this);
     return true;
   }
 }

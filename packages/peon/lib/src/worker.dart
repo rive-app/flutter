@@ -50,25 +50,35 @@ Future<void> loop(Future<SqsQueue> Function(ConsoleClient) getQueue,
       service: 'sqs',
     );
     messages.forEach((message) async {
+      bool success = false;
       try {
-        bool success = await execute(message, tasks);
-        if (success) {
-          await queue.deleteMessage(
-            message.receiptHandle,
-            region: defaultRegion,
-            service: 'sqs',
-          );
-          _log.info('Work done.');
-        } else {
-          await queue.deleteMessage(
-            message.receiptHandle,
-            region: defaultRegion,
-            service: 'sqs',
-          );
-          _log.info('Work failed, removing from queue.');
-        }
+        success = await execute(message, tasks);
       } on Exception catch (e, s) {
         _log.severe('Encountered Error: MESSAGE\n$message\n', e, s);
+        // ignore: avoid_catching_errors
+      } on Error catch (e, s) {
+        // Catching Error as some of our tasks throw errors as opposed to
+        // exceptions...
+        // Like the svg parser, complaining about not finding
+        // elements with matching ids.
+        _log.severe('Encountered Error: MESSAGE\n$message\n', e, s);
+      }
+
+      // If we fail updating the message I guess we fail.
+      if (success) {
+        await queue.deleteMessage(
+          message.receiptHandle,
+          region: defaultRegion,
+          service: 'sqs',
+        );
+        _log.info('Work done.');
+      } else {
+        await queue.deleteMessage(
+          message.receiptHandle,
+          region: defaultRegion,
+          service: 'sqs',
+        );
+        _log.info('Work failed, removing from queue.');
       }
     });
   }

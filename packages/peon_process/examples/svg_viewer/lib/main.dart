@@ -12,6 +12,7 @@ import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
 
+import 'package:peon_process/src/helpers/svg_utils/paths.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
 import 'package:rive/rive.dart' as rive;
 import 'package:rive_core/rive_file.dart';
@@ -62,11 +63,12 @@ class _MyHomePageState extends State<MyHomePage> {
     var imagePaths = manifestMap.keys
         // .where((String key) => key.contains('other'))
         // .where((String key) => key.contains('custom'))
+        // .where((String key) => key.contains('mini'))
         // .where((String key) => key.contains('sde'))
         // .where((String key) => key.contains('club'))
         // .where((String key) => key.contains('blob.'))
         // .where((String key) => key.contains('.svg'))
-        // .where((String key) => key.contains('krank'))
+        // .where((String key) => key.contains('avatar'))
         .where((String key) => key.contains('.svg'))
         .toList();
 

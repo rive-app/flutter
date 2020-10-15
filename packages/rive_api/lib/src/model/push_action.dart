@@ -34,13 +34,15 @@ class FolderNotification extends PushAction {
 class TaskCompleted extends PushAction {
   final Map<String, dynamic> attrs;
   final String taskId;
+  final bool success;
 
-  TaskCompleted({this.taskId, this.attrs});
+  TaskCompleted({this.taskId, this.attrs, this.success});
 
   factory TaskCompleted.fromDM(TaskCompletedDM action) {
     return TaskCompleted(
       taskId: action.taskId,
       attrs: action.attrs,
+      success: action.success,
     );
   }
 }
