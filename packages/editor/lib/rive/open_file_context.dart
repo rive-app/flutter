@@ -79,7 +79,7 @@ class OpenFileContext with RiveFileDelegate {
   /// File name
   final ValueNotifier<String> _name;
   ValueListenable<String> get name => _name;
-  
+
   String get tabName => _name.value;
   set tabName(String value) => _name.value = value;
 
@@ -257,10 +257,7 @@ class OpenFileContext with RiveFileDelegate {
   final Event stateChanged = Event();
 
   Future<bool> connect() async {
-    if (core != null) {
-      // TODO: We're already connected, the user re-clicked on this tab.
-      print('TODO: make sure Core connection is still open, maybe ping it?');
-    } else {
+    if (core == null) {
       // If the spectre cookie doesn't exist, then you're on the web
       // and the browser will handle cookie sending, so don't include
 
@@ -286,10 +283,6 @@ class OpenFileContext with RiveFileDelegate {
     }
 
     return true;
-  }
-
-  Future<bool> reconnect() async {
-    return core.forceReconnect();
   }
 
   @protected
@@ -355,6 +348,10 @@ class OpenFileContext with RiveFileDelegate {
     return false;
   }
 
+  void reconnect() {
+    core.reconnect(now: true);
+  }
+
   void delaySleep() {
     switch (_state) {
       case OpenFileState.sleeping:
@@ -362,8 +359,7 @@ class OpenFileContext with RiveFileDelegate {
         stateChanged.notify();
 
         _sleepTimer?.cancel();
-
-        core.forceReconnect();
+        core.reconnect();
         break;
       case OpenFileState.open:
         _sleepTimer?.cancel();
