@@ -98,7 +98,7 @@ class SvgToRiveTask extends PeonTask {
   }
 
   @override
-  Future<bool> execute() async {
+  Future<bool> peonExecute() async {
     var data = await getS3Key(sourceLocation);
     var cleanedData = await clean(String.fromCharCodes(data));
 
@@ -118,7 +118,6 @@ class SvgToRiveTask extends PeonTask {
     var uint8data = exporter.export();
 
     await putS3Key(targetLocation, uint8data);
-    await completeTask(this);
     return true;
   }
 }

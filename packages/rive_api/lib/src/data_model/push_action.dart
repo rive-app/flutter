@@ -2,10 +2,10 @@ import 'package:utilities/deserialize.dart';
 
 abstract class PushActionDM {
   static PushActionDM fromData(Map<String, dynamic> data) {
-    if (!data.containsKey("action")) {
+    if (!data.containsKey('action')) {
       return null;
     }
-    switch (data["action"] as String) {
+    switch (data['action'] as String) {
       case 'NewNotification':
         return NewNotificationDM();
       case 'Ping':
@@ -13,6 +13,8 @@ abstract class PushActionDM {
       case 'FolderChange':
         return FolderNotificationDM.fromData(data);
       case 'TaskCompleted':
+        return TaskCompletedDM.fromData(data);
+      case 'TaskFailed':
         return TaskCompletedDM.fromData(data);
       default:
         throw Exception('Unknown action $data');
@@ -42,14 +44,16 @@ class FolderNotificationDM extends PushActionDM {
 class TaskCompletedDM extends PushActionDM {
   final Map<String, dynamic> attrs;
   final String taskId;
+  final bool success;
 
-  TaskCompletedDM({this.taskId, this.attrs});
+  TaskCompletedDM({this.taskId, this.attrs, this.success});
 
   factory TaskCompletedDM.fromData(Map<String, dynamic> data) {
     var params = data.getMap<String, Object>('params');
     return TaskCompletedDM(
       taskId: params.getString('taskId'),
       attrs: data,
+      success: data['action'] == 'TaskCompleted',
     );
   }
 }
