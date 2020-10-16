@@ -1466,14 +1466,14 @@ class Stage extends Debouncer {
       return;
     }
     if (_soloNotifier.value != null) {
-      for (final item in _soloNotifier.value) {
+      var removedItems = value == null
+          ? _soloNotifier.value
+          : _soloNotifier.value.difference(value.toSet());
+      for (final item in removedItems) {
         item.onSoloChanged(false);
       }
     }
-    if (value != null) {
-      // Force select the solo items to expand them in the hierarchy.
-      file.selection.selectMultiple(value);
-    }
+    
     file.selection.clear();
     _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
     _updateHover();

@@ -342,6 +342,12 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
         double distance = Vec2D.distance(worldMouse, intersectionWorld);
         if (distance < closestPathDistance) {
+
+          // If this is a cubic, don't allow splitting right on existing points.
+          if (cubicBezier != null && (cubicSplitT <= 0 || cubicSplitT >= 1)) {
+            continue;
+          }
+
           closestPathDistance = distance;
           pathResult = PenToolInsertTarget(
             path: path,
@@ -359,6 +365,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         result = pathResult;
       }
     }
+
     return result;
   }
 
@@ -399,6 +406,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       autoKeySuppression.restore();
       return true;
     }
+
+    // must split between the start/end.
+    assert(target.cubicSplitT > 0 && target.cubicSplitT < 1);
 
     // Store a list of cubic vertices that'll need to be patched up.
     final patchBoundCubics =
