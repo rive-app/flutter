@@ -2,11 +2,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:peon_process/src/helpers/svg_utils/clipping.dart';
 import 'package:peon_process/src/helpers/svg_utils/gradient.dart';
 import 'package:peon_process/src/helpers/svg_utils/masking.dart';
+// import 'package:peon_process/src/helpers/svg_utils/masking.dart';
 import 'package:peon_process/src/helpers/svg_utils/paths.dart';
 import 'package:peon_process/src/helpers/svg_utils/utils.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
@@ -19,7 +21,8 @@ void addChild(
   RiveFile file,
   ContainerComponent parent,
   Drawable drawable,
-  Map<String, Node> clippingRefs, {
+  Map<String, Node> clippingRefs,
+  Map<Node, String> clips, {
   bool forceNode = false,
   bool mask = false,
 }) {
@@ -49,25 +52,25 @@ void addChild(
       var nodeParent = parent;
 
       if (drawableShape.transform != null) {
-        // need to unpack the transform into rotation, scale and transform
-        var transformNode = Node();
-        var transform = TransformComponents();
-        Mat2D.decompose(Mat2D.fromMat4(drawableShape.transform), transform);
+        var shapeTransform = Mat2D.fromMat4(drawableShape.transform);
+        var pathTranslation = Mat2D.fromTranslation(
+            Vec2D.fromValues(shapeOffset.dx, shapeOffset.dy));
+        var appliedTransform = Mat2D();
+        Mat2D.multiply(
+          appliedTransform,
+          shapeTransform,
+          pathTranslation,
+        );
 
-        transformNode.x = transform.x;
-        transformNode.y = transform.y;
-        transformNode.rotation += transform.rotation;
-        transformNode.scaleX *= transform.scaleX;
-        transformNode.scaleY *= transform.scaleY;
-        if (transform.x != 0 ||
-            transform.y != 0 ||
-            transform.rotation != 0 ||
-            transform.scaleX != 1 ||
-            transform.scaleY != 1) {
-          file.addObject(transformNode);
-          parent.appendChild(transformNode);
-          nodeParent = transformNode;
-        }
+        // need to unpack the transform into rotation, scale and transform
+        var transform = TransformComponents();
+        Mat2D.decompose(appliedTransform, transform);
+
+        node.x = transform.x;
+        node.y = transform.y;
+        node.rotation += transform.rotation;
+        node.scaleX *= transform.scaleX;
+        node.scaleY *= transform.scaleY;
       }
       nodeParent.appendChild(node);
 
@@ -112,25 +115,13 @@ void addChild(
         }
       }
 
-      addNormalClipping(
+      registerClips(
         drawableShape,
         drawableShape.attributes,
         node,
-        root,
-        file,
-        parent,
-        clippingRefs,
+        clips,
       );
 
-      addMaskClipping(
-        drawableShape,
-        drawableShape.attributes,
-        node,
-        root,
-        file,
-        parent,
-        clippingRefs,
-      );
       break;
     case DrawableGroup:
       var drawableGroup = drawable as DrawableGroup;
@@ -164,29 +155,47 @@ void addChild(
       file.addObject(node);
       parent.appendChild(node);
 
-      addNormalClipping(
+      registerClips(
         drawableGroup,
         drawableGroup.attributes,
         node,
-        root,
-        file,
-        parent,
-        clippingRefs,
+        clips,
       );
 
-      addMaskClipping(
-        drawableGroup,
-        drawableGroup.attributes,
-        node,
-        root,
-        file,
-        parent,
-        clippingRefs,
-      );
+      for (var i = drawableGroup.clipPaths.length - 1; i >= 0; i--) {
+        var clipPath = drawableGroup.clipPaths[i];
+        clippingRefs[clipPath.id] = getClippingShape(
+          clipPath,
+          root,
+          file,
+          node,
+          clippingRefs,
+          clips,
+        );
+      }
 
       for (var i = drawableGroup.children.length - 1; i >= 0; i--) {
-        addChild(root, file, node, drawableGroup.children[i], clippingRefs,
-            mask: mask);
+        addChild(
+          root,
+          file,
+          node,
+          drawableGroup.children[i],
+          clippingRefs,
+          clips,
+          mask: mask,
+        );
+      }
+
+      for (var i = 0; i < drawableGroup.masks.length; i++) {
+        var mask = getMaskingShape(
+          drawableGroup.masks[i] as DrawableGroup,
+          root,
+          file,
+          node,
+          clippingRefs,
+          clips,
+        );
+        clippingRefs['url(#${mask.name})'] = mask;
       }
 
       break;
@@ -195,48 +204,11 @@ void addChild(
   }
 }
 
-void addMaskClipping(
+void registerClips(
   DrawableStyleable drawable,
   List<XmlEventAttribute> attributes,
   Node node,
-  DrawableRoot root,
-  RiveFile file,
-  ContainerComponent parent,
-  Map<String, Node> clippingRefs,
-) {
-  if (drawable.style.mask != null) {
-    var clipAttr = attributes
-        .firstWhere((element) =>
-            element.name == 'mask' || element.value.contains('mask'))
-        .value;
-    clipAttr = clipAttr.split(':').last;
-
-    if (!clippingRefs.containsKey(clipAttr)) {
-      clippingRefs[clipAttr] = getMaskingShape(
-        drawable.style.mask as DrawableGroup,
-        root,
-        file,
-        parent,
-        drawable,
-        clippingRefs,
-      );
-    }
-
-    var clipper = ClippingShape();
-    file.addObject(clipper);
-    clipper.source = clippingRefs[clipAttr];
-    node.appendChild(clipper);
-  }
-}
-
-void addNormalClipping(
-  DrawableStyleable drawable,
-  List<XmlEventAttribute> attributes,
-  Node node,
-  DrawableRoot root,
-  RiveFile file,
-  ContainerComponent parent,
-  Map<String, Node> clippingRefs,
+  Map<Node, String> clips,
 ) {
   if (drawable.style.clipPath != null) {
     var clipAttr = attributes
@@ -244,21 +216,21 @@ void addNormalClipping(
             element.name == 'clip-path' || element.value.contains('clip-path'))
         .value;
     clipAttr = clipAttr.split(':').last;
-
-    if (!clippingRefs.containsKey(clipAttr)) {
-      clippingRefs[clipAttr] = getClippingShape(
-        drawable.style.clipPath,
-        root,
-        file,
-        parent,
-        drawable,
-        clippingRefs,
-      );
-    }
-
-    var clipper = ClippingShape();
-    file.addObject(clipper);
-    clipper.source = clippingRefs[clipAttr];
-    node.appendChild(clipper);
+    clips[node] = clipAttr;
   }
+  if (drawable.style.mask != null) {
+    var clipAttr = attributes
+        .firstWhere((element) =>
+            element.name == 'mask' || element.value.contains('mask'))
+        .value;
+    clipAttr = clipAttr.split(':').last;
+    clips[node] = clipAttr;
+  }
+}
+
+void clip(Node clipped, Node clipSource, RiveFile file) {
+  var clipper = ClippingShape();
+  file.addObject(clipper);
+  clipper.source = clipSource;
+  clipped.appendChild(clipper);
 }
