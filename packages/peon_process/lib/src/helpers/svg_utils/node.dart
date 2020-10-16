@@ -8,6 +8,7 @@ import 'package:peon_process/src/helpers/svg_utils/utils.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
@@ -51,25 +52,25 @@ void addChild(
       var nodeParent = parent;
 
       if (drawableShape.transform != null) {
-        // need to unpack the transform into rotation, scale and transform
-        var transformNode = Node();
-        var transform = TransformComponents();
-        Mat2D.decompose(Mat2D.fromMat4(drawableShape.transform), transform);
+        var shapeTransform = Mat2D.fromMat4(drawableShape.transform);
+        var pathTranslation = Mat2D.fromTranslation(
+            Vec2D.fromValues(shapeOffset.dx, shapeOffset.dy));
+        var appliedTransform = Mat2D();
+        Mat2D.multiply(
+          appliedTransform,
+          shapeTransform,
+          pathTranslation,
+        );
 
-        transformNode.x = transform.x;
-        transformNode.y = transform.y;
-        transformNode.rotation += transform.rotation;
-        transformNode.scaleX *= transform.scaleX;
-        transformNode.scaleY *= transform.scaleY;
-        if (transform.x != 0 ||
-            transform.y != 0 ||
-            transform.rotation != 0 ||
-            transform.scaleX != 1 ||
-            transform.scaleY != 1) {
-          file.addObject(transformNode);
-          parent.appendChild(transformNode);
-          nodeParent = transformNode;
-        }
+        // need to unpack the transform into rotation, scale and transform
+        var transform = TransformComponents();
+        Mat2D.decompose(appliedTransform, transform);
+
+        node.x = transform.x;
+        node.y = transform.y;
+        node.rotation += transform.rotation;
+        node.scaleX *= transform.scaleX;
+        node.scaleY *= transform.scaleY;
       }
       nodeParent.appendChild(node);
 
