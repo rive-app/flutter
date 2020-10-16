@@ -287,9 +287,6 @@ class OpenFileContext with RiveFileDelegate {
 
   @protected
   void completeInitialConnection(OpenFileState state, [String info]) {
-    // TODO: this is now pretty much just called on successful connection.
-
-    core.completeConnection();
     _stateInfo = info;
     _state = state;
     if (state == OpenFileState.error) {
