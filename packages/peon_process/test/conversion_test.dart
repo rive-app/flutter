@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
 import 'package:peon_process/src/helpers/flare_to_rive.dart';
+import 'package:peon_process/src/helpers/svg_utils/paths.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
@@ -123,6 +124,18 @@ void main() {
     test('hulk mask test', () async {
       var drawable = await SvgParserStateRived(
               xml.parseEvents(mini_hulk), 'rive_key', svgPathFuncs)
+          .parse();
+
+      RiveFile _riveFile = createFromSvg(drawable);
+
+      var exporter = RuntimeExporter(
+          core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
+      exporter.export();
+    });
+
+    test('male snip test', () async {
+      var drawable = await SvgParserStateRived(
+              xml.parseEvents(male_snip), 'rive_key', svgPathFuncs)
           .parse();
 
       RiveFile _riveFile = createFromSvg(drawable);

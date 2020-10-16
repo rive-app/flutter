@@ -13,8 +13,8 @@ Node getMaskingShape(
   DrawableRoot root,
   RiveFile file,
   ContainerComponent parent,
-  Drawable drawable,
   Map<String, Node> clippingRefs,
+  Map<Node, String> clips,
 ) {
   var id = attrOrDefault(mask.attributes, 'id', null);
   var maskShape = Node()
@@ -47,6 +47,7 @@ Node getMaskingShape(
       maskShape,
       child,
       clippingRefs,
+      clips,
       forceNode: true,
       mask: true,
     );

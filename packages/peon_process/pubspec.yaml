@@ -20,6 +20,7 @@ dependencies:
     sdk: flutter
   flutter_svg:
     git: https://github.com/rive-app/flutter_svg.git
+    # path: ../../../flutter_svg
   core:
     path: ../core
   utilities: 
