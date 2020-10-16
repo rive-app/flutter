@@ -3,15 +3,19 @@ import 'dart:collection';
 
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rxdart/rxdart.dart';
 
 @immutable
@@ -51,6 +55,10 @@ class EditingAnimationManager extends AnimationTimeManager
 
   final _keyController = StreamController<KeyComponentsEvent>();
 
+  // TODO: swap with stream.
+  final Event _hierarchySelectionChanged = Event();
+  Listenable get hierarchySelectionChanged => _hierarchySelectionChanged;
+
   /// Set a keyframe on a property for a bunch of components.
   Sink<KeyComponentsEvent> get keyComponents => _keyController;
 
@@ -65,6 +73,9 @@ class EditingAnimationManager extends AnimationTimeManager
   void dispose() {
     for (final allHelper in _allPropertiesHelpers) {
       allHelper.reset();
+    }
+    for (final vm in _componentViewModels.values) {
+      vm.selectionState?.removeListener(_vmSelectionStateChanged);
     }
     cancelDebounce(_updateHierarchy);
     _hierarchyController.close();
@@ -108,6 +119,8 @@ class EditingAnimationManager extends AnimationTimeManager
     }
   }
 
+  void _vmSelectionStateChanged() => _hierarchySelectionChanged.notify();
+
   KeyedComponentViewModel _makeComponentViewModel(
     Component timelineComponent, {
     KeyedObject keyedObject,
@@ -123,6 +136,7 @@ class EditingAnimationManager extends AnimationTimeManager
       children: children,
       allProperties: allProperties,
     );
+    viewModel.selectionState?.addListener(_vmSelectionStateChanged);
     return viewModel;
   }
 
@@ -336,6 +350,9 @@ class EditingAnimationManager extends AnimationTimeManager
 /// KeyedObject with more KeyedObjects within it).
 @immutable
 abstract class KeyHierarchyViewModel {
+  ValueListenable<SelectionState> get selectionState;
+  bool get hasSelectionFlags =>
+      selectionState != null && selectionState.value != SelectionState.none;
   Set<KeyHierarchyViewModel> get children;
   const KeyHierarchyViewModel();
 }
@@ -358,6 +375,10 @@ class KeyedComponentViewModel extends AllKeysViewModel {
 
   /// A component is always present in the viewmodel.
   final Component component;
+
+  @override
+  ValueListenable<SelectionState> get selectionState =>
+      component?.stageItem?.selectionState;
 
   @override
   final Set<KeyHierarchyViewModel> children;
@@ -383,6 +404,9 @@ class KeyedComponentViewModel extends AllKeysViewModel {
 class KeyedGroupViewModel extends AllKeysViewModel {
   final String label;
 
+  @override
+  ValueListenable<SelectionState> get selectionState => null;
+
   /// All keyed properties within this viewmodel.
   @override
   final _AllPropertiesHelper allProperties;
@@ -403,6 +427,9 @@ class KeyedPropertyViewModel extends KeyHierarchyViewModel {
   final KeyedProperty keyedProperty;
   final String label;
   final String subLabel;
+
+  @override
+  ValueListenable<SelectionState> get selectionState => null;
 
   // /// The component in the timeline that'll show this property (may not match
   // /// the component that stores the property).

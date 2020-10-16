@@ -121,6 +121,7 @@ class _TimelineKeysState extends State<TimelineKeys> {
                   selection: selection.data,
                   workArea: workArea.hasData ? workArea.data : null,
                   expandedRows: widget.treeController.expanded,
+                  repaint: widget.animationManager.hierarchySelectionChanged,
                 ),
               ),
             ),
@@ -140,6 +141,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   final HashSet<KeyFrame> selection;
   final WorkAreaViewModel workArea;
   final HashSet<KeyHierarchyViewModel> expandedRows;
+  final Listenable repaint;
+
   const _TimelineKeysRenderer({
     @required this.theme,
     @required this.verticalScrollOffset,
@@ -149,6 +152,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
     @required this.selection,
     @required this.workArea,
     @required this.expandedRows,
+    @required this.repaint,
   });
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -160,7 +164,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..animation = animation
       ..selection = selection
       ..workArea = workArea
-      ..expandedRows = expandedRows;
+      ..expandedRows = expandedRows
+      ..repaint = repaint;
   }
 
   @override
@@ -174,7 +179,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..animation = animation
       ..selection = selection
       ..workArea = workArea
-      ..expandedRows = expandedRows;
+      ..expandedRows = expandedRows
+      ..repaint = repaint;
   }
 
   @override
@@ -217,6 +223,17 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
   double _verticalScrollOffset;
   List<FlatTreeItem<KeyHierarchyViewModel>> _rows;
+
+  Listenable _repaint;
+  Listenable get repaint => _repaint;
+  set repaint(Listenable value) {
+    if (_repaint == value) {
+      return;
+    }
+    _repaint?.removeListener(markNeedsPaint);
+    _repaint = value;
+    _repaint?.addListener(markNeedsPaint);
+  }
 
   WorkAreaViewModel _workArea;
   WorkAreaViewModel get workArea => _workArea;
@@ -261,6 +278,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
   void dispose() {
     _animation?.keyframesChanged?.removeListener(markNeedsPaint);
+    _repaint?.removeListener(markNeedsPaint);
   }
 
   @override
@@ -373,6 +391,11 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
     for (int i = firstRow; i < lastRow; i++) {
       var row = _rows[i].data;
+
+      if (row.hasSelectionFlags) {
+        canvas.drawRect(
+            Rect.fromLTWH(0, 0, size.width, rowHeight), _separatorPaint);
+      }
 
       // We only draw the separator line if it's delineating a component.
       if (row is KeyedComponentViewModel) {

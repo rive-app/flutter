@@ -592,7 +592,7 @@ class TreeStyles {
   TreeStyle get timeline => const TreeStyle(
         showFirstLine: false,
         hideLines: false,
-        padding: EdgeInsets.only(left: 10, right: 19),
+        padding: EdgeInsets.only(left: 10),
         lineColor: _darkTreeLines,
       );
 
