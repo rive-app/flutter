@@ -234,7 +234,7 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
           return null;
         }
         elementIndex = row * maxColumns + column;
-        if (elementIndex < _files.length) {
+        if (elementIndex < _files.length && elementIndex >= 0) {
           return _files[elementIndex];
         }
       }

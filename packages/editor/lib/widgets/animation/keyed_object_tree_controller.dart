@@ -120,18 +120,13 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
   @override
   void onMouseEnter(
       PointerEnterEvent event, FlatTreeItem<KeyHierarchyViewModel> item) {
-    // animationManager.mouseOver.add(item.data.value);
+    animationManager.mouseOver.add(item.data);
   }
 
   @override
   void onMouseExit(
       PointerExitEvent event, FlatTreeItem<KeyHierarchyViewModel> item) {
-    // animationManager.mouseOut.add(item.data.value);
-  }
-
-  @override
-  void onTap(FlatTreeItem<KeyHierarchyViewModel> item) {
-    // animationManager.select.add(item.data.value);
+    animationManager.mouseExit.add(item.data);
   }
 
   @override
@@ -147,5 +142,15 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
       return treeItem.label.isNotEmpty;
     }
     return true;
+  }
+
+  @override
+  void selectTreeItem(KeyHierarchyViewModel item) {
+    animationManager.select.add(item);
+  }
+
+  @override
+  void selectMultipleTreeItems(Iterable<KeyHierarchyViewModel> items) {
+    animationManager.selectMultiple.add(items);
   }
 }

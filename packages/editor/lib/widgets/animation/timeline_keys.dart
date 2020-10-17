@@ -8,6 +8,7 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/animation/key_path_maker.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/animation/timeline_keys_manipulator.dart';
@@ -121,6 +122,7 @@ class _TimelineKeysState extends State<TimelineKeys> {
                   selection: selection.data,
                   workArea: workArea.hasData ? workArea.data : null,
                   expandedRows: widget.treeController.expanded,
+                  repaint: widget.animationManager.hierarchySelectionChanged,
                 ),
               ),
             ),
@@ -140,6 +142,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   final HashSet<KeyFrame> selection;
   final WorkAreaViewModel workArea;
   final HashSet<KeyHierarchyViewModel> expandedRows;
+  final Listenable repaint;
+
   const _TimelineKeysRenderer({
     @required this.theme,
     @required this.verticalScrollOffset,
@@ -149,6 +153,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
     @required this.selection,
     @required this.workArea,
     @required this.expandedRows,
+    @required this.repaint,
   });
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -160,7 +165,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..animation = animation
       ..selection = selection
       ..workArea = workArea
-      ..expandedRows = expandedRows;
+      ..expandedRows = expandedRows
+      ..repaint = repaint;
   }
 
   @override
@@ -174,7 +180,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..animation = animation
       ..selection = selection
       ..workArea = workArea
-      ..expandedRows = expandedRows;
+      ..expandedRows = expandedRows
+      ..repaint = repaint;
   }
 
   @override
@@ -191,6 +198,9 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
   final Path strokeHoldPath = Path();
   final Paint _bgPaint = Paint();
   final Paint _separatorPaint = Paint();
+  final Paint _hoveredRowPaint = Paint();
+  final Paint _selectedRowPaint = Paint();
+
   final Paint _keyPaintFill = Paint()..isAntiAlias = false;
   final Paint _keyPaintStroke = Paint()
     ..isAntiAlias = false
@@ -217,6 +227,17 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
   double _verticalScrollOffset;
   List<FlatTreeItem<KeyHierarchyViewModel>> _rows;
+
+  Listenable _repaint;
+  Listenable get repaint => _repaint;
+  set repaint(Listenable value) {
+    if (_repaint == value) {
+      return;
+    }
+    _repaint?.removeListener(markNeedsPaint);
+    _repaint = value;
+    _repaint?.addListener(markNeedsPaint);
+  }
 
   WorkAreaViewModel _workArea;
   WorkAreaViewModel get workArea => _workArea;
@@ -261,6 +282,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
   void dispose() {
     _animation?.keyframesChanged?.removeListener(markNeedsPaint);
+    _repaint?.removeListener(markNeedsPaint);
   }
 
   @override
@@ -275,6 +297,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     _selectedPaint.color = theme.colors.keySelection;
     _workAreaBgPaint.color = theme.colors.workAreaBackground;
     _workAreaLinePaint.color = theme.colors.workAreaDelineator;
+    _hoveredRowPaint.color = theme.colors.timelineBackgroundHover;
+    _selectedRowPaint.color = theme.colors.timelineBackgroundSelected;
 
     makeStrokeKeyPath(
         strokeKeyPath,
@@ -374,6 +398,22 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     for (int i = firstRow; i < lastRow; i++) {
       var row = _rows[i].data;
 
+      var selection = row.selectionState?.value;
+      if (selection != null) {
+        switch (selection) {
+          case SelectionState.hovered:
+          case SelectionState.selected:
+            canvas.drawRect(
+                Rect.fromLTWH(0, 0, size.width, rowHeight),
+                selection == SelectionState.hovered
+                    ? _hoveredRowPaint
+                    : _selectedRowPaint);
+            break;
+          default:
+            break;
+        }
+      }
+      
       // We only draw the separator line if it's delineating a component.
       if (row is KeyedComponentViewModel) {
         // var rowOffset = i * rowHeight;

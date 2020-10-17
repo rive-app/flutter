@@ -190,6 +190,10 @@ class RiveColors {
   Color get interpolationPreviewSeparator => const Color(0xFF3C3C3C);
   Color get interpolationControlHandleIn => const Color(0xFF29BB9C);
   Color get interpolationControlHandleOut => const Color(0xFF33A7FF);
+  Color get timelineBackgroundHover => const Color(0xFF2A2A2A);
+  Color get timelineBackgroundSelected => const Color(0xFF2A2A2A);
+  Color get timelineTreeBackgroundHover => const Color(0xFF2E2E2E);
+  Color get timelineTreeBackgroundSelected => const Color(0xFF2E2E2E);
 
   // Inspector panel pill button
   Color get inspectorPillBackground => buttonDark;
@@ -592,7 +596,7 @@ class TreeStyles {
   TreeStyle get timeline => const TreeStyle(
         showFirstLine: false,
         hideLines: false,
-        padding: EdgeInsets.only(left: 10, right: 19),
+        padding: EdgeInsets.only(left: 10),
         lineColor: _darkTreeLines,
       );
 

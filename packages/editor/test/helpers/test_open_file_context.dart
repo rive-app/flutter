@@ -14,7 +14,7 @@ class TestOpenFileContext extends OpenFileContext {
   Future<bool> fakeConnect() async {
     LocalDataPlatform dataPlatform = LocalDataPlatform.make();
     core = TestRiveFile('fake', localDataPlatform: dataPlatform);
-    core.onConnected();
+    core.validate();
     completeInitialConnection(OpenFileState.open);
     return true;
   }

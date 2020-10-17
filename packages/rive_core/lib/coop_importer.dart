@@ -22,8 +22,9 @@ class CoopImporter {
       _log.severe('Failed to deserialize coop file.');
       return false;
     }
+    // ignore: invalid_use_of_protected_member
     core.receiveCoopChanges(coop.toChangeSet());
-    core.onConnected();
+    core.validate();
     return true;
   }
 }
