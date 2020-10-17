@@ -17,6 +17,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:utilities/iterable.dart';
 
 @immutable
 class KeyComponentsEvent {
@@ -37,6 +38,10 @@ class EditingAnimationManager extends AnimationTimeManager
     animation.context.addDelegate(this);
     _updateHierarchy();
     _keyController.stream.listen(_keyComponents);
+    _mouseOverController.stream.listen(_mouseOver);
+    _mouseExitController.stream.listen(_mouseExit);
+    _selectController.stream.listen(_select);
+    _selectMultipleController.stream.listen(_selectMultiple);
   }
 
   final _componentViewModels = HashMap<Component, KeyedComponentViewModel>();
@@ -55,7 +60,18 @@ class EditingAnimationManager extends AnimationTimeManager
 
   final _keyController = StreamController<KeyComponentsEvent>();
 
-  // TODO: swap with stream.
+  final _mouseOverController = StreamController<KeyHierarchyViewModel>();
+  Sink<KeyHierarchyViewModel> get mouseOver => _mouseOverController;
+  final _mouseExitController = StreamController<KeyHierarchyViewModel>();
+  Sink<KeyHierarchyViewModel> get mouseExit => _mouseExitController;
+
+  final _selectController = StreamController<KeyHierarchyViewModel>();
+  Sink<KeyHierarchyViewModel> get select => _selectController;
+  final _selectMultipleController =
+      StreamController<Iterable<KeyHierarchyViewModel>>();
+  Sink<Iterable<KeyHierarchyViewModel>> get selectMultiple =>
+      _selectMultipleController;
+
   final Event _hierarchySelectionChanged = Event();
   Listenable get hierarchySelectionChanged => _hierarchySelectionChanged;
 
@@ -69,6 +85,32 @@ class EditingAnimationManager extends AnimationTimeManager
     animation.context.captureJournalEntry();
   }
 
+  void _mouseOver(KeyHierarchyViewModel vm) {
+    if (vm is KeyedComponentViewModel) {
+      vm.component.stageItem.isHovered = true;
+    }
+  }
+
+  void _mouseExit(KeyHierarchyViewModel vm) {
+    if (vm is KeyedComponentViewModel) {
+      vm.component.stageItem.isHovered = false;
+    }
+  }
+
+  void _select(KeyHierarchyViewModel vm) {
+    if (vm is KeyedComponentViewModel && vm.component.stageItem != null) {
+      activeFile.select(vm.component.stageItem);
+    }
+  }
+
+  void _selectMultiple(Iterable<KeyHierarchyViewModel> vms) {
+    var keyedComponentStageItems = vms.mapWhereType<StageItem>((item) =>
+        item is KeyedComponentViewModel ? item.component.stageItem : null);
+    if (keyedComponentStageItems.isNotEmpty) {
+      activeFile.selection.selectMultiple(keyedComponentStageItems);
+    }
+  }
+
   @override
   void dispose() {
     for (final allHelper in _allPropertiesHelpers) {
@@ -80,6 +122,10 @@ class EditingAnimationManager extends AnimationTimeManager
     cancelDebounce(_updateHierarchy);
     _hierarchyController.close();
     _keyController.close();
+    _mouseOverController.close();
+    _mouseExitController.close();
+    _selectController.close();
+    _selectMultipleController.close();
     animation.context.removeDelegate(this);
     super.dispose();
   }
@@ -351,8 +397,6 @@ class EditingAnimationManager extends AnimationTimeManager
 @immutable
 abstract class KeyHierarchyViewModel {
   ValueListenable<SelectionState> get selectionState;
-  bool get hasSelectionFlags =>
-      selectionState != null && selectionState.value != SelectionState.none;
   Set<KeyHierarchyViewModel> get children;
   const KeyHierarchyViewModel();
 }

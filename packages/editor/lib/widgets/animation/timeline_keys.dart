@@ -8,6 +8,7 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/animation/key_path_maker.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/animation/timeline_keys_manipulator.dart';
@@ -197,6 +198,9 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
   final Path strokeHoldPath = Path();
   final Paint _bgPaint = Paint();
   final Paint _separatorPaint = Paint();
+  final Paint _hoveredRowPaint = Paint();
+  final Paint _selectedRowPaint = Paint();
+
   final Paint _keyPaintFill = Paint()..isAntiAlias = false;
   final Paint _keyPaintStroke = Paint()
     ..isAntiAlias = false
@@ -293,6 +297,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     _selectedPaint.color = theme.colors.keySelection;
     _workAreaBgPaint.color = theme.colors.workAreaBackground;
     _workAreaLinePaint.color = theme.colors.workAreaDelineator;
+    _hoveredRowPaint.color = theme.colors.timelineBackgroundHover;
+    _selectedRowPaint.color = theme.colors.timelineBackgroundSelected;
 
     makeStrokeKeyPath(
         strokeKeyPath,
@@ -392,11 +398,22 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     for (int i = firstRow; i < lastRow; i++) {
       var row = _rows[i].data;
 
-      if (row.hasSelectionFlags) {
-        canvas.drawRect(
-            Rect.fromLTWH(0, 0, size.width, rowHeight), _separatorPaint);
+      var selection = row.selectionState?.value;
+      if (selection != null) {
+        switch (selection) {
+          case SelectionState.hovered:
+          case SelectionState.selected:
+            canvas.drawRect(
+                Rect.fromLTWH(0, 0, size.width, rowHeight),
+                selection == SelectionState.hovered
+                    ? _hoveredRowPaint
+                    : _selectedRowPaint);
+            break;
+          default:
+            break;
+        }
       }
-
+      
       // We only draw the separator line if it's delineating a component.
       if (row is KeyedComponentViewModel) {
         // var rowOffset = i * rowHeight;

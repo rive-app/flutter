@@ -121,7 +121,10 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
                     padding: const EdgeInsets.only(left: 2),
                     child: SelectionBorder(
                       // child: child,
-                      color: theme.colors.editorTreeHover,
+                      color: selectionState == SelectionState.hovered
+                          ? theme.colors.timelineTreeBackgroundHover
+                          : theme.colors.timelineTreeBackgroundSelected,
+                      roundRight: false,
                     ),
                   );
                 default:

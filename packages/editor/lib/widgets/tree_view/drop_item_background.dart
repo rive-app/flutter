@@ -116,7 +116,7 @@ class SelectionBorder extends SingleChildRenderObjectWidget {
 
   const SelectionBorder({
     @required this.color,
-    this.roundRight = false,
+    this.roundRight = true,
     Key key,
     Widget child,
   }) : super(
