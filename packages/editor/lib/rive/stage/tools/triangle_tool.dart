@@ -9,10 +9,7 @@ class TriangleTool extends ShapeTool {
   TriangleTool._();
 
   @override
-  String get shapeName => 'Triangle';
-
-  @override
-  ParametricPath makePath() => Triangle()..name = 'Triangle Path';
+  ParametricPath makePath() => Triangle();
 
   @override
   Iterable<PackedIcon> get icon => PackedIcon.toolTriangle;

@@ -112,9 +112,11 @@ class DropItemBackground extends StatelessWidget {
 /// as it's still lighter weight at runtime than a Container.
 class SelectionBorder extends SingleChildRenderObjectWidget {
   final Color color;
+  final bool roundRight;
 
   const SelectionBorder({
     @required this.color,
+    this.roundRight = true,
     Key key,
     Widget child,
   }) : super(
@@ -124,21 +126,28 @@ class SelectionBorder extends SingleChildRenderObjectWidget {
 
   @override
   _RenderSelectionBorder createRenderObject(BuildContext context) {
-    return _RenderSelectionBorder(color: color);
+    return _RenderSelectionBorder(color: color, roundRight: roundRight);
   }
 
   @override
   void updateRenderObject(
       BuildContext context, _RenderSelectionBorder renderObject) {
-    renderObject.color = color;
+    renderObject
+      ..color = color
+      ..roundRight = roundRight;
   }
 }
 
 class _RenderSelectionBorder extends RenderProxyBox {
   final Paint _borderPaint;
+  static const radius = Radius.circular(5);
 
-  _RenderSelectionBorder({RenderBox child, Color color})
-      : _borderPaint = Paint()..color = color,
+  _RenderSelectionBorder({
+    RenderBox child,
+    Color color,
+    bool roundRight,
+  })  : _borderPaint = Paint()..color = color,
+        _roundRight = roundRight,
         super(child);
 
   Color get color => _borderPaint.color;
@@ -147,6 +156,16 @@ class _RenderSelectionBorder extends RenderProxyBox {
       return;
     }
     _borderPaint.color = value;
+    markNeedsPaint();
+  }
+
+  bool _roundRight = false;
+  bool get roundRight => _roundRight;
+  set roundRight(bool value) {
+    if (_roundRight == value) {
+      return;
+    }
+    _roundRight = value;
     markNeedsPaint();
   }
 
@@ -159,7 +178,14 @@ class _RenderSelectionBorder extends RenderProxyBox {
 
     var path = Path()
       ..addRRect(
-          RRect.fromRectAndRadius(offset & size, const Radius.circular(5)));
+        _roundRight
+            ? RRect.fromRectAndRadius(offset & size, radius)
+            : RRect.fromRectAndCorners(
+                offset & size,
+                topLeft: radius,
+                bottomLeft: radius,
+              ),
+      );
 
     canvas.drawPath(path, _borderPaint);
 

@@ -46,6 +46,15 @@ abstract class Path extends PathBase {
   // -> editor-only
   @override
   Component get timelineParent => _shape;
+
+  @override
+  String get defaultName {
+    var shapeName = shape?.name;
+    if (shapeName != null) {
+      return '$shapeName Path';
+    }
+    return 'Path';
+  }
   // <- editor-only
 
   @override

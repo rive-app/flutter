@@ -5,7 +5,6 @@ import 'package:core/error_logger/error_logger.dart';
 import 'package:core/error_logger/native_error_logger.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -23,6 +22,7 @@ import 'package:rive_editor/rive/managers/websocket_comms_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
@@ -45,6 +45,8 @@ import 'package:rive_editor/widgets/stage_late_view.dart';
 import 'package:rive_editor/widgets/stage_view.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_widgets/listenable_builder.dart';
+
+import 'widgets/popup/popup.dart';
 
 void _configureLogging() {
   Logger.root.onRecord.listen((r) {
@@ -414,6 +416,21 @@ class StagePanel extends StatelessWidget {
                   : StageView(
                       file: file,
                       stage: stage,
+                      showContextMenu: (event) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var globalPosition =
+                            getBox.localToGlobal(event.position);
+                        ListPopup<PopupContextItem>.show(
+                          context,
+                          showArrow: false,
+                          position: globalPosition,
+                          width: 200,
+                          itemBuilder: (popupContext, item, isHovered) =>
+                              item.itemBuilder(popupContext, isHovered),
+                          items: event.items,
+                        );
+                      },
                     ),
             ),
             Positioned.fill(
@@ -451,16 +468,7 @@ class StagePanel extends StatelessWidget {
                         stage.mouseMove(details.buttons, local.dx, local.dy);
                       },
                       child: Listener(
-                        behavior: HitTestBehavior.opaque,
-                        onPointerSignal: (details) {
-                          if (details is PointerScrollEvent) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseWheel(local.dx, local.dy,
-                                details.scrollDelta.dx, details.scrollDelta.dy);
-                          }
-                        },
+                        behavior: HitTestBehavior.deferToChild,
                         onPointerDown: (details) {
                           RenderBox getBox =
                               context.findRenderObject() as RenderBox;
@@ -481,6 +489,15 @@ class StagePanel extends StatelessWidget {
                           var local = getBox.globalToLocal(details.position);
                           stage.mouseDrag(details.buttons, local.dx, local.dy);
                         },
+                        child: MouseWheelProvider(
+                          listener: (details) {
+                            stage.mouseWheel(
+                              details.delta.dx,
+                              details.delta.dy,
+                              details.forceZoom,
+                            );
+                          },
+                        ),
                       ),
                     ),
             ),

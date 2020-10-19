@@ -431,40 +431,8 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       ..stateChanged = connectionStateChanged;
 
     // does this need to return anything?
-    var connected = await _client.connect();
-    // if we connected successfully lets complete some neccessary steps
-    if (connected.state == ConnectState.connected) {
-      completeConnection();
-    }
-    return connected;
+    return _client.connect();
   }
-
-  void completeConnection() {
-    // In test setups _client doesnt always exist.
-    if (_client == null) {
-      return;
-    }
-    int maxId = 0;
-
-    for (final object in _objects.values) {
-      if (object.id.client == _client.clientId) {
-        if (object.id.object >= maxId) {
-          maxId = object.id.object;
-        }
-      }
-    }
-    _nextObjectId = Id(_client.clientId, maxId + 1);
-
-    // Load is complete, we can now process any deferred batch add operations.
-    if (_deferredBatchAdd != null) {
-      var deferred = Set<BatchAddCallback>.from(_deferredBatchAdd);
-      _deferredBatchAdd = null;
-      deferred.forEach(batchAdd);
-    }
-    onConnected();
-  }
-
-  void onConnected();
 
   Player makeClientSidePlayer(Player serverPlayer, bool isSelf);
 
@@ -513,9 +481,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     return disconnectResult;
   }
 
-  Future<bool> forceReconnect() async {
-    return _client.forceReconnect();
-  }
+  void reconnect({bool now = false}) => _client.reconnect(now);
 
   Object getObjectProperty(Core object, int propertyKey);
 
@@ -928,7 +894,37 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     _client.sendCursor(_lastCursorX, _lastCursorY);
   }
 
-  void connectionStateChanged(CoopConnectionStatus status);
+  @mustCallSuper
+  void connectionStateChanged(CoopConnectionStatus status) {
+    switch (status.state) {
+      case CoopConnectionState.connected:
+        // In test setups _client doesnt always exist.
+        if (_client == null) {
+          return;
+        }
+        int maxId = 0;
+
+        for (final object in _objects.values) {
+          if (object.id.client == _client.clientId) {
+            if (object.id.object >= maxId) {
+              maxId = object.id.object;
+            }
+          }
+        }
+        _nextObjectId = Id(_client.clientId, maxId + 1);
+
+        // Load is complete, we can now process any deferred batch add
+        // operations.
+        if (_deferredBatchAdd != null) {
+          var deferred = Set<BatchAddCallback>.from(_deferredBatchAdd);
+          _deferredBatchAdd = null;
+          deferred.forEach(batchAdd);
+        }
+        break;
+      default:
+        break;
+    }
+  }
 
   void _skipProperty(BinaryReader reader, int propertyKey,
       HashMap<int, CoreFieldType> propertyToField) {

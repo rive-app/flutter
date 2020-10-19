@@ -90,7 +90,7 @@ class CreatePopupButton extends StatelessWidget {
           select: () => file.stage.tool = BoneTool.instance,
         ),
         ToolPopupItem(
-          'Node',
+          'Group',
           icon: PackedIcon.toolNode,
           listenable: file.stage.toolListenable,
           isSelected: () => file.stage.tool == NodeTool.instance,

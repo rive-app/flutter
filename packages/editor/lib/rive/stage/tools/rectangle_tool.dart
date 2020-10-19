@@ -9,10 +9,7 @@ class RectangleTool extends ShapeTool {
   RectangleTool._();
 
   @override
-  String get shapeName => 'Rectangle';
-
-  @override
-  ParametricPath makePath() => Rectangle()..name = 'Rectangle Path';
+  ParametricPath makePath() => Rectangle();
 
   @override
   Iterable<PackedIcon> get icon => PackedIcon.toolRectangle;

@@ -3,13 +3,64 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_context_menu_launcher.dart';
 
-/// Draws a path with custom paint and a nudge property.
-class StageView extends LeafRenderObjectWidget {
+/// Draws the stage and marshals events for the stage that the UI is interested
+/// in (like showing popup menus).
+class StageView extends StatefulWidget {
+  final OpenFileContext file;
+  final Stage stage;
+  final void Function(StageContextMenuDetails) showContextMenu;
+
+  const StageView({
+    @required this.file,
+    @required this.stage,
+    this.showContextMenu,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _StageViewState createState() => _StageViewState();
+}
+
+class _StageViewState extends State<StageView> {
+  @override
+  void initState() {
+    widget.stage.showContextMenu.addListener(_showContextMenu);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.stage.showContextMenu.removeListener(_showContextMenu);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant StageView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.stage != widget.stage) {
+      oldWidget.stage?.showContextMenu?.removeListener(_showContextMenu);
+      widget.stage?.showContextMenu?.addListener(_showContextMenu);
+    }
+  }
+
+  void _showContextMenu(StageContextMenuDetails contextMenuDetails) {
+    widget.showContextMenu?.call(contextMenuDetails);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StageViewRenderer(file: widget.file, stage: widget.stage);
+  }
+}
+
+/// Widget that manages the lifecycle of the render object for the stage.
+class StageViewRenderer extends LeafRenderObjectWidget {
   /// The Rive context.
   final OpenFileContext file;
   final Stage stage;
-  const StageView({
+  const StageViewRenderer({
     this.file,
     this.stage,
   });

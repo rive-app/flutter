@@ -142,7 +142,7 @@ abstract class ShapePaintContainer {
 
     Fill fill;
     context.batchAdd(() {
-      fill = Fill()..name = 'Fill ${fills.length + 1}';
+      fill = Fill();
       final solidColor = SolidColor();
       if (color != null) {
         solidColor.color = color;
@@ -163,7 +163,7 @@ abstract class ShapePaintContainer {
 
     Fill fill;
     context.batchAdd(() {
-      fill = Fill()..name = 'Fill ${fills.length + 1}';
+      fill = Fill();
 
       final gradient = LinearGradient();
 
@@ -204,7 +204,7 @@ abstract class ShapePaintContainer {
     assert(color != null);
     Stroke stroke;
     context.batchAdd(() {
-      stroke = Stroke()..name = 'Stroke ${strokes.length + 1}';
+      stroke = Stroke();
       var solidColor = SolidColor()..color = color;
 
       context.addObject(stroke);

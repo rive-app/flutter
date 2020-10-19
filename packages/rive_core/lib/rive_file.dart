@@ -392,8 +392,7 @@ class RiveFile extends RiveCoreContext {
     return super.connect(host, path, token);
   }
 
-  @override
-  void onConnected() {
+  void validate() {
     // Let's validate the file. First thing we expect is that it has a
     // backboard.
     var backboards = objects.whereType<Backboard>();
@@ -419,7 +418,6 @@ class RiveFile extends RiveCoreContext {
       // artboards yet).
       _backboard.activeArtboard = artboards.first;
     }
-
     if (fixedBackboard || hasRecordedChanges) {
       // We had to patch up the file, save the changes and disallow undo.
       captureJournalEntry();
@@ -432,6 +430,17 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void connectionStateChanged(core.CoopConnectionStatus status) {
+    super.connectionStateChanged(status);
+
+    switch (status.state) {
+      case core.CoopConnectionState.connected:
+        validate();
+        break;
+      default:
+        break;
+    }
+
+    // Let the delegates know...
     delegates
         .union(connectionDelegates)
         .toList()

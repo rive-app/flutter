@@ -54,13 +54,15 @@ class MiddlePanel extends StatelessWidget {
                   title: 'Get started',
                   thumbnail: 's1-e1.png',
                   type: ContentType.helpCenter,
-                  url: 'https://f.io/39_jZ-_N'),
+                  url:
+                      'https://www.youtube.com/watch?v=RsSaYW1wG-0&feature=youtu.be'),
               VideoSeriesEpisode(
                   episodeNumber: 2,
                   title: 'Interface overview',
                   thumbnail: 's1-e2.png',
                   type: ContentType.helpCenter,
-                  url: 'https://help.rive.app/editor/fundamentals/interface-overview'),
+                  url:
+                      'https://help.rive.app/editor/fundamentals/interface-overview'),
               VideoSeriesEpisode(
                   episodeNumber: 3,
                   title: 'Artboards and shapes',
@@ -78,7 +80,8 @@ class MiddlePanel extends StatelessWidget {
                   title: 'Importing and exporting',
                   thumbnail: 's1-e5.png',
                   type: ContentType.helpCenter,
-                  url: 'https://help.rive.app/editor/fundamentals/importing-assets'),
+                  url:
+                      'https://help.rive.app/editor/fundamentals/importing-assets'),
             ]),
         VideoSeriesContainer(
             tag: '02',
@@ -91,35 +94,40 @@ class MiddlePanel extends StatelessWidget {
             fillColor: Color(0xFF541B4D),
             episodes: [
               VideoSeriesEpisode(
-                  episodeNumber: 1, 
-                  title: 'Shapes and paths', 
+                  episodeNumber: 1,
+                  title: 'Shapes and paths',
                   thumbnail: 's2-e1.png',
                   type: ContentType.helpCenter,
-                  url: 'https://help.rive.app/editor/fundamentals/shapes-and-paths'),
+                  url:
+                      'https://help.rive.app/editor/fundamentals/shapes-and-paths'),
               VideoSeriesEpisode(
                   episodeNumber: 2,
                   title: 'The hierarchy',
                   thumbnail: 's2-e2.png',
                   type: ContentType.helpCenter,
-                  url: 'https://help.rive.app/editor/fundamentals/interface-overview/hierarchy'),
+                  url:
+                      'https://help.rive.app/editor/fundamentals/interface-overview/hierarchy'),
               VideoSeriesEpisode(
-                  episodeNumber: 3, 
-                  title: 'Bones', 
+                  episodeNumber: 3,
+                  title: 'Bones',
                   thumbnail: 's2-e3.png',
                   type: ContentType.helpCenter,
-                  url: 'https://help.rive.app/editor/manipulating-shapes/bones'),
+                  url:
+                      'https://help.rive.app/editor/manipulating-shapes/bones'),
               VideoSeriesEpisode(
                   episodeNumber: 4,
                   title: 'Editing vertices',
                   thumbnail: 's2-e4.png',
                   type: ContentType.helpCenter,
-                  url: 'https://help.rive.app/editor/manipulating-shapes/editing-vertices'),
+                  url:
+                      'https://help.rive.app/editor/manipulating-shapes/editing-vertices'),
               VideoSeriesEpisode(
                   episodeNumber: 5,
                   title: 'Time-saving shortcuts',
                   thumbnail: 's2-e5.png',
                   type: ContentType.helpCenter,
-                  url: 'https://help.rive.app/editor/miscellaneous/keyboard-shortcuts'),
+                  url:
+                      'https://help.rive.app/editor/miscellaneous/keyboard-shortcuts'),
               VideoSeriesEpisode(
                   episodeNumber: 6,
                   title: 'Draw order',
@@ -133,9 +141,7 @@ class MiddlePanel extends StatelessWidget {
                   title: 'Constraints',
                   thumbnail: 's2-e8.png'),
               VideoSeriesEpisode(
-                  episodeNumber: 9,
-                  title: 'Remixing!',
-                  thumbnail: 's2-e9.png'),
+                  episodeNumber: 9, title: 'Remixing!', thumbnail: 's2-e9.png'),
             ]),
         VideoSeriesContainer(
             tag: '03',

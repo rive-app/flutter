@@ -297,10 +297,6 @@ class _RiveHierarchyClipboard extends RiveClipboard {
         var component =
             core.readRuntimeObject<Component>(reader, propertyToField, remaps);
         if (component != null) {
-          // TODO: kill
-          if (component.name != null) {
-            component.name = 'PASTED: ${component.name}';
-          }
           objects[i] = component;
           core.addObject(component);
         }

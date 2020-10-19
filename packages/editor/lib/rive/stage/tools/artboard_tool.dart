@@ -63,9 +63,8 @@ class ArtboardTool extends CreateTool {
     var core = file.core;
     core.batchAdd(() {
       var solidColor = SolidColor()..colorValue = 0xFF313131;
-      var fill = Fill()..name = 'Background';
+      var fill = Fill();
       _artboard = Artboard()
-        ..name = 'New Artboard'
         ..x = worldMouse[0]
         ..y = worldMouse[1]
         ..originX = 0

@@ -50,12 +50,15 @@ class _ValueStreamDebounceBuilderState<T>
     extends State<ValueStreamDebounceBuilder<T>> {
   Timer _debouncer;
   T value;
-  BehaviorSubject<T> _controller;
+  final BehaviorSubject<T> _controller = BehaviorSubject<T>();
   StreamSubscription<T> _subscription;
   @override
   void initState() {
     super.initState();
-    _controller = BehaviorSubject<T>();
+    _subscribe();
+  }
+
+  void _subscribe() {
     _subscription = widget.stream.listen((v) {
       value = v;
       _debouncer ??= Timer(widget.duration, () {
@@ -65,11 +68,22 @@ class _ValueStreamDebounceBuilderState<T>
     });
   }
 
+  void _unsubscribe() {
+    _subscription?.cancel();
+    _debouncer?.cancel();
+  }
+
+  @override
+  void didUpdateWidget(covariant ValueStreamDebounceBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _unsubscribe();
+    _subscribe();
+  }
+
   @override
   void dispose() {
     super.dispose();
-    _subscription?.cancel();
-    _debouncer?.cancel();
+    _unsubscribe();
     _controller.close();
   }
 

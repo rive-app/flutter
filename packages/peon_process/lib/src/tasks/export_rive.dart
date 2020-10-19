@@ -75,7 +75,7 @@ class ExportRive extends PeonTask {
   }
 
   @override
-  Future<bool> execute() async {
+  Future<bool> peonExecute() async {
     Directory tempDir;
     Uint8List zipBytes;
     // TODO: add file id and owner ids to all these files
@@ -112,7 +112,6 @@ class ExportRive extends PeonTask {
     }
 
     await putS3Key(targetLocation, zipBytes);
-    await completeTask(this);
 
     return true;
   }

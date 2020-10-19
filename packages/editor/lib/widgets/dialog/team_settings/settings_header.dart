@@ -13,14 +13,18 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class SettingsHeader extends StatefulWidget {
   final String name;
-  final int teamSize;
+  final int teamMemberCount;
+  final int teamMemberPaidCount;
   final String avatarPath;
   final bool avatarUploading;
   final VoidCallback changeAvatar;
+  final bool isTeam;
 
   const SettingsHeader(
       {@required this.name,
-      this.teamSize,
+      @required this.isTeam,
+      this.teamMemberCount,
+      this.teamMemberPaidCount,
       this.avatarPath,
       this.changeAvatar,
       this.avatarUploading});
@@ -30,23 +34,31 @@ class SettingsHeader extends StatefulWidget {
 }
 
 class _SettingsHeaderState extends State<SettingsHeader> {
-  bool get isTeam => widget.teamSize > 0;
   bool _isSigningOut = false;
 
   Widget _trailing() {
     final theme = RiveTheme.of(context);
     final textStyles = theme.textStyles;
     final colors = theme.colors;
-    final teamSize = widget.teamSize;
-    if (isTeam) {
+    final teamMemberCount = widget.teamMemberCount;
+    final teamMemberPaidCount = widget.teamMemberPaidCount;
+    if (widget.isTeam) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            '$teamSize ${teamSize > 1 ? 'members' : 'member'}',
-            style: textStyles.fileGreyTextLarge
-                .copyWith(fontSize: 13, height: 1.3),
+          RichText(
+            text: TextSpan(
+              style: textStyles.fileGreyTextLarge
+                  .copyWith(fontSize: 13, height: 1.3),
+              children: <TextSpan>[
+                if (teamMemberCount != 1)
+                  TextSpan(text: '$teamMemberCount members'),
+                if (teamMemberCount == 1) const TextSpan(text: '1 member'),
+                if (teamMemberPaidCount != teamMemberCount)
+                  TextSpan(text: ' ($teamMemberPaidCount billed)'),
+              ],
+            ),
           ),
         ],
       );
@@ -112,7 +124,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
                   widget.name,
                   style: textStyles.fileGreyTextLarge,
                 ),
-                if (isTeam) ...[
+                if (widget.isTeam) ...[
                   const SizedBox(height: 2),
                   Text(
                     'Studio Plan',

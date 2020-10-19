@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
+import 'package:peon_process/src/helpers/svg_utils/paths.dart';
 import 'package:peon_process/src/helpers/task_utils.dart';
 
 import 'package:rive_core/rive_file.dart';
@@ -77,11 +78,15 @@ class SvgToRiveTask extends PeonTask {
         inPath,
         outPath
       ]);
-      if (output.exitCode == 0) {
+      if (output.exitCode == 0 &&
+          output.stderr.toString().contains('Your image is')) {
+        // svg cleaner exits with code 0, but can fail!
+        // all output is going to stderr
         var outFile = File(outPath);
         cleaned = await outFile.readAsString();
       } else {
         _log.severe('Problem running svgcleaner for $taskId'
+            '\nexitCode: ${output.exitCode}'
             '\nstdout:\n${output.stdout.toString().split('\n')}'
             '\nstderr:\n${output.stderr.toString().split('\n')}');
       }
@@ -94,7 +99,7 @@ class SvgToRiveTask extends PeonTask {
   }
 
   @override
-  Future<bool> execute() async {
+  Future<bool> peonExecute() async {
     var data = await getS3Key(sourceLocation);
     var cleanedData = await clean(String.fromCharCodes(data));
 
@@ -114,7 +119,6 @@ class SvgToRiveTask extends PeonTask {
     var uint8data = exporter.export();
 
     await putS3Key(targetLocation, uint8data);
-    await completeTask(this);
     return true;
   }
 }

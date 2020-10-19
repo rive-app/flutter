@@ -92,6 +92,20 @@ class CoopClient extends CoopReader {
     _writer = CoopWriter(write);
   }
 
+  void reconnect(bool now) {
+    if (now) {
+      _reconnectAttempt = 0;
+    }
+    switch (_connectionStatus.state) {
+      case CoopConnectionState.disconnected:
+      case CoopConnectionState.reconnectTimeout:
+        _reconnect();
+        break;
+      default:
+        break;
+    }
+  }
+
   void _reconnect() {
     _reconnectTimer?.cancel();
 
@@ -144,19 +158,6 @@ class CoopClient extends CoopReader {
     return true;
   }
 
-  Future<bool> forceReconnect() async {
-    _allowReconnect = true;
-    _pingTimer?.cancel();
-
-    await _subscription?.cancel();
-    if (_channel != null) {
-      // TODO: this doesnt seem to return if we await it.
-      _channel?.sink?.close();
-    }
-    var result = await connect();
-    return result.state == ConnectState.connected;
-  }
-
   Completer<ConnectResult> _connectionCompleter;
   StreamSubscription _subscription;
 
@@ -175,6 +176,7 @@ class CoopClient extends CoopReader {
   Future<ConnectResult> connect() async {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
+
     _channel = RiveWebSocketChannel.connect(Uri.parse(url), _token);
     _connectionCompleter = Completer<ConnectResult>();
 
@@ -190,6 +192,7 @@ class CoopClient extends CoopReader {
             _connectionCompleter?.complete(ConnectResult(
                 ConnectState.networkError,
                 info: error.toString()));
+            _connectionCompleter = null;
             if (_allowReconnect) {
               _reconnect();
             }

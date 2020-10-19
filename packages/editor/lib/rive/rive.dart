@@ -77,7 +77,12 @@ class Rive {
     nomad.route('/login', _traveledLogin);
   }
 
-  void _traveledLogin(Trip trip) {
+  Future<void> _traveledLogin(Trip trip) async {
+    final me = Plumber().peek<Me>();
+    if (me.signedIn) {
+      nomad.travel('/files', replace: true);
+      return;
+    }
     Plumber().message<AppState>(AppState.login);
   }
 

@@ -3,12 +3,16 @@ import 'dart:ui' as ui;
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
+import 'package:rive_core/shapes/points_path.dart';
+import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
+import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_core/src/generated/shapes/shape_base.dart';
 
 export 'package:rive_core/src/generated/shapes/shape_base.dart';
@@ -65,6 +69,25 @@ class Shape extends ShapeBase with ShapePaintContainer {
   }
 
   // -> editor-only
+
+  @override
+  String get defaultName {
+    if (paths.length == 1) {
+      switch (paths.first.coreType) {
+        case PointsPathBase.typeKey:
+          return 'Custom Shape';
+        case EllipseBase.typeKey:
+          return 'Ellipse';
+        case RectangleBase.typeKey:
+          return 'Rectangle';
+        case TriangleBase.typeKey:
+          return 'Triangle';
+      }
+    }
+
+    return 'Shape';
+  }
+
   @override
   void onAdded() {
     super.onAdded();

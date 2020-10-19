@@ -93,7 +93,32 @@ abstract class ShapePaint extends ShapePaintBase {
 
   @override
   bool validate() {
-    return super.validate() && parent is ShapePaintContainer;
+    if (!super.validate() || parent is! ShapePaintContainer) {
+      return false;
+    }
+
+    // Shape paints should contain exactly one mutator.
+    var paintMutators = children.whereType<ShapePaintMutator>();
+    if (paintMutators.isEmpty) {
+      // No mutator, this paint is invalid, get rid of it.
+      return false;
+    }
+
+    // More than one mutator, we could also get rid of the paint object, but we
+    // try to place nice and heal the file by keeping only the last mutator and
+    // wiping out the older ones.
+    if (paintMutators.length > 1) {
+      var removeList = paintMutators.toList();
+      for (int i = 0; i < removeList.length - 1; i++) {
+        var component = removeList[i] as Component;
+        if (component is ContainerComponent) {
+          component.removeRecursive();
+        } else {
+          component.remove();
+        }
+      }
+    }
+    return true;
   }
   // <- editor-only
 

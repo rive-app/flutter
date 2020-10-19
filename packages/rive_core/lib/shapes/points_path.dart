@@ -1,4 +1,5 @@
 import 'package:rive_core/bones/skinnable.dart';
+import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -128,24 +129,29 @@ class PointsPath extends PointsPathBase with Skinnable {
     }
   }
 
-  /// Called whenever the tendonds have changed and the weights need to be
+  /// Called whenever the tendons have changed and the weights need to be
   /// validated (make sure they don't point to some non-existent weight).
   @override
   void validateWeights() {
     if (skin == null) {
       return;
     }
-    int tendonCount = skin.tendons.length;
-    bool needDeform = false;
-    for (final vertex in _vertices) {
-      if (!vertex.validateWeight(tendonCount)) {
-        needDeform = true;
+
+    // vertex.validateWeight can create weights that are missing, so we wrap the
+    // op in a batch add to ensure everything happens as one atomic-op.
+    context.batchAdd(() {
+      int tendonCount = skin.tendons.length;
+      bool needDeform = false;
+      for (final vertex in _vertices) {
+        if (!vertex.validateWeight(tendonCount)) {
+          needDeform = true;
+        }
       }
-    }
-    if (needDeform) {
-      // Tell the skin it needs to re-deform as a weight wasn't valid.
-      skin?.addDirt(ComponentDirt.path);
-    }
+      if (needDeform) {
+        // Tell the skin it needs to re-deform as a weight wasn't valid.
+        skin?.addDirt(ComponentDirt.path);
+      }
+    });
   }
 
   @override
@@ -170,6 +176,21 @@ class PointsPath extends PointsPathBase with Skinnable {
       }
     }
 
+    _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
+    markPathDirty();
+  }
+
+  void makeFirst(PathVertex<Weight> vertex) {
+    var order = _vertices.map((v) => v.childOrder).toList();
+
+    var start = _vertices.indexOf(vertex);
+    if (start == -1) {
+      return;
+    }
+    var length = _vertices.length;
+    for (int i = 0; i < length; i++) {
+      _vertices[(i + start) % length].childOrder = order[i];
+    }
     _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
     markPathDirty();
   }

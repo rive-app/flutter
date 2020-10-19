@@ -6,6 +6,7 @@ import 'package:core/debounce.dart';
 import 'package:rive_core/animation/cubic_interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -16,6 +17,7 @@ import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:utilities/list_equality.dart';
 import 'package:rive_core/animation/interpolator.dart';
 import 'package:meta/meta.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class KeyFrameManager extends AnimationManager with RiveFileDelegate {
   final OpenFileContext activeFile;
@@ -54,6 +56,8 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
     }
   }
 
+  bool _clearOnStageSelection = true;
+
   /// Check if any keyframes have been removed from core, this lets us clean up
   /// our selection in a self contained way and dispatch only one change in the
   /// stream even when multiple keyframes are deleted in a single action.
@@ -73,11 +77,47 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
       }
     }
     if (changed) {
-      _selection.add(selection);
+      _changeSelectedKeyframes(selection);
     }
   }
 
-  void _stageSelectionChanged() => _clearSelection();
+  void _changeSelectedKeyframes(HashSet<KeyFrame> keyframes,
+      {bool affectsStage = true}) {
+    _selection.add(keyframes);
+    if (affectsStage) {
+      debounce(_syncStageWithKeyframeSelection);
+    } else {
+      cancelDebounce(_syncStageWithKeyframeSelection);
+    }
+  }
+
+  /// Infer selected stage items from selected keyframes.
+  void _syncStageWithKeyframeSelection() {
+    // Gate changing the selection when the file reports a selection change. We
+    // want to control the entire selection in this context.
+    bool wasClearingOnStageSelection = _clearOnStageSelection;
+    _clearOnStageSelection = false;
+
+    var keyframes = _selection.value;
+    var core = activeFile.core;
+    Set<StageItem> toSelect = {};
+    for (final frame in keyframes) {
+      var component =
+          core.resolve<Component>(frame.keyedProperty.keyedObject.objectId);
+      if (component?.stageItem?.stage != null) {
+        toSelect.add(component.stageItem);
+      }
+    }
+    activeFile.selection.selectMultiple(toSelect);
+
+    _clearOnStageSelection = wasClearingOnStageSelection;
+  }
+
+  void _stageSelectionChanged() {
+    if (_clearOnStageSelection) {
+      _clearSelection();
+    }
+  }
 
   bool _onAction(ShortcutAction action) {
     switch (action) {
@@ -94,7 +134,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
 
   void _clearSelection() {
     var oldSelection = _selection.value;
-    _selection.add(HashSet<KeyFrame>());
+    _changeSelectedKeyframes(HashSet<KeyFrame>(), affectsStage: false);
     _onChangeSelected(oldSelection);
     _updateCommonInterpolation();
   }
@@ -178,7 +218,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
 
     // Selection should always have a valid set, even if requesting null
     // selection.
-    _selection.add(keyFrames != null
+    _changeSelectedKeyframes(keyFrames != null
         ? HashSet<KeyFrame>.from(keyFrames)
         : HashSet<KeyFrame>());
     _onChangeSelected(oldSelection);
@@ -220,6 +260,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
     _interpolationController.close();
     _commonInterpolation.close();
     cancelDebounce(_updateCommonInterpolation);
+    cancelDebounce(_syncStageWithKeyframeSelection);
   }
 }
 

@@ -18,7 +18,7 @@ RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
 # RUN flutter channel master
 RUN flutter config --enable-web
 RUN flutter pub get
-RUN flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
+RUN flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true --source-maps
 
 WORKDIR /app/packages/editor/build 
 ENTRYPOINT ["mv", "web", "/output"]

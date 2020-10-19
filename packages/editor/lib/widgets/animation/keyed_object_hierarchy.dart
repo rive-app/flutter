@@ -18,7 +18,7 @@ import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
-import 'package:tree_widget/flat_tree_item.dart';
+import 'package:rive_widgets/nullable_listenable_builder.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_widget.dart';
 import 'package:utilities/restorer.dart';
@@ -108,22 +108,51 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
                   : SelectionState.none,
             );
           },
-          backgroundBuilder: (context, item, style) => DropItemBackground(
-            DropState.none,
-            SelectionState.none,
-            color: theme.colors.animationSelected,
-            hoverColor: theme.colors.editorTreeHover,
+          backgroundBuilder: (context, item, style) =>
+              NullableValueListenableBuilder<SelectionState>(
+            builder: (context, selectionState, _) {
+              if (selectionState == null) {
+                return const SizedBox();
+              }
+              switch (selectionState) {
+                case SelectionState.hovered:
+                case SelectionState.selected:
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 2),
+                    child: SelectionBorder(
+                      // child: child,
+                      color: selectionState == SelectionState.hovered
+                          ? theme.colors.timelineTreeBackgroundHover
+                          : theme.colors.timelineTreeBackgroundSelected,
+                      roundRight: false,
+                    ),
+                  );
+                default:
+                  return const SizedBox();
+              }
+            },
+            valueListenable: item.data.selectionState,
           ),
           itemBuilder: (context, item, style) {
             var data = item.data;
+            Widget widget;
             if (data is KeyedComponentViewModel) {
-              return _buildKeyedComponent(context, theme, data);
+              widget = _buildKeyedComponent(context, theme, data);
             } else if (data is KeyedGroupViewModel) {
-              return _buildKeyedGroup(context, theme, data);
+              widget = _buildKeyedGroup(context, theme, data);
             } else if (data is KeyedPropertyViewModel) {
-              return _buildKeyedProperty(context, theme, data);
+              widget = _buildKeyedProperty(context, theme, data);
             }
-            return const SizedBox();
+            return widget == null
+                ? const SizedBox()
+                : Expanded(
+                    child: Padding(
+                      child: widget,
+                      padding: const EdgeInsets.only(
+                        right: 19,
+                      ),
+                    ),
+                  );
           },
         ),
       ],
@@ -176,20 +205,18 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
       );
     }
 
-    return Expanded(
-      child: CorePropertyBuilder<String>(
-        object: component,
-        propertyKey: ComponentBase.namePropertyKey,
-        builder: (context, name, _) => Renamable(
-          style: theme.textStyles.inspectorPropertyLabel,
-          name: name,
-          color: theme.colors.hierarchyText,
-          editingColor: theme.colors.selectedText,
-          onRename: (name) {
-            component.name = name;
-            component.context.captureJournalEntry();
-          },
-        ),
+    return CorePropertyBuilder<String>(
+      object: component,
+      propertyKey: ComponentBase.namePropertyKey,
+      builder: (context, name, _) => Renamable(
+        style: theme.textStyles.inspectorPropertyLabel,
+        name: name,
+        color: theme.colors.hierarchyText,
+        editingColor: theme.colors.selectedText,
+        onRename: (name) {
+          component.name = name;
+          component.context.captureJournalEntry();
+        },
       ),
     );
   }
@@ -204,25 +231,23 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
 
   Widget _buildKeyedProperty(
       BuildContext context, RiveThemeData theme, KeyedPropertyViewModel model) {
-    return Expanded(
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Text(
-              UIStrings.of(context).withKey(model.label),
-              style: theme.textStyles.inspectorPropertyLabel,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(
+            UIStrings.of(context).withKey(model.label),
+            style: theme.textStyles.inspectorPropertyLabel,
           ),
-          if (model.subLabel != null)
-            Text(
-              UIStrings.of(context).withKey(model.subLabel),
-              style: theme.textStyles.animationSubLabel,
-            ),
-          _buildKeyedPropertyEditor(context, theme, model),
-        ],
-      ),
+        ),
+        if (model.subLabel != null)
+          Text(
+            UIStrings.of(context).withKey(model.subLabel),
+            style: theme.textStyles.animationSubLabel,
+          ),
+        _buildKeyedPropertyEditor(context, theme, model),
+      ],
     );
   }
 

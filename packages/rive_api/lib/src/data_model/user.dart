@@ -35,6 +35,7 @@ class UserDM extends OwnerDM {
 }
 
 class TeamMemberDM extends OwnerDM {
+  final bool free;
   const TeamMemberDM({
     @required int ownerId,
     @required String name,
@@ -42,6 +43,7 @@ class TeamMemberDM extends OwnerDM {
     @required this.avatarUrl,
     @required this.status,
     @required this.permission,
+    @required this.free,
   }) : super(ownerId, name, username);
 
   final String avatarUrl;
@@ -57,6 +59,7 @@ class TeamMemberDM extends OwnerDM {
         username: data.getString('username'),
         avatarUrl: data.getString('avatar'),
         permission: data.getString('permission'),
+        free: data.getBool('free'),
         status: data.getInvitationStatus(),
       );
 

@@ -13,6 +13,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -49,6 +50,7 @@ import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
+import 'package:rive_editor/rive/stage/stage_context_menu_launcher.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
@@ -123,6 +125,11 @@ class Stage extends Debouncer {
   StageItem _mouseDownHit;
   bool _mouseDownSelectAppend = false;
 
+  // We track the mouse down button as on release we don't get the id of the
+  // button released but the state of the set of buttons, so we need to track it
+  // ourselves on press.
+  int _mouseDownButton = 0;
+
   /// Returns true if the last click operation resulted in a selection.
   StageItem get mouseDownHit => _mouseDownHit;
 
@@ -165,6 +172,11 @@ class Stage extends Debouncer {
   LateDrawViewDelegate lateDrawDelegate;
 
   StageDelegate _delegate;
+  final DetailedEvent<StageContextMenuDetails> _showContextMenu =
+      DetailedEvent<StageContextMenuDetails>();
+  DetailListenable<StageContextMenuDetails> get showContextMenu =>
+      _showContextMenu;
+
   final ValueNotifier<StageTool> _toolNotifier = ValueNotifier<StageTool>(null);
   ValueListenable<StageTool> get toolListenable => _toolNotifier;
 
@@ -402,11 +414,10 @@ class Stage extends Debouncer {
     markNeedsAdvance();
   }
 
-  void mouseWheel(double x, double y, double dx, double dy) {
-    _lastMousePosition[0] = x;
-    _lastMousePosition[1] = y;
-    if (ShortcutAction.mouseWheelZoom.value) {
-      zoomTo(x, y, _viewZoomTarget - dy / 30);
+  void mouseWheel(double dx, double dy, bool forceZoom) {
+    if (ShortcutAction.mouseWheelZoom.value || forceZoom) {
+      zoomTo(_lastMousePosition[0], _lastMousePosition[1],
+          _viewZoomTarget - dy / 100);
     } else {
       _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
       _viewTranslationTarget[0] -= dx;
@@ -489,12 +500,13 @@ class Stage extends Debouncer {
     });
   }
 
-  void _updateHover() {
+  void _updateHover({bool Function(StageItem) filter}) {
     if (isSelectionEnabled && _worldMouse != null) {
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         forEachHover((item) {
-          if (isItemSelectable(item) &&
+          if ((filter?.call(item) ?? true) &&
+              isItemSelectable(item) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
             hover = item;
@@ -504,7 +516,9 @@ class Stage extends Debouncer {
       } else {
         List<StageItem> candidates = [];
         forEachHover((item) {
-          if (isItemSelectable(item) && item.hitHiFi(_worldMouse)) {
+          if ((filter?.call(item) ?? true) &&
+              isItemSelectable(item) &&
+              item.hitHiFi(_worldMouse)) {
             candidates.add(item);
           }
           return true;
@@ -555,6 +569,7 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
+    _mouseDownButton = button;
     switch (button) {
       case 1:
         // If the user clicks while an updatePanIcon is scheduled, accelerate it
@@ -603,13 +618,20 @@ class Stage extends Debouncer {
         break;
       case 2:
         _isPanning = true;
-        _rightClickHandCursor?.remove();
-        _rightClickHandCursor = showCustomCursor(PackedIcon.cursorHand);
+        // Delay showing pan cursor in case right click is quick and should
+        // trigger context menu.
+        debounce(_showPanningCursor, duration: const Duration(seconds: 1));
         break;
       default:
     }
 
     _updateComponents();
+  }
+
+  void _showPanningCursor() {
+    cancelDebounce(_showPanningCursor);
+    _rightClickHandCursor?.remove();
+    _rightClickHandCursor = showCustomCursor(PackedIcon.cursorHand);
   }
 
   void mouseDrag(int button, double x, double y) {
@@ -623,6 +645,9 @@ class Stage extends Debouncer {
     // _dragTool so we can know if we were already dragging.
     StageTool dragTool;
     if (_isPanning) {
+      if (_rightClickHandCursor == null) {
+        _showPanningCursor();
+      }
       double dx = x - _lastMousePosition[0];
       double dy = y - _lastMousePosition[1];
 
@@ -689,9 +714,10 @@ class Stage extends Debouncer {
     }
   }
 
-  void mouseUp(int button, double x, double y) {
+  void mouseUp(int buttons, double x, double y) {
     var wasPanning = _isPanning;
     _dragInError = false;
+    cancelDebounce(_showPanningCursor);
     _isPanning = false;
     _rightClickHandCursor?.remove();
     _rightClickHandCursor = null;
@@ -699,8 +725,14 @@ class Stage extends Debouncer {
 
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
-    if (button == 2 && _rightMouseMoveAccum < 5) {
+    if (_mouseDownButton == 2 && _rightMouseMoveAccum < 5) {
       // show a popup.
+      if (_hoverItem is StageContextMenuLauncher) {
+        var items = (_hoverItem as StageContextMenuLauncher).contextMenuItems;
+        if (items != null && items.isNotEmpty) {
+          _showContextMenu.notify(StageContextMenuDetails(items, x, y));
+        }
+      }
     }
 
     // If we didn't complete an operation and nothing was selected, clear
@@ -720,10 +752,15 @@ class Stage extends Debouncer {
             node.isExpanded = true;
           }
 
-          _updateHover();
+          // Only hit items that have backing components when expanding.
+          _updateHover(filter: (item) => item.component != null);
+
           // The expansion caused something else to be hovered, select it.
           if (_hoverItem != _mouseDownHit) {
-            file.select(StageExpandable.findNonExpanded(_hoverItem));
+            var nonExpanded = StageExpandable.findNonExpanded(_hoverItem);
+            if (nonExpanded != null) {
+              file.select(nonExpanded);
+            }
           }
           markNeedsRedraw();
         } else if (_mouseDownHit is StagePath) {
@@ -1194,6 +1231,7 @@ class Stage extends Debouncer {
 
   /// Clear out all stage items. Normally called when the file is also wiped.
   void wipe() {
+    clearDebounce();
     _soloNotifier.value = null;
     _drawPasses.clear();
 
@@ -1428,14 +1466,14 @@ class Stage extends Debouncer {
       return;
     }
     if (_soloNotifier.value != null) {
-      for (final item in _soloNotifier.value) {
+      var removedItems = value == null
+          ? _soloNotifier.value
+          : _soloNotifier.value.difference(value.toSet());
+      for (final item in removedItems) {
         item.onSoloChanged(false);
       }
     }
-    if (value != null) {
-      // Force select the solo items to expand them in the hierarchy.
-      file.selection.selectMultiple(value);
-    }
+    
     file.selection.clear();
     _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
     _updateHover();
