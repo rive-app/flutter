@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/coop/connect_result.dart';
 import 'package:core/coop/coop_isolate.dart';
 import 'package:core/id.dart';
@@ -571,6 +573,85 @@ void main() {
       expect(await server.close(), true);
       await Future.delayed(const Duration(milliseconds: 200), () {});
       expect(await privateApi.close(), true);
+    },
+    timeout: const Timeout(
+      Duration(seconds: 60),
+    ),
+  );
+
+  test(
+    'make sure multiple overlapping persists work',
+    () async {
+      var privateApiHost = 'http://localhost:${privateApiPort}';
+
+      TestWidgetsFlutterBinding.ensureInitialized();
+
+      final server = TestCoopServer(privateApiHost: privateApiHost);
+      expect(await server.listen(port: coopPort), true);
+
+      final client1 = TestRiveFile(
+        'fake',
+        localDataPlatform: null,
+        overridePreferences: <String, dynamic>{
+          'token': 'fake',
+          'clientId': 22,
+        },
+        useSharedPreferences: false,
+      );
+
+      // This condition can occur when a persist call takes longer than 2
+      // seconds, so we delay all private api ops by 5 seconds.
+      final privateApi = TestPrivateApi()
+        ..responseDelay = const Duration(seconds: 3);
+
+      expect(await privateApi.listen(privateApiPort), true,
+          reason: 'private api starts listening');
+
+      unawaited(privateApi.startServing());
+
+      expect(
+        (await client1.connect('ws://localhost:$coopPort', filePath, 'fake'))
+            .state,
+        ConnectState.connected,
+      );
+      // Make a somewhat sane file.
+      Artboard artboardOnClient1;
+      Node node;
+      expect(client1.nextObjectId.object, 2,
+          reason: 'next monotonic id after backboard is 2');
+      client1.batchAdd(() {
+        artboardOnClient1 = Artboard()
+          ..name = 'My Artboard'
+          ..width = 1920
+          ..height = 1080;
+
+        client1.addObject(artboardOnClient1);
+
+        node = Node()..name = 'name 1';
+        client1.addObject(node);
+        artboardOnClient1.appendChild(node);
+      });
+      client1.captureJournalEntry();
+
+      // Wait for the first connection to settle (perform any initialization
+      // changes that could've been queued up during connect).
+      await client1.settle();
+
+      // Make two changes in rapid succession.
+      node.name = 'name 1';
+      client1.captureJournalEntry();
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      node.name = 'name 2';
+      client1.captureJournalEntry();
+      await Future<void>.delayed(const Duration(seconds: 2));
+      node.name = 'name 3';
+      client1.captureJournalEntry();
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      await Future<void>.delayed(const Duration(seconds: 9));
+
+      expect(await client1.disconnect(), true);
     },
     timeout: const Timeout(
       Duration(seconds: 60),
