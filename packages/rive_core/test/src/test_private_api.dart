@@ -5,6 +5,7 @@ import 'dart:typed_data';
 class TestPrivateApi {
   HttpServer _server;
   int _monotonicID = 1;
+  Duration responseDelay;
   Map<String, Uint8List> filesData = {};
 
   Future<bool> close() async {
@@ -31,6 +32,9 @@ class TestPrivateApi {
                 .takeBytes();
             String key = '${segs[1]}-${segs[2]}';
             filesData[key] = data;
+            if (responseDelay != null) {
+              await Future<void>.delayed(responseDelay);
+            }
             request.response.write(
                 '''{"key":"key-$_monotonicID","revision_id":$_monotonicID, "size":${data.length}}''');
             _monotonicID++;
