@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:rive_api/http.dart';
 import 'package:utilities/deserialize.dart';
+import 'package:utilities/environment.dart';
 
 void handleException(Response response) => throw ApiException(response);
 
@@ -46,12 +47,20 @@ class ApiException implements Exception {
       '[${_res.statusCode}] ${_res.request.url}: ${_res.body.toString()}';
 }
 
+final _webHost = getVariable(
+  'WEB_HOST',
+  defaultValue: const String.fromEnvironment(
+    'WEB_HOST',
+    defaultValue: 'https://zuul.rive.app',
+  ),
+);
+
 /// Now uses a singleton
 class RiveApi extends WebServiceClient {
   static final RiveApi _instance = RiveApi._();
   factory RiveApi() => _instance;
 
-  String _host = 'https://zuul.rive.app';
+  String _host = _webHost;
 
   String get host => _host;
   set host(String host) {

@@ -15,4 +15,7 @@ class PlatformWeb extends Platform {
   bool get isTouchDevice =>
       html.window.navigator.userAgent.contains('Android') ||
       html.window.navigator.userAgent.contains('iPhone');
+
+  @override
+  Map<String, String> get environment => <String, String>{};
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:rive_editor/platform/platform.dart';
+import 'package:utilities/platform.dart';
 
 /// Map shortcut key to a list of physical keys.
 Map<ShortcutKey, Set<PhysicalKeyboardKey>> keyToPhysical = {

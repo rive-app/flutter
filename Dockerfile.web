@@ -14,11 +14,26 @@ ADD dev /app/dev
 ADD submodules /app/submodules
 ADD .flutter_version /app/.flutter_version
 
+
+
 RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
 # RUN flutter channel master
+
 RUN flutter config --enable-web
 RUN flutter pub get
-RUN flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true --source-maps
+
+# set up some args to use for the build, these can be set 
+# when building this image using build-args
+ARG sentry_dsn=https://cd4c5a674f8e44f49203ce39d47c236c@sentry.io/3876713
+ARG sentry_env=development
+ARG web_host=https://zuul.rive.app
+
+RUN flutter build web \
+    --dart-define=SENTRY_ENV=${sentry_env} \
+    --dart-define=SENTRY_DSN=${sentry_dsn} \
+    --dart-define=WEB_HOST=${web_host} \
+    --dart-define=FLUTTER_WEB_USE_SKIA=true \
+    --source-maps
 
 WORKDIR /app/packages/editor/build 
 ENTRYPOINT ["mv", "web", "/output"]

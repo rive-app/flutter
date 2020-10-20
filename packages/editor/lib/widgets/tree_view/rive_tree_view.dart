@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:rive_editor/platform/platform.dart';
+import 'package:utilities/platform.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 
 class RiveTreeView extends StatefulWidget {
