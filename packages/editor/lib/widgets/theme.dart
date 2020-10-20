@@ -244,6 +244,9 @@ class RiveColors {
         Color.fromARGB(255, 251, 188, 20),
         Color.fromARGB(255, 0, 190, 143),
       ];
+
+  // Error page colors
+  Color get errorBackground => const Color(0xFF282828);
 }
 
 /// TextStyles used in the Rive Theme
@@ -561,6 +564,29 @@ class TextStyles {
   TextStyle get receiptRowFailed => receiptHeader.copyWith(
         color: const Color(0xFFAAAAAA),
       );
+
+  // Error Page
+  TextStyle get errorHeader => const TextStyle(
+      fontFamily: 'Roboto-Medium', 
+      color: Color(0xFFF1F1F1), 
+      fontSize: 30);
+
+  TextStyle get errorSubHeader => const TextStyle(
+    fontFamily: 'Roboto-Regular',
+    color: Color(0xFFF1F1F1),
+    fontSize: 16,
+    height: 1.6);
+
+  TextStyle get errorCaption => const TextStyle(
+    fontFamily: 'Roboto-Regular',
+    color: Color(0xFF666666),
+    fontSize: 16,
+    height: 1.6);
+
+  TextStyle get errorAction => const TextStyle(
+    fontFamily: 'Roboto-Medium',
+    color: Color(0xFF333333),
+    fontSize: 16);
 }
 
 /// Gradients used in the Rive Theme
