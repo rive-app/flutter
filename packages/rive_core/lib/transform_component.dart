@@ -175,6 +175,17 @@ abstract class TransformComponent extends TransformComponentBase {
   void parentChanged(ContainerComponent from, ContainerComponent to) {
     super.parentChanged(from, to);
     markWorldTransformDirty();
+
+    // -> editor-only
+    // Let any old node parent know it needs to re-compute its bounds. Let new
+    // node parents know they need to recompute their bounds.
+    if (from is TransformComponent) {
+      from.recomputeParentExpandableBounds();
+    }
+    if (to is TransformComponent) {
+      to.recomputeParentExpandableBounds();
+    }
+    // <- editor-only
   }
 
   @override

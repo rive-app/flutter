@@ -46,23 +46,6 @@ class Bone extends BoneBase {
     super.onRemoved();
   }
 
-  // Recompute node bounds when parents change, for Node UX. If we keep duping
-  // this code (currently in Drawable and here) we may want to just stick this
-  // in Component...
-  @override
-  void parentChanged(ContainerComponent from, ContainerComponent to) {
-    super.parentChanged(from, to);
-
-    // Let any old node parent know it needs to re-compute its bounds. Let new
-    // node parents know they need to recompute their bounds.
-    if (from is TransformComponent) {
-      from.recomputeParentExpandableBounds();
-    }
-    if (to is TransformComponent) {
-      to.recomputeParentExpandableBounds();
-    }
-  }
-
   @override
   void updateWorldTransform() {
     super.updateWorldTransform();
