@@ -13,4 +13,7 @@ class PlatformNative extends Platform {
 
   @override
   bool get isTouchDevice => io.Platform.isAndroid || io.Platform.isIOS;
+
+  @override
+  Map<String, String> get environment => io.Platform.environment;
 }
