@@ -1,6 +1,7 @@
 /// Native error logger usies sentry
 
 import 'package:sentry/sentry.dart';
+import 'package:utilities/sentry.dart';
 
 import 'error_logger.dart';
 
@@ -44,8 +45,6 @@ SeverityLevel _crumbSeverityToSentry(CrumbSeverity severity) {
 }
 
 class NativeErrorLogger extends ErrorLogger {
-  static final _sentry = SentryClient(
-      dsn: "https://1ea8934c37fb4d948c7b057827db4e4d@sentry.io/3764728");
   static final ErrorLogger instance = NativeErrorLogger._();
 
   ErrorLogUser _user;
@@ -60,31 +59,34 @@ class NativeErrorLogger extends ErrorLogger {
       return;
     }
     _user = value;
-    _sentry.userContext = User(username: value.username, id: value.id);
+    sentryClient.userContext = User(username: value.username, id: value.id);
   }
 
+  @override
   Future<void> reportException(Object e, StackTrace trace) async {
     if (isInDebugMode) {
       print('[Error]:\n$e');
       print('[Trace]:\n$trace');
       return;
     } else {
-      print("Logging to sentry the current error $e");
+      print('Logging to sentry the current error $e');
       final Event event = Event(
         exception: e,
         stackTrace: trace,
-        breadcrumbs: breadcrumbs.map(
-          (crumb) => Breadcrumb(
-            crumb.message,
-            crumb.timestamp,
-            category: crumb.category,
-            type: _crumbTypeToString(crumb.type),
-            level: _crumbSeverityToSentry(crumb.severity),
-            data: crumb.data,
-          ),
-        ).toList(growable: false),
+        breadcrumbs: breadcrumbs
+            .map(
+              (crumb) => Breadcrumb(
+                crumb.message,
+                crumb.timestamp,
+                category: crumb.category,
+                type: _crumbTypeToString(crumb.type),
+                level: _crumbSeverityToSentry(crumb.severity),
+                data: crumb.data,
+              ),
+            )
+            .toList(growable: false),
       );
-      final response = await _sentry.capture(event: event);
+      final response = await sentryClient.capture(event: event);
       if (response.isSuccessful) {
         print('Sent to Sentry! ${response.eventId}');
       } else {

@@ -3,13 +3,9 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:sentry/sentry.dart';
-
-// Sentry config
-const _dsn = 'https://cd4c5a674f8e44f49203ce39d47c236c@sentry.io/3876713';
-final _sentry = SentryClient(dsn: _dsn);
+import 'package:utilities/sentry.dart';
 
 /// Configure logging options
-
 void configureLogger({bool disableSentry = false}) {
   // Set the log level from the LOG_LEVEL env variable
   final level = Platform.environment['LOG_LEVEL'];
@@ -35,7 +31,7 @@ void configureLogger({bool disableSentry = false}) {
     if (!_disableSentry && r.level.compareTo(Level.SEVERE) >= 0) {
       try {
         print('Capturing to Sentry');
-        _sentry.capture(
+        sentryClient.capture(
             event: Event(
           loggerName: r.loggerName,
           level: SeverityLevel.error,
