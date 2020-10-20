@@ -131,6 +131,16 @@ class TransformComponentSnappingItem extends SnappingItem {
       ));
     } else if (isSingleSelection && stageItem.obb != null) {
       var obb = stageItem.obb;
+      if (obb.bounds.isEmpty) {
+        // If the bounds are empty, just add the single point of translation of
+        // this object.
+        dynamic component = stageItem.component;
+        if (component is TransformComponent && component.artboard != null) {
+          snap.addVec(
+              component.artboard.renderTranslation(component.worldTranslation));
+        }
+        return;
+      }
       var poly = obb.poly;
 
       snap.addPoint(poly[0], poly[1]);

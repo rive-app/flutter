@@ -246,11 +246,12 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
   Completer _persistCompleter;
   @override
   Future<void> persist() async {
-    _persistCompleter = Completer<void>();
+    var completer = Completer<void>();
+    _persistCompleter = completer;
     var writer = BinaryWriter(alignment: max(1, file.objects.length) * 256);
     file.serialize(writer);
     await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
-    _persistCompleter.complete();
+    completer.complete();
   }
 
   @override

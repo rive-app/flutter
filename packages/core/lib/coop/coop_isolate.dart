@@ -96,9 +96,10 @@ class CoopIsolate {
     if (_shutdownCompleter != null) {
       return false;
     }
-    _shutdownCompleter = Completer<bool>();
+    var completer = Completer<bool>();
+    _shutdownCompleter = completer;
     sendToIsolate(_CoopServerShutdown());
-    return _shutdownCompleter.future;
+    return completer.future;
   }
 
   Future<bool> spawn(void entryPoint(CoopIsolateArgument message),
