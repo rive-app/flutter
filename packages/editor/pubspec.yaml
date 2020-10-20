@@ -36,7 +36,10 @@ dependencies:
   url_launcher: ^5.7.1
   rxdart: ^0.24.1
   collection: ^1.14.13
-  cached_network_image: ^2.3.2+1
+  cached_network_image:
+    git: 
+      url: git://github.com/luigi-rosso/flutter_cached_network_image.git
+      ref: fix_flutter_60239
 
   path_provider: ^1.6.18
   path_provider_macos: ^0.0.4+4
