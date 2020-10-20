@@ -21,14 +21,20 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
 
   final BinaryMessenger messenger;
   static const String keyChannelName = 'plugins.rive.app/key_press';
-  static const String wheelChannelName = 'plugins.rive.app/mouse_wheel';
+  final MethodChannel channel;
 
   /// Registers this class as the default instance of [UrlLauncherPlatform].
   static void registerWith(Registrar registrar) {
     WindowUtilsPlatform.instance = WindowUtilsPlugin(registrar.messenger);
   }
 
-  WindowUtilsPlugin(this.messenger);
+  WindowUtilsPlugin(this.messenger)
+      : channel = MethodChannel(
+            keyChannelName, const StandardMethodCodec(), messenger) {
+    channel.setMethodCallHandler(handleMethodCall);
+  }
+
+  Future<dynamic> handleMethodCall(MethodCall call) async => true;
 
   /// Stubbed out for web; does nothing except return true
   @override
