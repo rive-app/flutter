@@ -37,9 +37,8 @@ class AnimationTimePopupButton extends StatelessWidget {
                 'Current',
                 child: (focus, key) => SizedBox(
                   width: 62,
-                  child: ValueStreamDebounceBuilder<double>(
+                  child: ValueStreamBuilder<double>(
                     stream: animationManager.currentTime,
-                    duration: debounceDuration,
                     builder: (context, snapshot) => snapshot.hasData
                         ? InspectorTextField<int>(
                             key: key,
@@ -137,9 +136,8 @@ class AnimationTimePopupButton extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                     vertical: 5,
                   ),
-                  child: ValueStreamDebounceBuilder<double>(
+                  child: ValueStreamBuilder<double>(
                       stream: animationManager.currentTime,
-                      duration: debounceDuration,
                       // This will rebuild whenever the time changes
                       builder: (context, snapshot) {
                         return snapshot.hasData

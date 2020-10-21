@@ -221,7 +221,23 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     });
   }
 
+  /// Are there any changes in progress that haven't been captured yet?
   bool get hasRecordedChanges => _currentChanges != null;
+
+  /// Are there any changes in progress that need to be synced to coop?
+  bool get hasUnsyncedChanges {
+    if (_currentChanges == null) {
+      return false;
+    }
+    for (final changes in _currentChanges.entries.values) {
+      for (final key in changes.keys) {
+        if (isCoopProperty(key)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   int _journalIndex = 0;
 
