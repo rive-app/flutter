@@ -396,7 +396,6 @@ class RiveFile extends RiveCoreContext {
     // Let's validate the file. First thing we expect is that it has a
     // backboard.
     var backboards = objects.whereType<Backboard>();
-    bool fixedBackboard = false;
     if (backboards.isEmpty) {
       // Don't have one? Patch up the file and make one...
       batchAdd(() {
@@ -408,7 +407,6 @@ class RiveFile extends RiveCoreContext {
         do {
           removeObject(backboards.last);
         } while (backboards.length > 1);
-        fixedBackboard = true;
       }
       _backboard = backboards.first;
     }
@@ -418,10 +416,15 @@ class RiveFile extends RiveCoreContext {
       // artboards yet).
       _backboard.activeArtboard = artboards.first;
     }
-    if (fixedBackboard || hasRecordedChanges) {
-      // We had to patch up the file, save the changes and disallow undo.
+    if (hasUnsyncedChanges) {
+      // We had to patch up the file which required coop changes, save the
+      // changes and disallow undo.
       captureJournalEntry();
       clearJournal();
+    } else if (hasRecordedChanges) {
+      // We have recorded changes but they didn't require coop sync, so just
+      // capture them but don't save them in the undo stack.
+      captureJournalEntry(record: false);
     }
 
     assert(objects.whereType<Backboard>().length == 1,
