@@ -45,6 +45,15 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
   int _nextChangeId;
   final PrivateApi _privateApi;
 
+  // We store the fileId/ownerId on the isolate process just incase the one in
+  // the file/revision-data is out of sync or someone sneakily copied the
+  // revision data (to do testing like Luigi ran into) from another file. This
+  // ensures that the coop server is writing to the file it was given as an id
+  // to connect to. N.B. this'll need to update when we move to single id (maybe
+  // it'll just be a string).
+  int _fileId;
+  int _ownerId;
+
   RiveCoopIsolateProcess({String privateApiHost})
       : _privateApi = PrivateApi(host: privateApiHost);
 
@@ -176,6 +185,8 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
   @override
   Future<bool> initialize(
       int ownerId, int fileId, Map<String, String> options) async {
+    _ownerId = ownerId;
+    _fileId = fileId;
     // check data is not null, check signature, if it's RIVE deserialize
     // if it's { or something else, send wtf.
     var data = await _privateApi.load(ownerId, fileId);
@@ -250,7 +261,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     _persistCompleter = completer;
     var writer = BinaryWriter(alignment: max(1, file.objects.length) * 256);
     file.serialize(writer);
-    await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
+    await _privateApi.save(_ownerId, _fileId, writer.uint8Buffer);
     completer.complete();
   }
 
@@ -276,8 +287,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     for (final to in clients) {
       to.notifyChangingRevision();
     }
-    var data = await _privateApi.restoreRevision(
-        file.ownerId, file.fileId, revisionId);
+    var data = await _privateApi.restoreRevision(_ownerId, _fileId, revisionId);
     if (data == null) {
       print('no data from restore?');
       return;
