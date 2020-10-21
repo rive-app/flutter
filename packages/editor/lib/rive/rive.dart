@@ -79,7 +79,7 @@ class Rive {
 
   Future<void> _traveledLogin(Trip trip) async {
     final me = Plumber().peek<Me>();
-    if (me.signedIn) {
+    if (me != null && me.signedIn) {
       nomad.travel('/files', replace: true);
       return;
     }

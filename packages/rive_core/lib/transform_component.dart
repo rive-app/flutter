@@ -33,7 +33,14 @@ abstract class TransformComponent extends TransformComponentBase {
   }
 
   void recomputeParentExpandableBounds() {
-    for (ContainerComponent p = this; p != null; p = p.parent) {
+    // TODO: reconsider the escapeHatch. Make this work via some form of
+    // settling process that runs the recompute when the dag has next validated
+    // (if a validation is in progress).
+
+    int escapeHatch = 1000;
+    for (ContainerComponent p = this;
+        escapeHatch > 0 && p != null;
+        p = p.parent, escapeHatch--) {
       if (p.isExpandable) {
         // N.B. Hard assumption an expandable is a TransformComponent.
         assert(p is TransformComponent);
@@ -175,6 +182,17 @@ abstract class TransformComponent extends TransformComponentBase {
   void parentChanged(ContainerComponent from, ContainerComponent to) {
     super.parentChanged(from, to);
     markWorldTransformDirty();
+
+    // -> editor-only
+    // Let any old node parent know it needs to re-compute its bounds. Let new
+    // node parents know they need to recompute their bounds.
+    if (from is TransformComponent) {
+      from.recomputeParentExpandableBounds();
+    }
+    if (to is TransformComponent) {
+      to.recomputeParentExpandableBounds();
+    }
+    // <- editor-only
   }
 
   @override
