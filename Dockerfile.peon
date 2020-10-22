@@ -1,51 +1,11 @@
 FROM google/dart
 
-RUN apt update && apt-get -y install unzip zip clang cmake ninja-build pkg-config libgtk-3-dev xvfb cargo wget g++ lsof
+RUN apt-get update && apt-get -y --no-install-recommends install xvfb libgtk-3-dev && rm -rf /var/lib/apt/lists/*
 
-# Install premake 
-RUN wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-linux.tar.gz
-RUN tar -xvf premake-5.0.0-alpha15-linux.tar.gz
-RUN mv premake5 /usr/bin/
-
-# Setup env variables for rive-cpp compilation
-ENV LDFLAGS="-pthreads"
-ENV CC=/usr/bin/clang
-ENV CXX=/usr/bin/clang++
-
-# Install skia and glfw
-ADD submodules/rive-cpp/skia/dependencies/make_skia.sh /app/submodules/rive-cpp/skia/dependencies/make_skia.sh
-ADD submodules/rive-cpp/skia/dependencies/make_glfw.sh /app/submodules/rive-cpp/skia/dependencies/make_glfw.sh
-WORKDIR /app/submodules/rive-cpp/skia/dependencies
-RUN /app/submodules/rive-cpp/skia/dependencies/make_skia.sh
-RUN /app/submodules/rive-cpp/skia/dependencies/make_glfw.sh
-
-# Install SVG Cleaner
-RUN cargo install svgcleaner
-WORKDIR /
-RUN git clone https://github.com/flutter/flutter.git
-ENV PATH "$PATH:/flutter/bin:/root/.cargo/bin:/app/submodules/rive-cpp/skia/thumbnail_generator/build/bin/debug/"
-
-# Go make sure we got the right flutter version
-ADD .flutter_version /app/.flutter_version
-ADD dev /app/dev
-RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
-RUN flutter config --enable-linux-desktop
-
+ADD build/release /app/packages/peon_process/build/linux/release
+ADD build/rive_thumbnail_generator /usr/local/bin/rive_thumbnail_generator
+ADD packages/peon_process/run.sh /app/packages/peon_process/run.sh
 WORKDIR /app/packages/peon_process
-ADD packages /app/packages
-ADD submodules /app/submodules
-WORKDIR /app/submodules/rive-cpp/skia/thumbnail_generator
-RUN /app/submodules/rive-cpp/skia/thumbnail_generator/build.sh clean
-RUN /app/submodules/rive-cpp/skia/thumbnail_generator/build.sh
-RUN mv build/bin/debug/rive_thumbnail_generator /usr/local/bin/
-
-WORKDIR /app/packages/peon_process
-
-# need to make sure we're setup to trust github for our pub get.
-RUN flutter pub get
-
-# build the linux distro
-RUN flutter build linux
 
 # set thumbnail generator path
 ENV THUMBNAIL_GENERATOR_PATH=rive_thumbnail_generator
