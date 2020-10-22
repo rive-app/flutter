@@ -1,4 +1,7 @@
 #!/bin/sh
 set -e 
-cp -r /app/submodules/rive-cpp/skia/dependencies/skia/out/Static /output/static
-cp -r /app/submodules/rive-cpp/skia/dependencies/skia/include /output/include
+cd /app/submodules/rive-cpp/skia/dependencies/skia/out/
+ls 
+tar -czvf /output/static.tar.gz Static
+cd /app/submodules/rive-cpp/skia/dependencies/skia/
+tar -czvf /output/include.tar.gz include 

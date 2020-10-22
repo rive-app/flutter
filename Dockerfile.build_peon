@@ -20,8 +20,8 @@ RUN mv premake5 /usr/bin/
 # # Install SVG Cleaner
 # RUN cargo install svgcleaner
 
-ADD packages/peon_process/skia/include /app/submodules/rive-cpp/skia/dependencies/skia/include
-ADD packages/peon_process/skia/static /app/submodules/rive-cpp/skia/dependencies/skia/out/Static 
+ADD packages/peon_process/skia/include.tar.gz /app/submodules/rive-cpp/skia/dependencies/skia/
+ADD packages/peon_process/skia/static.tar.gz /app/submodules/rive-cpp/skia/dependencies/skia/out/ 
 
 # Go make sure we got the right flutter version
 RUN git clone https://github.com/flutter/flutter.git
