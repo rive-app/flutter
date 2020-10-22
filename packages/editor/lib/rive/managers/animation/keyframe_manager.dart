@@ -88,9 +88,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
   void _changeSelectedKeyframes(HashSet<KeyFrame> keyframes,
       {bool affectsStage = true}) {
     _selection.add(keyframes);
-    print("CHANGE SELECT? $keyframes $affectsStage");
     if (affectsStage) {
-      print("WILL DEBOUNCE!");
       debounce(_syncStageWithKeyframeSelection);
     } else {
       cancelDebounce(_syncStageWithKeyframeSelection);
@@ -99,7 +97,6 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
 
   /// Infer selected stage items from selected keyframes.
   void _syncStageWithKeyframeSelection() {
-    print("YES!");
     // Gate changing the selection when the file reports a selection change. We
     // want to control the entire selection in this context.
     bool wasClearingOnStageSelection = _clearOnStageSelection;
@@ -115,7 +112,6 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
         toSelect.add(component.stageItem);
       }
     }
-    print("TO SELECT IS ${toSelect}");
     activeFile.selection.selectMultiple(toSelect);
 
     _clearOnStageSelection = wasClearingOnStageSelection;

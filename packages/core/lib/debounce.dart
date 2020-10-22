@@ -24,4 +24,5 @@ bool debounceAccelerate(DebounceCallback call) {
 
 void cancelDebounce(DebounceCallback callback) {
   _debounce[callback]?.cancel();
+  _debounce.remove(callback);
 }
