@@ -25,6 +25,9 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
       BehaviorSubject<HashSet<KeyFrame>>.seeded(HashSet<KeyFrame>());
   ValueStream<HashSet<KeyFrame>> get selection => _selection;
 
+  final _selectionController = StreamController<HashSet<KeyFrame>>();
+  Sink<HashSet<KeyFrame>> get changeSelection => _selectionController;
+
   final _commonInterpolation = BehaviorSubject<InterpolationViewModel>();
   ValueStream<InterpolationViewModel> get commonInterpolation =>
       _commonInterpolation;
@@ -44,6 +47,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
 
     _interpolationController.stream.listen(_changeInterpolation);
     _cubicController.stream.listen(_changeCubicInterpolation);
+    _selectionController.stream.listen(_changeSelection);
     _updateCommonInterpolation();
   }
 
@@ -84,7 +88,9 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
   void _changeSelectedKeyframes(HashSet<KeyFrame> keyframes,
       {bool affectsStage = true}) {
     _selection.add(keyframes);
+    print("CHANGE SELECT? $keyframes $affectsStage");
     if (affectsStage) {
+      print("WILL DEBOUNCE!");
       debounce(_syncStageWithKeyframeSelection);
     } else {
       cancelDebounce(_syncStageWithKeyframeSelection);
@@ -93,6 +99,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
 
   /// Infer selected stage items from selected keyframes.
   void _syncStageWithKeyframeSelection() {
+    print("YES!");
     // Gate changing the selection when the file reports a selection change. We
     // want to control the entire selection in this context.
     bool wasClearingOnStageSelection = _clearOnStageSelection;
@@ -108,6 +115,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
         toSelect.add(component.stageItem);
       }
     }
+    print("TO SELECT IS ${toSelect}");
     activeFile.selection.selectMultiple(toSelect);
 
     _clearOnStageSelection = wasClearingOnStageSelection;
@@ -213,7 +221,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
     _updateCommonInterpolation();
   }
 
-  void changeSelection(HashSet<KeyFrame> keyFrames) {
+  void _changeSelection(HashSet<KeyFrame> keyFrames) {
     var oldSelection = _selection.value;
 
     // Selection should always have a valid set, even if requesting null
@@ -253,12 +261,14 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
           _keyframeInterpolationTypeChanged);
     }
     _cubicController.close();
+    _selectionController.close();
     activeFile.core.removeDelegate(this);
     activeFile.removeActionHandler(_onAction);
     activeFile.selection.removeListener(_stageSelectionChanged);
     _selection.close();
     _interpolationController.close();
     _commonInterpolation.close();
+    print("DISPOSE?!?!");
     cancelDebounce(_updateCommonInterpolation);
     cancelDebounce(_syncStageWithKeyframeSelection);
   }

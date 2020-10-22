@@ -17,7 +17,6 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:utilities/iterable.dart';
 
 @immutable
 class KeyComponentsEvent {
@@ -33,8 +32,12 @@ class KeyComponentsEvent {
 /// Animation manager for the currently editing [LinearAnimation].
 class EditingAnimationManager extends AnimationTimeManager
     with RiveFileDelegate {
-  EditingAnimationManager(LinearAnimation animation, OpenFileContext activeFile)
-      : super(animation, activeFile) {
+  EditingAnimationManager(
+    LinearAnimation animation,
+    OpenFileContext activeFile, {
+    this.selectedFrameStream,
+    this.changeSelectedFrameStream,
+  }) : super(animation, activeFile) {
     animation.context.addDelegate(this);
     _updateHierarchy();
     _keyController.stream.listen(_keyComponents);
@@ -42,7 +45,13 @@ class EditingAnimationManager extends AnimationTimeManager
     _mouseExitController.stream.listen(_mouseExit);
     _selectController.stream.listen(_select);
     _selectMultipleController.stream.listen(_selectMultiple);
+    _selectedFrameSubscription =
+        selectedFrameStream.listen(_debounceSelectedFramesChanged);
   }
+
+  StreamSubscription<HashSet<KeyFrame>> _selectedFrameSubscription;
+  final ValueStream<HashSet<KeyFrame>> selectedFrameStream;
+  final Sink<HashSet<KeyFrame>> changeSelectedFrameStream;
 
   final _componentViewModels = HashMap<Component, KeyedComponentViewModel>();
   HashMap<Component, KeyedComponentViewModel> get componentViewModels =>
@@ -87,28 +96,110 @@ class EditingAnimationManager extends AnimationTimeManager
 
   void _mouseOver(KeyHierarchyViewModel vm) {
     if (vm is KeyedComponentViewModel) {
-      vm.component.stageItem.isHovered = true;
+      var stageItem = vm.component.stageItem;
+      if (stageItem != null && stageItem.stage != null) {
+        stageItem.isHovered = true;
+      }
+    } else if (vm is KeyedPropertyViewModel) {
+      vm.selection.isHovered = true;
     }
   }
 
   void _mouseExit(KeyHierarchyViewModel vm) {
     if (vm is KeyedComponentViewModel) {
-      vm.component.stageItem.isHovered = false;
+      var stageItem = vm.component.stageItem;
+      if (stageItem != null && stageItem.stage != null) {
+        stageItem.isHovered = false;
+      }
+    } else if (vm is KeyedPropertyViewModel) {
+      vm.selection.isHovered = false;
     }
   }
 
   void _select(KeyHierarchyViewModel vm) {
-    if (vm is KeyedComponentViewModel && vm.component.stageItem != null) {
+    if (vm is KeyedComponentViewModel &&
+        vm.component.stageItem != null &&
+        vm.component.stageItem.stage != null) {
       activeFile.select(vm.component.stageItem);
+    } else if (vm is KeyedPropertyViewModel) {
+      // vm.keyedProperty.keyframes
+      changeSelectedFrameStream
+          .add(HashSet<KeyFrame>.from(vm.keyedProperty.keyframes));
     }
   }
 
   void _selectMultiple(Iterable<KeyHierarchyViewModel> vms) {
-    var keyedComponentStageItems = vms.mapWhereType<StageItem>((item) =>
-        item is KeyedComponentViewModel ? item.component.stageItem : null);
-    if (keyedComponentStageItems.isNotEmpty) {
-      activeFile.selection.selectMultiple(keyedComponentStageItems);
+    var selectStageItems = HashSet<StageItem>();
+    var selectKeyFrames = HashSet<KeyFrame>();
+    for (final vm in vms) {
+      if (vm is KeyedComponentViewModel) {
+        var item = vm.component.stageItem;
+        if (item == null || item.stage == null) {
+          // Some keyed components don't have stageItems (Fills)
+          continue;
+        }
+        selectStageItems.add(item);
+      } else if (vm is KeyedPropertyViewModel) {
+        selectKeyFrames.addAll(vm.keyedProperty.keyframes);
+      }
     }
+    changeSelectedFrameStream.add(selectKeyFrames);
+    activeFile.selection.selectMultiple(selectStageItems);
+  }
+
+  var _selectedProperties = HashSet<KeyedPropertyViewModel>();
+
+  void _debounceSelectedFramesChanged(HashSet<KeyFrame> keyframes) {
+    debounce(_selectedFramesChanged);
+  }
+
+  void _selectedFramesChanged() {
+    var keyframes = selectedFrameStream.value;
+    var core = activeFile.core;
+
+    // First get the set of unique keyed properties (do it by ID so each
+    // iteration doesn't need to do multiple core lookups). It would be three
+    // core lookups per keyframe (one for the keyedPropertyId, one for the
+    // keyedObjectId, and one for the objectId).
+    var keyedPropertyIds = HashSet<Id>();
+    for (final frame in keyframes) {
+      keyedPropertyIds.add(frame.keyedPropertyId);
+    }
+
+    var selectPropertyViewModels = HashSet<KeyedPropertyViewModel>();
+    for (final keyedPropertyId in keyedPropertyIds) {
+      var keyedProperty = core.resolve<KeyedProperty>(keyedPropertyId);
+      if (keyedProperty == null) {
+        continue;
+      }
+      var component =
+          core.resolve<Component>(keyedProperty.keyedObject.objectId);
+
+      if (component == null) {
+        continue;
+      }
+      var vm = _componentViewModels[component.timelineProxy];
+      if (vm == null) {
+        continue;
+      }
+      for (final child in vm.children) {
+        if (child is KeyedPropertyViewModel &&
+            child.keyedProperty == keyedProperty) {
+          selectPropertyViewModels.add(child);
+          child.selection.isSelected = true;
+          break;
+        }
+      }
+    }
+
+    // Finally clean up previously selected items by marking them no longer
+    // selected.
+    for (final previouslySelected
+        in _selectedProperties.difference(selectPropertyViewModels)) {
+      previouslySelected.selection.isSelected = false;
+    }
+
+    _selectedProperties = selectPropertyViewModels;
   }
 
   @override
@@ -118,7 +209,11 @@ class EditingAnimationManager extends AnimationTimeManager
     }
     for (final vm in _componentViewModels.values) {
       vm.selectionState?.removeListener(_vmSelectionStateChanged);
+      for (final child in vm.children) {
+        child.selectionState?.removeListener(_vmSelectionStateChanged);
+      }
     }
+
     cancelDebounce(_updateHierarchy);
     _hierarchyController.close();
     _keyController.close();
@@ -127,6 +222,8 @@ class EditingAnimationManager extends AnimationTimeManager
     _selectController.close();
     _selectMultipleController.close();
     animation.context.removeDelegate(this);
+    _selectedFrameSubscription.cancel();
+    cancelDebounce(_selectedFramesChanged);
     super.dispose();
   }
 
@@ -192,6 +289,9 @@ class EditingAnimationManager extends AnimationTimeManager
 
     // Reset children.
     for (final vm in _componentViewModels.values) {
+      for (final child in vm.children) {
+        child.selectionState?.removeListener(_vmSelectionStateChanged);
+      }
       vm.children.clear();
       // Clear component groups.
       var groups = _componentGroupViewModels[vm.component];
@@ -280,16 +380,16 @@ class EditingAnimationManager extends AnimationTimeManager
         }
         var propertyKeyName =
             RiveCoreContext.propertyKeyName(property.keyedProperty.propertyKey);
-        viewModel.children.add(
-          KeyedPropertyViewModel(
-            keyedProperty: property.keyedProperty,
-            label: displayGroupLabel ?? propertyKeyName,
-            subLabel: displayGroupLabel != null
-                ? '$groupLabel.$propertyKeyName'
-                : null,
-            component: component,
-          ),
+        var propertyViewModel = KeyedPropertyViewModel(
+          keyedProperty: property.keyedProperty,
+          label: displayGroupLabel ?? propertyKeyName,
+          subLabel:
+              displayGroupLabel != null ? '$groupLabel.$propertyKeyName' : null,
+          component: component,
+          selection: SelectableItem(),
         );
+        propertyViewModel.selectionState.addListener(_vmSelectionStateChanged);
+        viewModel.children.add(propertyViewModel);
 
         // Also add it to the keyed properties, this is the first step in
         // building up the all properties.
@@ -472,8 +572,11 @@ class KeyedPropertyViewModel extends KeyHierarchyViewModel {
   final String label;
   final String subLabel;
 
+  final SelectableItem selection;
+
   @override
-  ValueListenable<SelectionState> get selectionState => null;
+  ValueListenable<SelectionState> get selectionState =>
+      selection.selectionState;
 
   // /// The component in the timeline that'll show this property (may not match
   // /// the component that stores the property).
@@ -491,6 +594,7 @@ class KeyedPropertyViewModel extends KeyHierarchyViewModel {
     this.subLabel,
     // this.timelineComponent,
     this.component,
+    this.selection,
   });
 }
 

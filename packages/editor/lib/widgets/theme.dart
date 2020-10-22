@@ -192,8 +192,8 @@ class RiveColors {
   Color get interpolationControlHandleOut => const Color(0xFF33A7FF);
   Color get timelineBackgroundHover => const Color(0xFF2A2A2A);
   Color get timelineBackgroundSelected => const Color(0xFF2A2A2A);
-  Color get timelineTreeBackgroundHover => const Color(0xFF2E2E2E);
-  Color get timelineTreeBackgroundSelected => const Color(0xFF2E2E2E);
+  Color get timelineTreeBackgroundHover => const Color(0x20646464);
+  Color get timelineTreeBackgroundSelected => const Color(0x20646464);
 
   // Inspector panel pill button
   Color get inspectorPillBackground => buttonDark;
@@ -567,26 +567,22 @@ class TextStyles {
 
   // Error Page
   TextStyle get errorHeader => const TextStyle(
-      fontFamily: 'Roboto-Medium', 
-      color: Color(0xFFF1F1F1), 
-      fontSize: 30);
+      fontFamily: 'Roboto-Medium', color: Color(0xFFF1F1F1), fontSize: 30);
 
   TextStyle get errorSubHeader => const TextStyle(
-    fontFamily: 'Roboto-Regular',
-    color: Color(0xFFF1F1F1),
-    fontSize: 16,
-    height: 1.6);
+      fontFamily: 'Roboto-Regular',
+      color: Color(0xFFF1F1F1),
+      fontSize: 16,
+      height: 1.6);
 
   TextStyle get errorCaption => const TextStyle(
-    fontFamily: 'Roboto-Regular',
-    color: Color(0xFF666666),
-    fontSize: 16,
-    height: 1.6);
+      fontFamily: 'Roboto-Regular',
+      color: Color(0xFF666666),
+      fontSize: 16,
+      height: 1.6);
 
   TextStyle get errorAction => const TextStyle(
-    fontFamily: 'Roboto-Medium',
-    color: Color(0xFF333333),
-    fontSize: 16);
+      fontFamily: 'Roboto-Medium', color: Color(0xFF333333), fontSize: 16);
 }
 
 /// Gradients used in the Rive Theme
