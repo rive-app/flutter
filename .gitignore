@@ -125,3 +125,4 @@ packages/window_utils/window_utils_web/pubspec.lock
 /packages/rive_core/test/assets/file_teeny_tiny.riv
 /packages/peon_process/out/interpolation.riv
 node_modules
+build

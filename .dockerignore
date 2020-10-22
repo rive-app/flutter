@@ -6,3 +6,5 @@
 **/.git
 !submodules/rive-cpp/**/build
 submodules/rive-cpp/skia/dependencies/skia
+!build/peon
+!build/rive_thumbnail_generator

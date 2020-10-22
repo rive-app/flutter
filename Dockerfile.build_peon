@@ -1,0 +1,52 @@
+FROM google/dart
+
+RUN apt update && apt-get -y install unzip zip clang cmake ninja-build pkg-config libgtk-3-dev xvfb cargo wget g++ lsof
+
+# Setup env variables for rive-cpp compilation
+ENV LDFLAGS="-pthreads"
+ENV CC=/usr/bin/clang
+ENV CXX=/usr/bin/clang++
+
+WORKDIR /
+ENV PATH "$PATH:/flutter/bin:/root/.cargo/bin:/app/submodules/rive-cpp/skia/thumbnail_generator/build/bin/debug/"
+
+# Install premake 
+RUN wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-linux.tar.gz
+RUN tar -xvf premake-5.0.0-alpha15-linux.tar.gz
+RUN mv premake5 /usr/bin/
+
+
+# SVG cleaner is out fttb
+# # Install SVG Cleaner
+# RUN cargo install svgcleaner
+
+ADD packages/peon_process/skia/include /app/submodules/rive-cpp/skia/dependencies/skia/include
+ADD packages/peon_process/skia/static /app/submodules/rive-cpp/skia/dependencies/skia/out/Static 
+
+# Go make sure we got the right flutter version
+RUN git clone https://github.com/flutter/flutter.git
+ADD .flutter_version /app/.flutter_version
+ADD dev /app/dev
+RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
+RUN flutter config --enable-linux-desktop
+
+WORKDIR /app/packages/peon_process
+ADD packages /app/packages
+ADD submodules /app/submodules
+WORKDIR /app/submodules/rive-cpp/skia/thumbnail_generator
+RUN /app/submodules/rive-cpp/skia/thumbnail_generator/build.sh clean
+RUN /app/submodules/rive-cpp/skia/thumbnail_generator/build.sh
+RUN mv build/bin/debug/rive_thumbnail_generator /usr/local/bin/
+
+WORKDIR /app/packages/peon_process
+
+# need to make sure we're setup to trust github for our pub get.
+RUN flutter pub get
+
+# build the linux distro
+RUN flutter build linux
+
+# set thumbnail generator path
+ENV THUMBNAIL_GENERATOR_PATH=rive_thumbnail_generator
+# run.sh should just start the xvfb session & launch the build
+ENTRYPOINT ["sh", "copy.peon.sh"]
