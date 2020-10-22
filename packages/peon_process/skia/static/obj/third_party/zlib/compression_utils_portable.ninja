@@ -1,0 +1,14 @@
+defines = -DNDEBUG
+framework_dirs =
+include_dirs =
+cflags = -w -Wno-attributes -fstrict-aliasing -fPIC -fvisibility=hidden -O3 -fdata-sections -ffunction-sections -Wno-sign-conversion -Wno-unused-parameter -isystem /app/submodules/rive-cpp/skia/dependencies/skia/third_party/externals/zlib/google -isystem /app/submodules/rive-cpp/skia/dependencies/skia/third_party/externals/zlib
+cflags_cc = -std=c++17 -fvisibility-inlines-hidden -fno-exceptions -fno-rtti
+root_out_dir = .
+target_output_name = libcompression_utils_portable
+
+build obj/third_party/externals/zlib/google/libcompression_utils_portable.compression_utils_portable.o: cxx ../../third_party/externals/zlib/google/compression_utils_portable.cc
+
+build ./libcompression_utils_portable.a: alink obj/third_party/externals/zlib/google/libcompression_utils_portable.compression_utils_portable.o || ./libzlib.a obj/third_party/zlib/zlib_adler32_simd.stamp obj/third_party/zlib/zlib_crc32_simd.stamp obj/third_party/zlib/zlib_inflate_chunk_simd.stamp obj/third_party/zlib/zlib_x86_x64_simd.stamp
+  arflags =
+  output_extension = .a
+  output_dir = 

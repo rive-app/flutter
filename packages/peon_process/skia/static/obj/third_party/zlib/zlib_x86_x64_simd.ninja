@@ -1,0 +1,12 @@
+defines = -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2 -DNDEBUG -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3
+framework_dirs =
+include_dirs =
+cflags = -msse4.2 -mpclmul -Wno-attributes -fstrict-aliasing -fPIC -fvisibility=hidden -O3 -fdata-sections -ffunction-sections -Wno-sign-conversion -Wno-unused-parameter -w
+cflags_c =
+root_out_dir = .
+target_output_name = zlib_x86_x64_simd
+
+build obj/third_party/externals/zlib/zlib_x86_x64_simd.crc_folding.o: cc ../../third_party/externals/zlib/crc_folding.c
+build obj/third_party/externals/zlib/zlib_x86_x64_simd.fill_window_sse.o: cc ../../third_party/externals/zlib/fill_window_sse.c
+
+build obj/third_party/zlib/zlib_x86_x64_simd.stamp: stamp obj/third_party/externals/zlib/zlib_x86_x64_simd.crc_folding.o obj/third_party/externals/zlib/zlib_x86_x64_simd.fill_window_sse.o

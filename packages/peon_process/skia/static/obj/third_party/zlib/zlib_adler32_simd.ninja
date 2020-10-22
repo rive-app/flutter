@@ -1,0 +1,11 @@
+defines = -DADLER32_SIMD_SSSE3 -DNDEBUG -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3
+framework_dirs =
+include_dirs =
+cflags = -mssse3 -Wno-attributes -fstrict-aliasing -fPIC -fvisibility=hidden -O3 -fdata-sections -ffunction-sections -Wno-sign-conversion -Wno-unused-parameter -w
+cflags_c =
+root_out_dir = .
+target_output_name = zlib_adler32_simd
+
+build obj/third_party/externals/zlib/zlib_adler32_simd.adler32_simd.o: cc ../../third_party/externals/zlib/adler32_simd.c
+
+build obj/third_party/zlib/zlib_adler32_simd.stamp: stamp obj/third_party/externals/zlib/zlib_adler32_simd.adler32_simd.o

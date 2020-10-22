@@ -1,0 +1,25 @@
+FROM google/dart
+# Using google/dart base to make sure we compile our thumbnail generator to something compatible with 
+
+RUN apt update && apt-get -y install unzip zip clang cmake ninja-build pkg-config libgtk-3-dev xvfb cargo wget g++ lsof
+
+# Install premake 
+RUN wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-linux.tar.gz
+RUN tar -xvf premake-5.0.0-alpha15-linux.tar.gz
+RUN mv premake5 /usr/bin/
+
+# Setup env variables for rive-cpp compilation
+ENV LDFLAGS="-pthreads"
+ENV CC=/usr/bin/clang
+ENV CXX=/usr/bin/clang++
+
+# First install skia and glfw
+RUN mkdir /output
+ADD submodules/rive-cpp/skia/dependencies/make_skia.sh /app/submodules/rive-cpp/skia/dependencies/make_skia.sh
+WORKDIR /app/submodules/rive-cpp/skia/dependencies
+RUN /app/submodules/rive-cpp/skia/dependencies/make_skia.sh
+WORKDIR /
+
+ADD packages/peon_process/copy.skia.sh /copy.skia.sh
+
+ENTRYPOINT ["/bin/sh", "copy.skia.sh"]

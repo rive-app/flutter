@@ -1,0 +1,11 @@
+defines = -DNDEBUG -DSK_R32_SHIFT=16 -DSK_GAMMA_APPLY_TO_A8 -DSKIA_IMPLEMENTATION=1
+framework_dirs =
+include_dirs = -I../..
+cflags = -Wno-attributes -fstrict-aliasing -fPIC -fvisibility=hidden -O3 -fdata-sections -ffunction-sections -Wno-sign-conversion -Wno-unused-parameter
+cflags_cc = -std=c++17 -fvisibility-inlines-hidden -fno-exceptions -fno-rtti
+root_out_dir = .
+target_output_name = pdf
+
+build obj/src/pdf/pdf.SkDocument_PDF_None.o: cxx ../../src/pdf/SkDocument_PDF_None.cpp
+
+build obj/pdf.stamp: stamp obj/src/pdf/pdf.SkDocument_PDF_None.o

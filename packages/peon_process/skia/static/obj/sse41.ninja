@@ -1,0 +1,11 @@
+defines = -DNDEBUG -DSK_R32_SHIFT=16 -DSK_GAMMA_APPLY_TO_A8 -DSKIA_IMPLEMENTATION=1
+framework_dirs =
+include_dirs = -I../..
+cflags = -msse4.1 -Wno-attributes -fstrict-aliasing -fPIC -fvisibility=hidden -O3 -fdata-sections -ffunction-sections -Wno-sign-conversion -Wno-unused-parameter
+cflags_cc = -std=c++17 -fvisibility-inlines-hidden -fno-exceptions -fno-rtti
+root_out_dir = .
+target_output_name = sse41
+
+build obj/src/opts/sse41.SkOpts_sse41.o: cxx ../../src/opts/SkOpts_sse41.cpp
+
+build obj/sse41.stamp: stamp obj/src/opts/sse41.SkOpts_sse41.o

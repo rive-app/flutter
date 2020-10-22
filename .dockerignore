@@ -3,5 +3,6 @@
 **/build
 **/output
 **/.dart_tool
-.git
+**/.git
 !submodules/rive-cpp/**/build
+submodules/rive-cpp/skia/dependencies/skia

@@ -1,0 +1,11 @@
+defines = -DNDEBUG
+framework_dirs =
+include_dirs = -I../../include/third_party/skcms
+cflags = -w -std=c11 -Wno-attributes -fstrict-aliasing -fPIC -fvisibility=hidden -O3 -fdata-sections -ffunction-sections -Wno-sign-conversion -Wno-unused-parameter
+cflags_cc = -std=c++17 -fvisibility-inlines-hidden -fno-exceptions -fno-rtti
+root_out_dir = .
+target_output_name = skcms
+
+build obj/third_party/skcms/skcms.skcms.o: cxx ../../third_party/skcms/skcms.cc
+
+build obj/skcms.stamp: stamp obj/third_party/skcms/skcms.skcms.o
