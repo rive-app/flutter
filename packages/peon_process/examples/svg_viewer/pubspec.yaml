@@ -24,9 +24,9 @@ dependencies:
   flutter:
     sdk: flutter
   rive:
-    path: ../../../../../rive-flutter
+    path: ../../../../submodules/rive-flutter
   rive_core:
-    path: ../../../../../rive/packages/rive_core
+    path: ../../../rive_core
   peon_process:
     path: ../../../peon_process
 
