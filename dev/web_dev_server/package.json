@@ -4,11 +4,15 @@
   "description": "2Dimensions.com",
   "repository": "git@github.com:2d-inc/2dimensions.git",
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "PASSWORD=password USER=test mocha --no-timeout"
   },
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "mocha": "^8.2.0",
+    "puppeteer": "^5.3.1"
+  }
 }
