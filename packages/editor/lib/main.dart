@@ -6,6 +6,7 @@ import 'package:core/error_logger/native_error_logger.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:pedantic/pedantic.dart';
@@ -537,8 +538,8 @@ class FeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const FlatButton(
-      child: Text(
-        'Feedback',
+      child: RiveUrl(
+        text: 'Feedback',
         style: TextStyle(color: Colors.grey),
       ),
       onPressed: launchSupportUrl,
