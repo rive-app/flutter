@@ -8,6 +8,7 @@ import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
@@ -21,9 +22,25 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
+import 'package:rive_editor/widgets/common/converters/convert.dart';
+import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:utilities/utilities.dart';
+
+bool _keyFramesBelongToSingleObject(HashSet<KeyFrame> keyframes) {
+  Id objectId = keyframes.first.keyedProperty.keyedObject.objectId;
+
+  return !keyframes
+      .skip(1)
+      .any((frame) => frame.keyedProperty.keyedObject.objectId != objectId);
+}
+
+bool _keyFramesBelongToSingleProperty(HashSet<KeyFrame> keyframes) {
+  Id propertyId = keyframes.first.keyedPropertyId;
+
+  return !keyframes.skip(1).any((frame) => frame.keyedPropertyId != propertyId);
+}
 
 abstract class RiveClipboard {
   RiveClipboard._();
@@ -31,7 +48,18 @@ abstract class RiveClipboard {
     assert(file != null, 'can\'t copy from null file');
     var keyFrameManager = file.keyFrameManager.value;
     if (keyFrameManager != null && keyFrameManager.selection.value.isNotEmpty) {
-      return _RiveKeyFrameClipboard(keyFrameManager.selection.value);
+      // We're copying keyframes, now determine what kind of keyframe copy/paste
+      // op it is.
+      var keyframes = keyFrameManager.selection.value;
+
+      // If any keyframes have a different objectId, we need a multi-object
+      // clipboard (means we can only paste back to this same file and only back
+      // to these same objects, no copying of keyframes across properties).
+      if (_keyFramesBelongToSingleObject(keyframes)) {
+        return _KeyFrameClipboard(file, keyframes);
+      } else {
+        return _MultiObjectKeyFrameClipboard(file, keyframes);
+      }
     } else {
       return _RiveHierarchyClipboard(file);
     }
@@ -39,10 +67,231 @@ abstract class RiveClipboard {
   bool paste(OpenFileContext file);
 }
 
-class _RiveKeyFrameClipboard extends RiveClipboard {
+class _KeyFrameClipboard extends RiveClipboard {
+  Uint8List bytes;
+  Id _keyedObjectId;
+  final int fileId;
+  final int ownerId;
+
+  _KeyFrameClipboard(OpenFileContext file, HashSet<KeyFrame> keyFrames)
+      : fileId = file.fileId,
+        ownerId = file.ownerId,
+        super._() {
+    // guaranteed to have only one common keyedObject across all keyframes
+    _keyedObjectId = keyFrames.first.keyedProperty.keyedObject.objectId;
+    var exportProperties = HashMap<KeyedProperty, HashSet<KeyFrame>>();
+    var interpolators = <Core>{};
+    for (final keyframe in keyFrames) {
+      if (keyframe.interpolator is Core) {
+        interpolators.add(keyframe.interpolator as Core);
+      }
+      var exportProperty =
+          exportProperties[keyframe.keyedProperty] ??= HashSet<KeyFrame>();
+      exportProperty.add(keyframe);
+    }
+
+    // Build up an idLookup table for the ids of the referenced interpolators to
+    // their export key (an index in the interpolator list).
+    var idLookup = HashMap<Id, int>();
+    var interpolatorList = interpolators.toList();
+    for (int i = 0; i < interpolatorList.length; i++) {
+      var interpolator = interpolatorList[i];
+      idLookup[interpolator.id] = i;
+    }
+
+    final propertyToField = HashMap<int, CoreFieldType>();
+    var writer = BinaryWriter();
+    writer.writeVarUint(interpolatorList.length);
+    for (final interpolator in interpolatorList) {
+      interpolator.writeRuntime(writer, propertyToField);
+    }
+
+    writer.writeVarUint(exportProperties.length);
+    exportProperties.forEach((keyedProperty, keyFrames) {
+      keyedProperty.writeRuntimeSubset(
+          writer, propertyToField, keyFrames, idLookup);
+    });
+
+    bytes = writer.uint8Buffer;
+  }
+
+  @override
+  bool paste(OpenFileContext file) {
+    var keyFrameManager = file.keyFrameManager.value;
+    var core = file.core;
+    var animationManager = file.editingAnimationManager.value;
+    // Can't paste keyframes if we're not in animation mode.
+    if (!core.isAnimating || keyFrameManager == null) {
+      return false;
+    }
+
+    final propertyToField = HashMap<int, CoreFieldType>();
+
+    bool canPasteToOriginalObject =
+        file.fileId == fileId && file.ownerId == ownerId;
+
+    var selectedKeyFrames = keyFrameManager.selection.value;
+    var targetObjects = HashSet<Component>();
+
+    // If we're copying from one field (like X) and we have a single other
+    // compatible field (like Y) selected, attempt copy/paste to that single
+    // target property.
+    KeyedProperty targetProperty;
+
+    if (selectedKeyFrames.isEmpty && file.selection.isNotEmpty) {
+      // No selected keyframes, but there are items selected on the stage, chose
+      // those as targets for pasting.
+      targetObjects.addAll(file.selection.items.mapWhereType<Component>(
+          (item) => item is StageItem && item.component is Component
+              ? item.component
+              : null));
+    } else if (selectedKeyFrames.isNotEmpty &&
+        _keyFramesBelongToSingleObject(selectedKeyFrames)) {
+      // paste to the single selected object in the timeline.
+      var component = core.resolve<Component>(
+          selectedKeyFrames.first.keyedProperty.keyedObject.objectId);
+      if (component != null) {
+        targetObjects.add(component);
+        if (_keyFramesBelongToSingleProperty(selectedKeyFrames)) {
+          targetProperty = selectedKeyFrames.first.keyedProperty;
+        }
+      }
+    }
+    var reader = BinaryReader.fromList(bytes);
+    var interpolatorCount = reader.readVarUint();
+    var interpolators = List<Core>(interpolatorCount);
+
+    // If there were no targetObjects, try pasting back to the original
+    // (effectively making that the target object).
+    if (targetObjects.isEmpty && canPasteToOriginalObject) {
+      var originalObject = core.resolve<Component>(_keyedObjectId);
+      if (originalObject != null) {
+        targetObjects.add(originalObject);
+      }
+    }
+    if (targetObjects.isNotEmpty) {
+      core.batchAdd(() {
+        for (int i = 0; i < interpolatorCount; i++) {
+          var interpolator = interpolators[i] =
+              core.readRuntimeObject(reader, propertyToField);
+          if (interpolator is Interpolator) {
+            core.addObject(interpolator);
+          }
+        }
+
+        int minTime = double.maxFinite.toInt();
+        List<KeyFrame> addedKeyFrames = [];
+        var animation = keyFrameManager.animation;
+        var keyedPropertyCount = reader.readVarUint();
+
+        var remaps = <RuntimeRemap>[];
+
+        var startOfProperties = reader.position;
+        for (final targetObject in targetObjects) {
+          // Make sure this object is keyed in the animation.
+          KeyedObject keyedObject = animation.getKeyed(targetObject);
+
+          reader.readIndex = startOfProperties;
+
+          for (int i = 0; i < keyedPropertyCount; i++) {
+            var keyedProperty = core.readRuntimeObject<KeyedProperty>(
+                reader, propertyToField, remaps);
+
+            if (keyedProperty == null) {
+              continue;
+            }
+            // We're attempting to paste to a single compatible field. Validate
+            // the backing field types for the properties match (X can paste to
+            // Y because they're both double).
+            var pasteToSingleField =
+                keyedPropertyCount == 1 && targetProperty != null;
+
+            if (pasteToSingleField &&
+                core.coreType(targetProperty.propertyKey) !=
+                    core.coreType(keyedProperty.propertyKey)) {
+              continue;
+            } else if (!pasteToSingleField &&
+                !targetObject.hasProperty(keyedProperty.propertyKey)) {
+              // The keyed property didn't load or it isn't a valid property for
+              // this target object.
+              continue;
+            }
+            InputValueConverter<double> converterFrom;
+            InputValueConverter<double> converterTo;
+
+            // When pasting to a single field, we already have the target keyed
+            // property, which is presumably valid and setup correctly (already
+            // has a matching KeyedObject, otherwise it wouldn't be in our
+            // selection).
+            if (pasteToSingleField) {
+              // Make sure we use the target as the keyed property to parent our
+              // incomining frames to.
+              if (core.coreType(targetProperty.propertyKey) ==
+                  core.doubleType) {
+                converterFrom =
+                    converterForProperty<double>(keyedProperty.propertyKey);
+                converterTo =
+                    converterForProperty<double>(targetProperty.propertyKey);
+              }
+              keyedProperty = targetProperty;
+            } else {
+              // If there wasn't a keyedObject, attempt to make one now that we
+              // know we have a valid property keyframed for it.
+              keyedObject ??= animation.makeKeyed(targetObject);
+
+              if (keyedObject.getKeyed(keyedProperty.propertyKey) != null) {
+                // This property is already keyed, make sure we tack on our
+                // keyframes to the existing list.
+                keyedProperty = keyedObject.getKeyed(keyedProperty.propertyKey);
+              } else {
+                // Add our newed up keyedProperty to the keyedObject as we
+                // didn't already keyframe this property.
+                core.addObject(keyedProperty);
+                keyedProperty.keyedObjectId = keyedObject.id;
+              }
+            }
+
+            var numKeyframes = reader.readVarUint();
+
+            for (int l = 0; l < numKeyframes; l++) {
+              var keyframe = core.readRuntimeObject<KeyFrame>(
+                  reader, propertyToField, remaps);
+              if (keyframe.frame < minTime) {
+                minTime = keyframe.frame;
+              }
+              addedKeyFrames.add(keyframe);
+              core.addObject(keyframe);
+              keyframe.keyedPropertyId = keyedProperty.id;
+              if (converterFrom != null) {
+                KeyFrameDouble doublekeyFrame = keyframe as KeyFrameDouble;
+                doublekeyFrame.value = converterTo.fromEditingValue(
+                    converterFrom.toEditingValue(doublekeyFrame.value));
+              }
+            }
+          }
+        }
+
+        // Put them all relative to the playhead...
+        for (final keyframe in addedKeyFrames) {
+          keyframe.frame = keyframe.frame - minTime + animationManager.frame;
+        }
+      });
+      return true;
+    }
+    return false;
+  }
+}
+
+class _MultiObjectKeyFrameClipboard extends RiveClipboard {
   Uint8List bytes;
   final List<Id> keyedObjectIds = [];
-  _RiveKeyFrameClipboard(HashSet<KeyFrame> keyFrames) : super._() {
+  final int fileId;
+  final int ownerId;
+  _MultiObjectKeyFrameClipboard(
+      OpenFileContext file, HashSet<KeyFrame> keyFrames)
+      : fileId = file.fileId,
+        ownerId = file.ownerId,
+        super._() {
     var export = <KeyedObject, HashMap<KeyedProperty, HashSet<KeyFrame>>>{};
 
     var interpolators = <Core>{};
@@ -87,6 +336,10 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
 
   @override
   bool paste(OpenFileContext file) {
+    if (file.fileId != fileId || file.ownerId != ownerId) {
+      // Don't allow pasting multi-object keyframe copies into different files.
+      return false;
+    }
     // ToC: For now assume that the we're pasting from one valid Rive to
     // another. If we ever paste across different versions of Rive, we can
     // consider building this up properly. It just means that if a bad field or
@@ -129,7 +382,7 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
         }
         // Original keyed object for the id we're trying to key.
         var existingObjectToKey = core.resolve<Core>(keyedObjectIds[i]);
-        // Make sure it is actually keyed in this animation (use could've
+        // Make sure it is actually keyed in this animation (user could've
         // changed animation).
         if (animation.getKeyed(existingObjectToKey) != null) {
           keyedObject = animation.getKeyed(existingObjectToKey);

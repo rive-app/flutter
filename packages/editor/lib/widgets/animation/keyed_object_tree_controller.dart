@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
@@ -146,6 +147,7 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
 
   @override
   void selectTreeItem(KeyHierarchyViewModel item) {
+    _rangeSelectionPivot = item;
     animationManager.select.add(item);
   }
 
@@ -153,4 +155,12 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
   void selectMultipleTreeItems(Iterable<KeyHierarchyViewModel> items) {
     animationManager.selectMultiple.add(items);
   }
+
+  @override
+  bool get isRangeSelecting =>
+      animationManager.activeFile.selectionMode == SelectionMode.range;
+
+  KeyHierarchyViewModel _rangeSelectionPivot;
+  @override
+  KeyHierarchyViewModel get rangeSelectionPivot => _rangeSelectionPivot;
 }

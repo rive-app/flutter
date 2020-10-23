@@ -890,10 +890,18 @@ class OpenFileContext with RiveFileDelegate {
     _editingAnimationManager.value?.dispose();
     _keyFrameManager.value?.dispose();
 
-    _editingAnimationManager.value =
-        animation == null ? null : EditingAnimationManager(animation, this);
-    _keyFrameManager.value =
-        animation == null ? null : KeyFrameManager(animation, this);
+    if (animation == null) {
+      _keyFrameManager.value = null;
+      _editingAnimationManager.value = null;
+    } else {
+      _keyFrameManager.value = KeyFrameManager(animation, this);
+      _editingAnimationManager.value = EditingAnimationManager(
+        animation,
+        this,
+        selectedFrameStream: _keyFrameManager.value?.selection,
+        changeSelectedFrameStream: _keyFrameManager.value?.changeSelection,
+      );
+    }
   }
 
   ContainerComponent _highestSelection() {

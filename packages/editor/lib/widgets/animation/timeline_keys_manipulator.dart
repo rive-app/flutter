@@ -191,7 +191,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
       // When multi-selecting, remove intersection from the set.
       fullSelection.removeAll(preSelect.intersection(toSelect));
     }
-    widget.keyFrameManager.changeSelection(fullSelection);
+    widget.keyFrameManager.changeSelection.add(fullSelection);
 
     setState(() {
       _marquee = marquee;
@@ -308,7 +308,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           fullSelection.clear();
         }
 
-        widget.keyFrameManager.changeSelection(fullSelection);
+        widget.keyFrameManager.changeSelection.add(fullSelection);
       },
       onPointerMove: (details) {
         _didDrag = true;
@@ -344,7 +344,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         if (!_didDrag && !ShortcutAction.multiSelect.value) {
           // We didn't drag and we're not multi selecting so change the
           // selection to what was hit on down.
-          widget.keyFrameManager.changeSelection(_downHit);
+          widget.keyFrameManager.changeSelection.add(_downHit);
         }
         widget.keyFrameManager.completeSelection();
         _edgeScrollTimer?.cancel();

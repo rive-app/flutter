@@ -11,7 +11,7 @@ class _SelectionFlags {
 /// Selection states are also entirely left up to the tree implementation, the
 /// tree widget itself assumes nothing regarding selections. We chose to
 /// implement it as an interface.
-abstract class SelectableItem {
+class SelectableItem {
   final _selectionState =
       SuppressableValueNotifier<SelectionState>(SelectionState.none);
 

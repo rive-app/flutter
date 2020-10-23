@@ -25,6 +25,9 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
       BehaviorSubject<HashSet<KeyFrame>>.seeded(HashSet<KeyFrame>());
   ValueStream<HashSet<KeyFrame>> get selection => _selection;
 
+  final _selectionController = StreamController<HashSet<KeyFrame>>();
+  Sink<HashSet<KeyFrame>> get changeSelection => _selectionController;
+
   final _commonInterpolation = BehaviorSubject<InterpolationViewModel>();
   ValueStream<InterpolationViewModel> get commonInterpolation =>
       _commonInterpolation;
@@ -44,6 +47,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
 
     _interpolationController.stream.listen(_changeInterpolation);
     _cubicController.stream.listen(_changeCubicInterpolation);
+    _selectionController.stream.listen(_changeSelection);
     _updateCommonInterpolation();
   }
 
@@ -213,7 +217,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
     _updateCommonInterpolation();
   }
 
-  void changeSelection(HashSet<KeyFrame> keyFrames) {
+  void _changeSelection(HashSet<KeyFrame> keyFrames) {
     var oldSelection = _selection.value;
 
     // Selection should always have a valid set, even if requesting null
@@ -253,12 +257,14 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
           _keyframeInterpolationTypeChanged);
     }
     _cubicController.close();
+    _selectionController.close();
     activeFile.core.removeDelegate(this);
     activeFile.removeActionHandler(_onAction);
     activeFile.selection.removeListener(_stageSelectionChanged);
     _selection.close();
     _interpolationController.close();
     _commonInterpolation.close();
+    print("DISPOSE?!?!");
     cancelDebounce(_updateCommonInterpolation);
     cancelDebounce(_syncStageWithKeyframeSelection);
   }

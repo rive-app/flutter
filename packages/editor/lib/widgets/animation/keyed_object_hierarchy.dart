@@ -236,15 +236,19 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: Text(
-            UIStrings.of(context).withKey(model.label),
-            style: theme.textStyles.inspectorPropertyLabel,
+          child: IgnorePointer(
+            child: Text(
+              UIStrings.of(context).withKey(model.label),
+              style: theme.textStyles.inspectorPropertyLabel,
+            ),
           ),
         ),
         if (model.subLabel != null)
-          Text(
-            UIStrings.of(context).withKey(model.subLabel),
-            style: theme.textStyles.animationSubLabel,
+          IgnorePointer(
+            child: Text(
+              UIStrings.of(context).withKey(model.subLabel),
+              style: theme.textStyles.animationSubLabel,
+            ),
           ),
         _buildKeyedPropertyEditor(context, theme, model),
       ],
