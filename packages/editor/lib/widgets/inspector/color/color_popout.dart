@@ -139,18 +139,17 @@ class ColorPopout extends StatelessWidget {
                       // TODO: disabled eyedropper due to CanvasKit bug
                       // Enable once bug is fixed.
                       // TintedIconButton(
-                      //   icon: 'eyedropper',
+                      //   icon: PackedIcon.delete,
                       //   color: theme.colors.popupIcon,
                       //   onPress: () {
                       //     var tool = ColorLoupeTool.instance;
                       //     inspecting.context.stage.tool = tool;
-                      //     tool.pickColor = (color) {
+                      //     tool.pickColor = (Color color) {
                       //       inspecting.changeColor(HSVColor.fromColor(color));
                       //       inspecting.completeChange();
                       //     };
                       //   },
-                      // ),
-                      // const SizedBox(width: 20),
+                      // ), const SizedBox(width: 20),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
