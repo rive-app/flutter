@@ -96,6 +96,7 @@ abstract class TransformComponent extends TransformComponentBase {
     }
     transform[4] = x;
     transform[5] = y;
+
     Mat2D.scaleByValues(transform, scaleX, scaleY);
   }
 
@@ -140,6 +141,47 @@ abstract class TransformComponent extends TransformComponentBase {
       item.updateWorldTransform();
     }
   }
+
+  // -> editor-only
+  Mat2D computeInvertableWorldTransform() {
+    final chain = <TransformComponent>[this];
+    var parent = this.parent;
+    while (parent != null) {
+      if (parent is TransformComponent) {
+        chain.insert(0, parent);
+      }
+      parent = parent.parent;
+    }
+    Mat2D world;
+    for (final item in chain) {
+      var local = Mat2D();
+      if (item.rotation != 0) {
+        Mat2D.fromRotation(local, item.rotation);
+      } else {
+        Mat2D.identity(local);
+      }
+      local[4] = item.x;
+      local[5] = item.y;
+
+      var sx = item.scaleX;
+      var sy = item.scaleY;
+      if (sx == 0) {
+        sx = 0.01;
+      }
+      if (sy == 0) {
+        sy = 0.01;
+      }
+      Mat2D.scaleByValues(local, sx, sy);
+
+      if (world == null) {
+        world = local;
+      } else {
+        Mat2D.multiply(world, world, local);
+      }
+    }
+    return world;
+  }
+  // <- editor-only
 
   @override
   void buildDependencies() {

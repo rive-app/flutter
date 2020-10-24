@@ -84,8 +84,7 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
       return component.shape.drawOrder
           .compareTo(other.component.shape.drawOrder);
     } else if (other is StageShape) {
-      return component.shape.drawOrder
-          .compareTo(other.component.drawOrder);
+      return component.shape.drawOrder.compareTo(other.component.drawOrder);
     } else {
       return super.compareDrawOrderTo(other);
     }

@@ -60,7 +60,17 @@ abstract class StageExpandable<T extends Node> {
     // Transform to get into local space of this node.
     var inverseWorld = Mat2D();
     if (!Mat2D.invert(inverseWorld, worldTransform)) {
-      Mat2D.identity(inverseWorld);
+      // If inversion fails, it's because one of the axes have 0 scale causing a
+      // 0 determinant which fails inversion. We use a hack to compute a
+      // non-zero determinant version and then reset it (ugh hideous but only
+      // happens in the editor). This allows the bounding box to be drawn
+      // (somewhat) correctly.
+      // component.calculateWorldTransform();
+      var invertableWorldTransform =
+          component.computeInvertableWorldTransform();
+      if (!Mat2D.invert(inverseWorld, invertableWorldTransform)) {
+        Mat2D.identity(inverseWorld);
+      }
     }
 
     AABB accumulatedBounds;
@@ -98,7 +108,6 @@ abstract class StageExpandable<T extends Node> {
       }
       return true;
     });
-
     _boundsValid = true;
 
     // Were we able to accumulate bounds from our children? If not, we return
@@ -106,16 +115,16 @@ abstract class StageExpandable<T extends Node> {
     // visual/selectable state as nothing inside of it is selectable. For a node
     // this equates to showing the 'null' rectangle icon for the node.
     if (accumulatedBounds != null &&
-        !accumulatedBounds.isEmpty &&
-        accumulatedBounds.area != 0) {
+        (accumulatedBounds.width > 0 || accumulatedBounds.height > 0)) {
+      var artboardWorld = artboard.transform(worldTransform);
       // accumulatedBounds is in local node space so convert it to world for the
       // AABB.
-      aabb = accumulatedBounds.transform(artboard.transform(worldTransform));
+      aabb = accumulatedBounds.transform(artboardWorld);
 
       // Store an OBB so we can draw and use that for accurate hit detection.
       obb = OBB(
         bounds: accumulatedBounds,
-        transform: artboard.transform(component.worldTransform),
+        transform: artboardWorld,
       );
       return true;
     }

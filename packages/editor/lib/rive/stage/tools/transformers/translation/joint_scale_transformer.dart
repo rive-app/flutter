@@ -1,6 +1,8 @@
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
@@ -19,15 +21,32 @@ class JointScaleTransformer extends StageTransformer {
 
   @override
   void advance(DragTransformDetails details) {
-    var constraintedDelta = details.artboardWorld.delta;
+    var constrainedDelta = details.artboardWorld.delta;
     if (lockAxis != null) {
-      var d = Vec2D.dot(constraintedDelta, lockAxis);
-      constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
-    }
+      var d = Vec2D.dot(constrainedDelta, lockAxis);
 
+      constrainedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
+    }
     for (final bone in _bones) {
-      bone.scaleX += constraintedDelta[0] * sensitivity;
-      bone.scaleY -= constraintedDelta[1] * sensitivity;
+      Mat2D parentSpace;
+
+      if (bone.parent is TransformComponent) {
+        var parent = bone.parent as TransformComponent;
+        parentSpace = Mat2D.clone(parent.worldTransform);
+      } else {
+        parentSpace = Mat2D();
+      }
+
+      if (!Mat2D.invert(
+          parentSpace,
+          Mat2D.multiply(Mat2D(), parentSpace,
+              Mat2D.fromRotation(Mat2D(), bone.rotation)))) {
+        continue;
+      }
+
+      var scale = Vec2D.transformMat2(Vec2D(), constrainedDelta, parentSpace);
+      bone.scaleX += scale[0] * sensitivity;
+      bone.scaleY -= scale[1] * sensitivity;
     }
   }
 

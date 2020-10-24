@@ -138,10 +138,11 @@ class StageScaleHandle extends StageHandle {
 
   @override
   List<StageTransformer> makeTransformers() {
+    var axis = computeAxis();
     return [
-      JointScaleTransformer(lockAxis: direction, handle: this),
+      JointScaleTransformer(lockAxis: axis, handle: this),
       NodeScaleTransformer(
-        lockAxis: direction,
+        lockAxis: axis,
         handle: this,
         proportionalScaleShortcut: ShortcutAction.symmetricDraw,
       ),
