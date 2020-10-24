@@ -1,6 +1,6 @@
 name: rive_editor
 description: The Rive editor written in Flutter.
-version: 0.4.10
+version: 0.4.11
 
 environment:
   sdk: ">=2.8.0 <3.0.0"
@@ -33,7 +33,7 @@ dependencies:
   http: ^0.12.2
   dotted_border: ^1.0.6
   flutter_widgets: ^0.1.12
-  url_launcher: ^5.7.1
+  url_launcher: ^5.7.7
   rxdart: ^0.24.1
   collection: ^1.14.13
   cached_network_image:
@@ -41,7 +41,7 @@ dependencies:
       url: git://github.com/luigi-rosso/flutter_cached_network_image.git
       ref: fix_flutter_60239
 
-  path_provider: ^1.6.18
+  path_provider: ^1.6.21
   path_provider_macos: ^0.0.4+4
   bezier: ^1.1.5
   
@@ -58,7 +58,7 @@ dependencies:
 
 dev_dependencies:
   test: any
-  mockito: ^4.1.2
+  mockito: ^4.1.3
   image_res: ^0.2.3
   flutter_test:
     sdk: flutter
