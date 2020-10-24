@@ -264,7 +264,6 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
     _selection.close();
     _interpolationController.close();
     _commonInterpolation.close();
-    print("DISPOSE?!?!");
     cancelDebounce(_updateCommonInterpolation);
     cancelDebounce(_syncStageWithKeyframeSelection);
   }
