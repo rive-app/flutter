@@ -222,6 +222,9 @@ describe("Register & Login Flow", () => {
 
         await buttonSwitch.click();
 
+        // Give switched view time to settle.
+        await delay(500);
+
         // Click username field.
         await firstField.click();
         await page.keyboard.type(username);
