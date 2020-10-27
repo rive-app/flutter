@@ -25,6 +25,10 @@ dependencies:
     sdk: flutter
   rive_api:
     path: ../rive_api
+  rive_editor:
+    path: ../editor
+  utilities:
+    path: ../utilities
   rxdart: ^0.24.0
   table_sticky_headers: ^1.1.2
 

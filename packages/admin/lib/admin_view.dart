@@ -6,29 +6,34 @@ import 'package:admin/charges.dart';
 import 'package:admin/transactions.dart';
 import 'package:admin/token_generator.dart';
 import 'package:admin/users.dart';
+import 'package:admin/announcements.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class AdminView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 500,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const AdminPageButton('Impersonate'),
-            const AdminPageButton('Invite'),
-            const AdminPageButton('Users'),
-            const AdminPageButton('Teams'),
-            const AdminPageButton('Charges'),
-            const AdminPageButton('Transactions'),
-            const SizedBox(height: 30),
-            Signout(),
-            Expanded(child: ApiChoser())
-          ],
+    return RiveTheme(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 500,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const AdminPageButton('Impersonate'),
+              const AdminPageButton('Invite'),
+              const AdminPageButton('Users'),
+              const AdminPageButton('Teams'),
+              const AdminPageButton('Charges'),
+              const AdminPageButton('Transactions'),
+              const AdminPageButton('Announcements'),
+              const SizedBox(height: 30),
+              Signout(),
+              Expanded(child: ApiChoser())
+            ],
+          ),
         ),
       ),
     );
@@ -52,7 +57,7 @@ class AdminPageButton extends StatelessWidget {
                 appBar: AppBar(
                   title: Text(routeName),
                 ),
-                body: _routeNameToPage[routeName]),
+                body: RiveTheme(child: _routeNameToPage[routeName])),
           ),
         );
       },
@@ -63,8 +68,9 @@ class AdminPageButton extends StatelessWidget {
 final _routeNameToPage = <String, Widget>{
   'Impersonate': Impersonate(),
   'Invite': TokenGenerator(),
-  'Teams': Teams(),
-  'Charges': Charges(),
-  'Transactions': Transactions(),
-  'Users': Users(),
+  'Teams': const Teams(),
+  'Charges': const Charges(),
+  'Transactions': const Transactions(),
+  'Announcements': const Announcements(),
+  'Users': const Users(),
 };

@@ -210,7 +210,6 @@ class TransactionFormState extends State<TransactionForm> {
                         Scaffold.of(context).showSnackBar(
                             const SnackBar(content: Text('Processing Data')));
 
-                        print(widget.ownerId);
                         AdminManager.instance.createTransaction(
                           ownerId: widget.ownerId,
                           unitCode: unitCodeController.text,
