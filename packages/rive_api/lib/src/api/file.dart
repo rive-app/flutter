@@ -15,11 +15,17 @@ class FileApi {
   FileApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<List<FileDM>> myFiles(int ownerId, int folderId) async =>
-      _files('/api/my/files/recent/rive/$folderId', ownerId);
-
-  Future<List<FileDM>> teamFiles(int ownerId, int folderId) async =>
-      _files('/api/teams/$ownerId/files/recent/rive/$folderId', ownerId);
+  Future<List<FileDM>> files(int ownerId, int folderId) async {
+    final res =
+        await api.get(api.host + '/api/files/$ownerId/$folderId/recent');
+    try {
+      final data = json.decodeList<int>(res.body);
+      return FileDM.fromIdList(data, ownerId);
+    } on FormatException catch (e) {
+      _log.severe('Error formatting teams api response', e);
+      rethrow;
+    }
+  }
 
   /// Return the user's file ids in most recent order
   /// This returns the new combo file id format.
@@ -71,17 +77,6 @@ class FileApi {
       'folders': folderIds ?? [],
     };
     await api.delete(api.host + url, body: jsonEncode(payload));
-  }
-
-  Future<List<FileDM>> _files(String url, [int ownerId]) async {
-    final res = await api.get(api.host + url);
-    try {
-      final data = json.decodeList<int>(res.body);
-      return FileDM.fromIdList(data, ownerId);
-    } on FormatException catch (e) {
-      _log.severe('Error formatting teams api response', e);
-      rethrow;
-    }
   }
 
   Future<List<FileDM>> myFileDetails(List<int> fileIds) async =>

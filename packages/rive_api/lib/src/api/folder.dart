@@ -13,33 +13,11 @@ class FolderApi {
   FolderApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<List<FolderDM>> folders(OwnerDM owner) async {
-    if (owner is MeDM) {
-      return myFolders(owner.ownerId);
-    } else if (owner is TeamDM) {
-      return teamFolders(owner.ownerId);
-    } else {
-      throw Exception('$owner must be either a team or a me');
-    }
-  }
-
-  Future<List<FolderDM>> myFolders(int ownerId) async =>
-      _folders('/api/my/files/folders', ownerId);
-
-  Future<List<FolderDM>> teamFolders(int ownerId) async =>
-      _folders('/api/teams/$ownerId/folders', ownerId);
-
-  Future<List<FolderDM>> _folders(String path, int ownerId) async {
-    final res = await api.getFromPath(path);
+  Future<List<FolderDM>> folders(int ownerId) async {
+    final res = await api.getFromPath('/api/folders/$ownerId');
     try {
-      final data = json.decodeMap(res.body);
-      // Check that the user's signed in
-      if (!data.containsKey('folders')) {
-        _log.severe('Incorrectly formatted folders json response: $res.body');
-        throw const FormatException(
-            'Incorrectly formatted folders json response');
-      }
-      return FolderDM.fromDataList(data.getList('folders'), ownerId);
+      var data = json.decodeList<Map<String, dynamic>>(res.body);
+      return FolderDM.fromDataList(data, ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting folder api response', e);
       rethrow;

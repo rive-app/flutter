@@ -97,7 +97,7 @@ class FileManager with Subscriptions {
   }
 
   Future<void> loadFolders(Owner owner) async {
-    final _foldersDM = await _folderApi.folders(owner.asDM);
+    final _foldersDM = await _folderApi.folders(owner.ownerId);
     final _folders = Folder.fromDMList(_foldersDM.toList());
     _folderMap[owner] = _folders;
     _plumber.message(_folders, owner.hashCode);

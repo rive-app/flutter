@@ -106,13 +106,15 @@ class FolderContentsManager with Subscriptions {
     final ownerId = owner.ownerId;
     final currentFolderId = directory.folder.id;
 
-    if (owner is Team) {
-      files = await _fileApi.teamFiles(ownerId, currentFolderId);
-      folders = await _folderApi.teamFolders(ownerId);
-    } else {
-      files = await _fileApi.myFiles(ownerId, currentFolderId);
-      folders = await _folderApi.myFolders(ownerId);
-    }
+    files = await _fileApi.files(ownerId, currentFolderId);
+    folders = await _folderApi.folders(ownerId);
+    // if (owner is Team) {
+    // files = await _fileApi.teamFiles(ownerId, currentFolderId);
+    //   folders = await _folderApi.teamFolders(ownerId);
+    // } else {
+    //   files = await _fileApi.myFiles(ownerId, currentFolderId);
+    //   folders = await _folderApi.myFolders(ownerId);
+    // }
 
     final folderCache =
         _initCache(Folder.fromDMList(folders), ownerId, currentFolderId);

@@ -15,7 +15,10 @@ class FolderDM {
         assert(order != null),
         assert(name != null);
   final int id;
+
+  // TODO: Can we nuke this now?
   final int ownerId;
+
   final int parent;
   final int order;
   final String name;
@@ -29,9 +32,7 @@ class FolderDM {
 
   factory FolderDM.fromData(Map<String, dynamic> data, int ownerId) => FolderDM(
         id: data.getInt('id'),
-        ownerId: data.containsKey('project_owner_id')
-            ? data.getInt('project_owner_id')
-            : ownerId,
+        ownerId: ownerId,
         name: data.getString('name'),
         order: data.getInt('order'),
         parent: data.optInt('parent'),
