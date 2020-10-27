@@ -372,6 +372,7 @@ class _MultiObjectKeyFrameClipboard extends _KeyFrameClipboard {
       // The animation didn't already key this object, so let's pipe in our
       // new keyedObject to it.
       core.addObject(keyedObject);
+      keyedObject.objectId = existingObjectId;
       keyedObject.animationId = keyFrameManager.animation.id;
     }
     var numKeyedProperties = reader.readVarUint();
