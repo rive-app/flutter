@@ -1,27 +1,27 @@
-import 'package:pedantic/pedantic.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/platform/nomad.dart';
 import 'package:rive_editor/widgets/common/editor_switch.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/login/fma.dart';
+import 'package:rive_editor/widgets/login/login_page.dart';
 import 'package:rive_editor/widgets/login/obscuring_controller.dart';
 import 'package:rive_editor/widgets/login/validators.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
-import 'package:rive_editor/external_url.dart';
 
-enum LoginPage { login, register, recover, link }
 typedef AuthAction = Future<AuthResponse> Function();
 
 class Login extends StatefulWidget {
@@ -40,6 +40,8 @@ class _LoginState extends State<Login> {
   bool _isSending = false;
   LoginPage _currentPanel;
   String _usernameError, _emailError, _passwordError, _generalError;
+  String _pageToken;
+  Nomad nomad;
 
   @override
   void initState() {
@@ -93,13 +95,15 @@ class _LoginState extends State<Login> {
       passwordValidator,
       inviteValidator,
     ]);
+
+    nomad = RiveContext.of(context).nomad;
     var currentMe = Plumber().peek<Me>();
     if (currentMe?.socialLink != null) {
       _currentPanel = LoginPage.link;
     } else {
-      // Defaulting to registration panel for the moment
-      // _currentPanel = LoginPage.login;
-      _currentPanel = LoginPage.register;
+      final location = nomad.location;
+      _currentPanel = LoginPageName.fromName(location.segments.first);
+      _pageToken = location?.parameters['token'] as String;
     }
     super.initState();
   }
@@ -113,6 +117,7 @@ class _LoginState extends State<Login> {
         _passwordError = null;
         _emailError = null;
         _usernameError = null;
+        nomad.travel('${_currentPanel.name}');
       });
     }
   }
@@ -213,6 +218,8 @@ class _LoginState extends State<Login> {
         return _registerForm();
       case LoginPage.link:
         return _linkAccountsForm();
+      case LoginPage.reset:
+        return resetForm();
       case LoginPage.login:
       default:
         return _loginForm();
@@ -249,7 +256,7 @@ class _LoginState extends State<Login> {
         socialLink.socialNetwork.substring(1);
 
     return Column(
-      key: const ValueKey<int>(3),
+      key: const ValueKey<String>('link'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         RichText(
@@ -322,12 +329,95 @@ class _LoginState extends State<Login> {
     );
   }
 
+  // Process for password recovery.
+  Future<void> _reset() async {
+    if (_isSending) {
+      return;
+    }
+    final newPassword = passwordController.text;
+    if (newPassword.length < 6) {
+      setState(() {
+        _passwordError = 'Password is too short';
+      });
+      return;
+    }
+
+    setState(() {
+      _isSending = true;
+    });
+    final api = RiveContext.of(context).api;
+    final auth = RiveAuth(api);
+    final success =
+        await auth.reset(Uri.encodeComponent(newPassword), _pageToken);
+    if (success) {
+      _selectPanel(LoginPage.login); // Back to login page.
+    } else {
+      setState(() {
+        _passwordError = 'Something went wrong.';
+      });
+    }
+    setState(() {
+      _isSending = false;
+    });
+  }
+
+  Widget resetForm() {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+    return Column(
+        key: const ValueKey<String>('reset'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+                style: styles.loginText.copyWith(height: 1.6),
+                text: 'You asked us to reset your password. If you don’t need '
+                    'to change your password anymore, go ',
+                children: [
+                  TextSpan(
+                    text: 'back to sign in.',
+                    style: styles.buttonUnderline
+                        .copyWith(height: 1.6, fontSize: 13),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => _selectPanel(LoginPage.login),
+                  ),
+                ]),
+          ),
+          const SizedBox(height: 50),
+          SizedBox(
+            width: 216,
+            child: LabeledTextField(
+              label: 'New Password',
+              hintText: '6 characters minimum…',
+              controller: passwordController,
+              onSubmit: (_) => _reset(),
+              errorText: _passwordError,
+            ),
+          ),
+          const SizedBox(height: 60),
+          SizedBox(
+            width: 145,
+            child: FlatIconButton(
+              label: 'Change Password',
+              onTap: _reset,
+              color:
+                  _isSending ? colors.commonLightGrey : colors.commonDarkGrey,
+              textColor: Colors.white,
+              radius: 20,
+              elevation: flatButtonIconElevation,
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+          ),
+        ]);
+  }
+
   Widget _recoverForm() {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final styles = theme.textStyles;
     return Column(
-        key: const ValueKey<int>(2),
+        key: const ValueKey<String>('recover'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           RichText(
@@ -379,7 +469,7 @@ class _LoginState extends State<Login> {
     final styles = theme.textStyles;
 
     return Column(
-      key: const ValueKey<int>(1),
+      key: const ValueKey<String>('register'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -459,9 +549,9 @@ class _LoginState extends State<Login> {
             mainAxisAlignment: MainAxisAlignment.center,
           ),
         ),
-       Padding(
-         padding: const EdgeInsets.only(top: 20.0),
-         child: RichText(
+        Padding(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: RichText(
             text: TextSpan(
               style: styles.loginText,
               children: <TextSpan>[
@@ -485,7 +575,7 @@ class _LoginState extends State<Login> {
               ],
             ),
           ),
-       ),
+        ),
       ],
     );
   }
@@ -582,7 +672,7 @@ class _LoginState extends State<Login> {
     final colors = theme.colors;
     final styles = theme.textStyles;
     return Column(
-      key: const ValueKey<int>(0),
+      key: const ValueKey<String>('login'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(

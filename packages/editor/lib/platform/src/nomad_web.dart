@@ -12,12 +12,12 @@ class NomadWeb extends Nomad {
       if (trip == null) {
         return false;
       }
-      trip.route.travel(trip);
+      internalTravel(trip);
     };
 
     var trip = super.travel(location);
     if (trip != null) {
-      trip.route.travel(trip);
+      internalTravel(trip);
       return true;
     }
     return false;
@@ -40,7 +40,7 @@ class NomadWeb extends Nomad {
       ],
     );
     // Actually call the callback.
-    trip.route.travel(trip);
+    internalTravel(trip);
 
     return trip;
   }

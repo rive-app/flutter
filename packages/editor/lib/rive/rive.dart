@@ -25,6 +25,7 @@ import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
+import 'package:rive_editor/widgets/login/login_page.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 import 'package:slugify2/slugify.dart';
@@ -74,7 +75,9 @@ class Rive {
 
     nomad.route('/files', _traveledHome);
     nomad.route('/file/:name/:hash', _traveledFile);
-    nomad.route('/login', _traveledLogin);
+    nomad.route('/${LoginPage.login.name}', _traveledLogin);
+    nomad.route('/${LoginPage.register.name}', _traveledLogin);
+    nomad.route('/${LoginPage.reset.name}/:token', _traveledLogin);
   }
 
   Future<void> _traveledLogin(Trip trip) async {
