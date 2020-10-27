@@ -23,6 +23,7 @@ extension DeserializeHelper on Map<String, dynamic> {
   int optInt(String key) => _rawDeserializeInt(this[key]);
 
   bool getBool(String key) => deserializeBool(this[key]);
+  DateTime getDateTime(String key) => deserializeDateTime(this[key]);
 
   String getString(String key) {
     dynamic value = this[key];
@@ -83,3 +84,10 @@ int _rawDeserializeInt(dynamic value) {
 
 // ignore: avoid_bool_literals_in_conditional_expressions
 bool deserializeBool(dynamic value) => value is bool ? value : false;
+
+DateTime deserializeDateTime(dynamic value) {
+  if (value != null) {
+    return DateTime.parse(value as String);
+  }
+  return null;
+}
