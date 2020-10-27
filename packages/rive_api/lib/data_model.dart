@@ -1,3 +1,4 @@
+export 'src/data_model/announcement.dart';
 export 'src/data_model/app_state.dart';
 export 'src/data_model/billing_details.dart';
 export 'src/data_model/cdn.dart';

@@ -1,3 +1,4 @@
+export 'src/model/announcement.dart';
 export 'src/model/billing_details.dart';
 export 'src/model/config.dart';
 export 'src/model/current_directory.dart';
