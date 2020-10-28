@@ -13,7 +13,6 @@ class RiveUser extends RiveOwner {
   final bool isVerified;
   final TeamInviteStatus status;
   final TeamRole role;
-  final DateTime lastAnnoucementRead;
 
   RiveUser(
       {@required int ownerId,
@@ -25,8 +24,7 @@ class RiveUser extends RiveOwner {
       this.notificationCount = 0,
       this.isVerified = false,
       this.status,
-      this.role,
-      this.lastAnnoucementRead})
+      this.role})
       : assert(ownerId != null),
         assert(name != null || username != null),
         super(id: ownerId, name: name, username: username, avatar: avatar);
@@ -38,16 +36,14 @@ class RiveUser extends RiveOwner {
     }
 
     return RiveUser(
-      ownerId: data.getInt('ownerId'),
-      username: data.getString('username'),
-      name: data.getString('name'),
-      avatar: data.getString('avatar'),
-      isAdmin: data.getBool('isAdmin'),
-      isPaid: data.getBool('isPaid'),
-      notificationCount: data.getInt('notificationCount'),
-      isVerified: data.getBool('verified'),
-      lastAnnoucementRead: data.getDateTime('lastAnnouncementRead'),
-    );
+        ownerId: data.getInt('ownerId'),
+        username: data.getString('username'),
+        name: data.getString('name'),
+        avatar: data.getString('avatar'),
+        isAdmin: data.getBool('isAdmin'),
+        isPaid: data.getBool('isPaid'),
+        notificationCount: data.getInt('notificationCount'),
+        isVerified: data.getBool('verified'));
   }
 
   factory RiveUser.fromAutoCompleteData(Map<String, dynamic> data) {

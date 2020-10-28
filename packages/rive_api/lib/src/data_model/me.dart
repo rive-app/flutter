@@ -19,6 +19,7 @@ class MeDM extends UserDM {
     this.notice,
     this.socialLink,
     this.isFirstRun = false,
+    this.lastAnnoucementRead,
   }) : super(
           ownerId: ownerId,
           name: name,
@@ -35,6 +36,7 @@ class MeDM extends UserDM {
   final int notificationCount;
   final String notice;
   final SocialLink socialLink;
+  final DateTime lastAnnoucementRead;
 
   /// Creates a model from JSON:
   ///
@@ -65,6 +67,7 @@ class MeDM extends UserDM {
         verified: data.getBool('verified'),
         notice: data.getString('notice'),
         isFirstRun: data.getBool('isFirstRun'),
+        lastAnnoucementRead: data.getDateTime('lastAnnouncementRead'),
       );
 
   /// Create a model from JSON data

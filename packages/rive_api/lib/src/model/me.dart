@@ -19,6 +19,7 @@ class Me extends User {
     this.socialLink,
     this.isFirstRun,
     this.signedIn = false,
+    this.lastAnnoucementRead,
   }) : super(
           ownerId: ownerId,
           name: name,
@@ -35,6 +36,7 @@ class Me extends User {
   final String notice;
   final SocialLink socialLink;
   final bool isFirstRun;
+  final DateTime lastAnnoucementRead;
 
   factory Me.fromDM(MeDM me) => Me(
         // lets not let signedIn be null
@@ -51,6 +53,7 @@ class Me extends User {
         notice: me?.notice,
         socialLink: me?.socialLink,
         isFirstRun: me?.isFirstRun,
+        lastAnnoucementRead: me?.lastAnnoucementRead,
       );
 
   // Me.isEmpty is currently neccessary to hold onto 'social links'
