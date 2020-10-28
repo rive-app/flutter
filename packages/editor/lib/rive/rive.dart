@@ -276,7 +276,6 @@ class Rive {
         closeTab(fileTabs[i]);
       }
 
-      print('Logged out! $me Traveling? $travel');
       if (travel) {
         nomad.travel('/auth/${LoginPage.register.name}');
       }
