@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/model.dart' as model;
+import 'package:rive_api/model.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
+import 'package:rive_editor/rive/managers/announcements_manager.dart';
 import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
@@ -86,46 +88,67 @@ class _NavigationPanelState extends State<NavigationPanel> {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-            child: ValueStreamBuilder<HomeSection>(
-              stream: Plumber().getStream<HomeSection>(),
+            child: ValueStreamBuilder<Me>(
+              stream: Plumber().getStream<Me>(),
               builder: (context, snapshot) {
-                return Column(
-                  children: <Widget>[
-                    ValueStreamBuilder<Object>(
-                        stream: Plumber().getStream<HomeSection>(),
-                        builder: (context, snapshot) {
-                          return IconTile(
-                            icon: PackedIcon.rocket,
-                            label: 'Learn',
-                            highlight: snapshot.data == HomeSection.getStarted,
-                            onTap: () async =>
-                                Plumber().message(HomeSection.getStarted),
-                          );
-                        }),
-                    ValueStreamBuilder<model.NotificationCount>(
-                        stream: Plumber().getStream(),
-                        builder: (context, notificationCountSnapshot) {
-                          final notificationCount =
-                              notificationCountSnapshot.hasData
-                                  ? notificationCountSnapshot.data.count
-                                  : 0;
-                          return IconTile(
-                            icon: PackedIcon.notification,
-                            label: 'Notifications',
-                            count: notificationCount,
-                            highlight:
-                                snapshot.data == HomeSection.notifications,
-                            onTap: () async =>
-                                Plumber().message(HomeSection.notifications),
-                          );
-                        }),
-                    IconTile(
-                      icon: PackedIcon.recents,
-                      label: 'Recents',
-                      highlight: snapshot.data == HomeSection.recents,
-                      onTap: () async => Plumber().message(HomeSection.recents),
-                    ),
-                  ],
+                return ValueStreamBuilder<HomeSection>(
+                  stream: Plumber().getStream<HomeSection>(),
+                  builder: (context, snapshot) {
+                    return Column(
+                      children: <Widget>[
+                        ValueStreamBuilder<Object>(
+                            stream: Plumber().getStream<HomeSection>(),
+                            builder: (context, snapshot) {
+                              return IconTile(
+                                icon: PackedIcon.rocket,
+                                label: 'Learn',
+                                highlight:
+                                    snapshot.data == HomeSection.getStarted,
+                                onTap: () async =>
+                                    Plumber().message(HomeSection.getStarted),
+                              );
+                            }),
+                        ValueStreamBuilder<model.NotificationCount>(
+                            stream:
+                                Plumber().getStream<model.NotificationCount>(),
+                            builder: (context, notificationCountSnapshot) {
+                              final notificationCount =
+                                  notificationCountSnapshot.hasData
+                                      ? notificationCountSnapshot.data.count
+                                      : 0;
+                              return ValueStreamBuilder<
+                                      List<model.Announcement>>(
+                                  stream: Plumber()
+                                      .getStream<List<model.Announcement>>(),
+                                  builder:
+                                      (context, notificationCountSnapshot) {
+                                    final newAnnoucement =
+                                        AnnouncementsManager()
+                                            .anyAnnouncementNew(
+                                                notificationCountSnapshot.data);
+
+                                    return IconTile(
+                                      icon: PackedIcon.notification,
+                                      label: 'Notifications',
+                                      count: notificationCount,
+                                      hasAnnouncement: newAnnoucement,
+                                      highlight: snapshot.data ==
+                                          HomeSection.notifications,
+                                      onTap: () async => Plumber()
+                                          .message(HomeSection.notifications),
+                                    );
+                                  });
+                            }),
+                        IconTile(
+                          icon: PackedIcon.recents,
+                          label: 'Recents',
+                          highlight: snapshot.data == HomeSection.recents,
+                          onTap: () async =>
+                              Plumber().message(HomeSection.recents),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
