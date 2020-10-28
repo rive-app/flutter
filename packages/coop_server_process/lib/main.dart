@@ -97,7 +97,7 @@ Future<void> server(List<String> arguments) async {
   }
 }
 
-/// Another attempt to get memory info from the underlying OS
+/// Attempt to get memory info from the underlying OS
 /// If it fails, it returns null.
 Future<Map<String, String>> _meminfo() async {
   const kilobyte = 1024;
@@ -106,6 +106,7 @@ Future<Map<String, String>> _meminfo() async {
     final total = SysInfo.getTotalPhysicalMemory();
     final free = SysInfo.getFreePhysicalMemory();
     final percentUsed = 1 - (free / total);
+    print('memory info for heartbeat $free/$total = $percentUsed');
     return {
       'memtotal': '${total ~/ kilobyte}',
       'memuse': percentUsed.toStringAsFixed(2),
