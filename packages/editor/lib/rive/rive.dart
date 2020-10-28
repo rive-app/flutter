@@ -234,7 +234,9 @@ class Rive {
       if (firstMe.signedIn) {
         nomad.travel('/files', replace: true);
       } else {
-        nomad.travel('/auth/${LoginPage.register.name}', replace: true);
+        final authPage =
+            firstMe?.socialLink != null ? LoginPage.link : LoginPage.register;
+        nomad.travel('/auth/${authPage.name}', replace: true);
       }
     }
 

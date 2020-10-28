@@ -41,7 +41,6 @@ class _LoginState extends State<Login> {
   LoginPage _currentPanel;
   String _usernameError, _emailError, _passwordError, _generalError;
   String _pageToken;
-  Nomad nomad;
 
   @override
   void initState() {
@@ -95,24 +94,14 @@ class _LoginState extends State<Login> {
       passwordValidator,
       inviteValidator,
     ]);
-
-    nomad = RiveContext.of(context).nomad;
     Plumber().getStream<LoginPageData>().listen(_onPageChanged);
-
-    var currentMe = Plumber().peek<Me>();
-    if (currentMe?.socialLink != null) {
-      _currentPanel = LoginPage.link;
-    } else {
-      final location = nomad.location;
-      _currentPanel = LoginPageName.fromName(location.segments.first);
-      _pageToken = location?.parameters['token'] as String;
-    }
     super.initState();
   }
 
   // When a new panel is selected, change the current route.
   // This, in turn, will trigger _onPageChanged() with the new information.
   void _selectPanel(LoginPage page) {
+    final nomad = RiveContext.of(context).nomad;
     nomad.travel('/auth/${page.name}');
   }
 
