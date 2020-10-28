@@ -14,7 +14,6 @@ class Announcements extends StatefulWidget {
 
 class _AnnouncementsState extends State<Announcements> {
   void clear() {
-    print('happen');
     setState(() {});
   }
 
@@ -30,7 +29,7 @@ class _AnnouncementsState extends State<Announcements> {
             flex: 1,
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: AnnouncementList(),
+              child: AnnouncementList(clear: clear),
             ),
           ),
           Expanded(
@@ -47,6 +46,10 @@ class _AnnouncementsState extends State<Announcements> {
 }
 
 class AnnouncementList extends StatelessWidget {
+  final Function clear;
+
+  const AnnouncementList({Key key, this.clear}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => FutureBuilder<List<Announcement>>(
       future: AdminManager.instance.getAnnouncements(),
@@ -55,6 +58,14 @@ class AnnouncementList extends StatelessWidget {
           return ListView(children: [
             for (final e in snapshot.data) ...[
               const SizedBox(height: 30),
+              FlatButton(
+                child: const Text('Delete below'),
+                onPressed: () => {
+                  AdminManager.instance
+                      .cancelAnnoucement(e.id)
+                      .then<dynamic>((value) => clear())
+                },
+              ),
               NotificationCard(
                 child: AnnouncementNotification(e),
               )
@@ -88,13 +99,29 @@ class AnnouncementFormState extends State<AnnouncementForm> {
 
   final titleController = TextEditingController();
   final bodyController = TextEditingController();
+  final validFromController =
+      TextEditingController(text: DateTime.now().toIso8601String());
+  final validToController = TextEditingController(
+      text: DateTime.now().add(const Duration(hours: 12)).toIso8601String());
   String title = '';
   String body = '';
+  DateTime parsedValidFrom;
+  DateTime parsedValidTo;
 
   void changed(String change) {
     setState(() {
       title = titleController.text;
       body = bodyController.text;
+      try {
+        parsedValidFrom = DateTime.parse(validFromController.text).toUtc();
+      } on Exception {
+        parsedValidFrom = null;
+      }
+      try {
+        parsedValidTo = DateTime.parse(validToController.text).toUtc();
+      } on Exception {
+        parsedValidTo = null;
+      }
     });
   }
 
@@ -107,6 +134,7 @@ class AnnouncementFormState extends State<AnnouncementForm> {
   @override
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
+
     return Form(
       key: _formKey,
       child: Column(
@@ -137,10 +165,56 @@ class AnnouncementFormState extends State<AnnouncementForm> {
               return null;
             },
           ),
+          TextFormField(
+            onChanged: changed,
+            controller: validFromController,
+            decoration: const InputDecoration(
+                labelText: 'This message will appear aftersdf!'),
+            validator: (String value) {
+              if (value.isEmpty) {
+                return 'Cannot be empty';
+              }
+              try {
+                DateTime.parse(value);
+              } on Exception {
+                return 'bad date time';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            onChanged: changed,
+            controller: validToController,
+            decoration: const InputDecoration(
+                labelText: 'This message will appear aftersdf!'),
+            validator: (String value) {
+              if (value.isEmpty) {
+                return 'Cannot be empty';
+              }
+              try {
+                DateTime.parse(value);
+              } on Exception {
+                return 'bad date time';
+              }
+              return null;
+            },
+          ),
           const SizedBox(height: 30),
           NotificationCard(
             child: AnnouncementNotification(
                 Announcement(title: title, body: body)),
+          ),
+          Row(
+            children: [
+              Expanded(child: Text('Valid from')),
+              Text('${parsedValidFrom?.toIso8601String()}'),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(child: Text('Valid to')),
+              Text('${parsedValidTo?.toIso8601String()}'),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -158,8 +232,8 @@ class AnnouncementFormState extends State<AnnouncementForm> {
                         AdminManager.instance.addAnnouncement(
                           title: titleController.text,
                           body: bodyController.text,
-                          validFrom: DateTime.now(),
-                          validTo: DateTime.now().add(const Duration(hours: 1)),
+                          validFrom: validFromController.text,
+                          validTo: validToController.text,
                         );
                         widget.clear();
                       }

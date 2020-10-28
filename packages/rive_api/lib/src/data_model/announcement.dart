@@ -1,7 +1,9 @@
 import 'package:utilities/deserialize.dart';
 
 class AnnouncementDM {
-  const AnnouncementDM({this.title, this.body, this.validFrom, this.validTo});
+  const AnnouncementDM(
+      {this.id, this.title, this.body, this.validFrom, this.validTo});
+  final int id;
   final String title;
   final String body;
   final DateTime validFrom;
@@ -17,6 +19,7 @@ class AnnouncementDM {
   /// Builds the right type of notification based on json data
   factory AnnouncementDM.fromData(Map<String, dynamic> data) {
     return AnnouncementDM(
+      id: data.getInt('id'),
       title: data.getString('title'),
       body: data.getString('body'),
       validFrom: data.getDateTime('validFrom'),

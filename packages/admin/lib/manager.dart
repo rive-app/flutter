@@ -155,15 +155,15 @@ class AdminManager {
   Future<dynamic> addAnnouncement({
     String title,
     String body,
-    DateTime validFrom,
-    DateTime validTo,
+    String validFrom,
+    String validTo,
   }) async {
     String payload = jsonEncode({
       'data': {
         'title': title,
         'body': body,
-        'validFrom': validFrom.toUtc().toIso8601String(),
-        'validTo': validTo.toUtc().toIso8601String(),
+        'validFrom': validFrom,
+        'validTo': validTo,
       }
     });
     var response =
@@ -183,5 +183,9 @@ class AdminManager {
       return Announcement.fromDMList(AnnouncementDM.fromDataList(data));
     }
     return [];
+  }
+
+  Future<void> cancelAnnoucement(int annoucementId) async {
+    await api.delete(api.host + '/api/announcements/$annoucementId');
   }
 }
