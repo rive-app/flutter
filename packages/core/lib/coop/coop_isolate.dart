@@ -123,6 +123,7 @@ class CoopIsolate {
       } else if (data is _CoopServerShutdown) {
         _isolate?.kill();
         _isolate = null;
+        print('Killed isolate for $ownerId-$fileId');
 
         /// This was a requested shutdown
         if (_shutdownCompleter != null) {
