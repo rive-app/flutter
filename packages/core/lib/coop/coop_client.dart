@@ -336,7 +336,7 @@ class CoopClient extends CoopReader {
   @override
   Future<void> recvSync(List<ChangeSet> _) {
     throw UnsupportedError(
-        "Client should never receive sync (gets sent only to server)");
+        'Client should never receive sync (gets sent only to server)');
   }
 
   @override
@@ -355,7 +355,7 @@ class CoopClient extends CoopReader {
   @override
   Future<void> recvCursor(double x, double y) {
     throw UnsupportedError(
-        "Client should never receive cursor (gets sent only to server)");
+        'Client should never receive cursor (gets sent only to server)');
   }
 
   @override
@@ -370,7 +370,7 @@ class CoopClient extends CoopReader {
   @override
   Future<void> recvRevision(int id) {
     // TODO: darken screen!!!
-    print("Client got revision: $id");
+    print('Client got revision: $id');
   }
 
   void restoreRevision(int id) => _writer.writeRevision(id);
