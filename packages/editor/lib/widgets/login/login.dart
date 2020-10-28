@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,6 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/platform/nomad.dart';
 import 'package:rive_editor/widgets/common/editor_switch.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
@@ -35,6 +36,7 @@ class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   FormValidator loginValidator, registerValidator;
+  StreamSubscription<LoginPageData> _pageSubscription;
 
   bool _buttonDisabled = false;
   bool _isSending = false;
@@ -94,8 +96,15 @@ class _LoginState extends State<Login> {
       passwordValidator,
       inviteValidator,
     ]);
-    Plumber().getStream<LoginPageData>().listen(_onPageChanged);
+    _pageSubscription =
+        Plumber().getStream<LoginPageData>().listen(_onPageChanged);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _pageSubscription.cancel();
   }
 
   // When a new panel is selected, change the current route.

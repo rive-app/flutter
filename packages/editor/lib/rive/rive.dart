@@ -87,9 +87,9 @@ class Rive {
     }
     final token = trip.parameters['token'] as String;
     final page = LoginPageName.fromName(trip.segments[1]);
-    final destionationData = LoginPageData(page, token: token);
+    final destinationData = LoginPageData(page, token: token);
     // The login screen will be listening for `LoginPageData`.
-    Plumber().message<LoginPageData>(destionationData);
+    Plumber().message<LoginPageData>(destinationData);
     Plumber().message<AppState>(AppState.login);
   }
 
