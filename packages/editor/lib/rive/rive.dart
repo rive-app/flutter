@@ -25,6 +25,7 @@ import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
+import 'package:rive_editor/widgets/login/login_page.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 import 'package:slugify2/slugify.dart';
@@ -74,7 +75,8 @@ class Rive {
 
     nomad.route('/files', _traveledHome);
     nomad.route('/file/:name/:hash', _traveledFile);
-    nomad.route('/login', _traveledLogin);
+    nomad.route('/auth/:page', _traveledLogin);
+    nomad.route('/auth/:page/:token?', _traveledLogin);
   }
 
   Future<void> _traveledLogin(Trip trip) async {
@@ -83,6 +85,11 @@ class Rive {
       nomad.travel('/files', replace: true);
       return;
     }
+    final token = trip.parameters['token'] as String;
+    final page = LoginPageName.fromName(trip.segments[1]);
+    final destinationData = LoginPageData(page, token: token);
+    // The login screen will be listening for `LoginPageData`.
+    Plumber().message<LoginPageData>(destinationData);
     Plumber().message<AppState>(AppState.login);
   }
 
@@ -91,7 +98,7 @@ class Rive {
     var meStream = Plumber().getStream<Me>();
     var me = await meStream.first;
     if (!me.signedIn) {
-      nomad.travel('/login', replace: true);
+      nomad.travel('/auth/${LoginPage.register.name}', replace: true);
       return false;
     }
     return true;
@@ -227,7 +234,9 @@ class Rive {
       if (firstMe.signedIn) {
         nomad.travel('/files', replace: true);
       } else {
-        nomad.travel('/login', replace: true);
+        final authPage =
+            firstMe?.socialLink != null ? LoginPage.link : LoginPage.register;
+        nomad.travel('/auth/${authPage.name}', replace: true);
       }
     }
 
@@ -270,7 +279,7 @@ class Rive {
       }
 
       if (travel) {
-        nomad.travel('/login');
+        nomad.travel('/auth/${LoginPage.register.name}');
       }
       return;
     }

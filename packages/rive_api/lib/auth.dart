@@ -199,7 +199,7 @@ class RiveAuth {
       final response = apiException.response;
       dynamic data = json.decode(response.body);
       Map<String, Object> responseData;
-      if(data is Map<String, Object>) {
+      if (data is Map<String, Object>) {
         responseData = data;
       }
       if (response.statusCode == 422) {
@@ -207,6 +207,25 @@ class RiveAuth {
       }
     }
     return AuthResponse.empty();
+  }
+
+  Future<bool> reset(String password, String token) async {
+    final body = jsonEncode(
+      <String, String>{'password': password},
+    );
+    try {
+      var response =
+          await api.post('${api.host}/signin/reset/$token', body: body);
+      print('All good? ${response.statusCode}');
+
+      return true;
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      if (response.statusCode == 422) {
+        return false;
+      }
+    }
+    return false;
   }
 }
 
