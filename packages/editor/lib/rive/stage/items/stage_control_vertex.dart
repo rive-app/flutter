@@ -8,6 +8,7 @@ import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
+import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -17,6 +18,9 @@ abstract class StageControlVertex extends StageVertex<CubicVertex> {
   /// The mirrored/detached/asymmetric control point on the other side of the
   /// main vertex.
   StageControlVertex sibling;
+
+  // Vertex associated with this control
+  StagePathVertex vertex;
 
   @override
   void drawPoint(Canvas canvas, Rect rect, Paint stroke, Paint fill) {

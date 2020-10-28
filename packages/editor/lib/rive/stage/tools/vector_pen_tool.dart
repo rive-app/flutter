@@ -16,6 +16,7 @@ import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -263,7 +264,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   @override
   List<StageTransformer> get transformers => [
-        PathVertexTranslateTransformer(),
+        PathVertexTranslateTransformer(
+          lockRotationShortcut: ShortcutAction.symmetricDraw,
+        ),
       ];
 
   static const double snapIntersectionDistance = 10;
@@ -342,7 +345,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
         double distance = Vec2D.distance(worldMouse, intersectionWorld);
         if (distance < closestPathDistance) {
-
           // If this is a cubic, don't allow splitting right on existing points.
           if (cubicBezier != null && (cubicSplitT <= 0 || cubicSplitT >= 1)) {
             continue;

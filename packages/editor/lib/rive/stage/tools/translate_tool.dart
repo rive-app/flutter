@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/artboard_translate_transformer.dart';
@@ -46,7 +47,9 @@ class TranslateTool extends TransformHandleTool {
 
           JointTranslateTransformer(),
 
-          PathVertexTranslateTransformer(),
+          PathVertexTranslateTransformer(
+            lockRotationShortcut: ShortcutAction.symmetricDraw,
+          ),
         ];
 
   static final TranslateTool instance = TranslateTool();
