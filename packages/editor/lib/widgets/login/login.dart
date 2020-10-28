@@ -97,6 +97,8 @@ class _LoginState extends State<Login> {
     ]);
 
     nomad = RiveContext.of(context).nomad;
+    Plumber().getStream<LoginPageData>().listen(_onPageChanged);
+
     var currentMe = Plumber().peek<Me>();
     if (currentMe?.socialLink != null) {
       _currentPanel = LoginPage.link;
@@ -108,16 +110,23 @@ class _LoginState extends State<Login> {
     super.initState();
   }
 
+  // When a new panel is selected, change the current route.
+  // This, in turn, will trigger _onPageChanged() with the new information.
   void _selectPanel(LoginPage page) {
-    if (page != _currentPanel) {
+    nomad.travel('/auth/${page.name}');
+  }
+
+  void _onPageChanged(LoginPageData data) {
+    if (data.page != _currentPanel || data.token != _pageToken) {
       setState(() {
-        _currentPanel = page;
+        _currentPanel = data.page;
+        _pageToken = data.token;
+
         // Reset error fields.
         _generalError = null;
         _passwordError = null;
         _emailError = null;
         _usernameError = null;
-        nomad.travel('${_currentPanel.name}');
       });
     }
   }

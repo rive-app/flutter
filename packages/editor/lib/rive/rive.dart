@@ -75,9 +75,8 @@ class Rive {
 
     nomad.route('/files', _traveledHome);
     nomad.route('/file/:name/:hash', _traveledFile);
-    nomad.route('/${LoginPage.login.name}', _traveledLogin);
-    nomad.route('/${LoginPage.register.name}', _traveledLogin);
-    nomad.route('/${LoginPage.reset.name}/:token', _traveledLogin);
+    nomad.route('/auth/:page', _traveledLogin);
+    nomad.route('/auth/:page/:token?', _traveledLogin);
   }
 
   Future<void> _traveledLogin(Trip trip) async {
@@ -86,6 +85,11 @@ class Rive {
       nomad.travel('/files', replace: true);
       return;
     }
+    final token = trip.parameters['token'] as String;
+    final page = LoginPageName.fromName(trip.segments[1]);
+    final destionationData = LoginPageData(page, token: token);
+    // The login screen will be listening for `LoginPageData`.
+    Plumber().message<LoginPageData>(destionationData);
     Plumber().message<AppState>(AppState.login);
   }
 
@@ -94,7 +98,7 @@ class Rive {
     var meStream = Plumber().getStream<Me>();
     var me = await meStream.first;
     if (!me.signedIn) {
-      nomad.travel('/login', replace: true);
+      nomad.travel('/auth/${LoginPage.register.name}', replace: true);
       return false;
     }
     return true;
@@ -230,7 +234,7 @@ class Rive {
       if (firstMe.signedIn) {
         nomad.travel('/files', replace: true);
       } else {
-        nomad.travel('/login', replace: true);
+        nomad.travel('/auth/${LoginPage.register.name}', replace: true);
       }
     }
 
@@ -272,8 +276,9 @@ class Rive {
         closeTab(fileTabs[i]);
       }
 
+      print('Logged out! $me Traveling? $travel');
       if (travel) {
-        nomad.travel('/login');
+        nomad.travel('/auth/${LoginPage.register.name}');
       }
       return;
     }

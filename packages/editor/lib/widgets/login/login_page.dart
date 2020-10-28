@@ -35,3 +35,9 @@ extension LoginPageName on LoginPage {
     }
   }
 }
+
+class LoginPageData {
+  final LoginPage page;
+  final String token;
+  const LoginPageData(this.page, {this.token});
+}
