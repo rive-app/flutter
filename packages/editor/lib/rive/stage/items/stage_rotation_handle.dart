@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -168,7 +169,10 @@ class StageRotationHandle extends StageHandle {
   List<StageTransformer> makeTransformers() {
     return [
       JointRotateTransformer(handle: this),
-      NodeRotateTransformer(handle: this),
+      NodeRotateTransformer(
+        handle: this,
+        lockRotationShortcut: ShortcutAction.symmetricDraw,
+      ),
     ];
   }
 

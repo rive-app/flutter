@@ -537,7 +537,7 @@ packages:
       path: "../../submodules/rive-flutter"
       relative: true
     source: path
-    version: "0.5.2"
+    version: "0.6.2"
   rive_api:
     dependency: "direct main"
     description:

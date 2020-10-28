@@ -197,7 +197,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.rectangleTool,
       {
-        ShortcutKey.u,
+        ShortcutKey.r,
       },
     ),
     Shortcut(

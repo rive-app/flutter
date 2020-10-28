@@ -5,6 +5,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/transform_component.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
@@ -20,7 +21,12 @@ class NodeRotateTransformer extends StageTransformer {
   final HashMap<TransformComponent, Mat2D> _inHandleSpace =
       HashMap<TransformComponent, Mat2D>();
 
-  NodeRotateTransformer({this.handle}) {
+  // Locks rotation to 45 degree increments
+  final StatefulShortcutAction<bool> lockRotationShortcut;
+  // Are we locked to 45 increments?
+  bool _rotationLocked = false;
+
+  NodeRotateTransformer({this.handle, this.lockRotationShortcut}) {
     Mat2D.decompose(handle.transform, transformComponents);
   }
 
@@ -29,21 +35,41 @@ class NodeRotateTransformer extends StageTransformer {
 
   @override
   void advance(DragTransformDetails details) {
-    var toCursor = Vec2D.subtract(Vec2D(), details.artboardWorld.current,
-        transformComponents.translation);
-    var lastCursorAngle = _cursorAngle;
-    _cursorAngle = atan2(toCursor[1], toCursor[0]);
+    final rotatedComponents = TransformComponents.clone(transformComponents);
+    final lockedRotatedComponents =
+        TransformComponents.clone(transformComponents);
+    // This happens if advance is triggered by the lock rotation key being
+    // pressed. If the key is pressed, we need to remember the current rotation,
+    // lock to the nearest 45. If the key is released, we need to go back to
+    // the original rotation.
+    if (details == null) {
+      if (_rotationLocked) {
+        rotatedComponents.rotation = lockedRotatedComponents.rotation =
+            _snapToNearest45Degrees(
+                rotatedComponents.rotation + _cursorAngle - _startCursorAngle);
+      } else {
+        rotatedComponents.rotation += _cursorAngle - _startCursorAngle;
+      }
+    } else {
+      var toCursor = Vec2D.subtract(Vec2D(), details.artboardWorld.current,
+          transformComponents.translation);
+      var lastCursorAngle = _cursorAngle;
+      _cursorAngle = atan2(toCursor[1], toCursor[0]);
 
-    _cursorAngle = lastCursorAngle +
-        atan2(sin(_cursorAngle - lastCursorAngle),
-            cos(_cursorAngle - lastCursorAngle));
+      _cursorAngle = lastCursorAngle +
+          atan2(sin(_cursorAngle - lastCursorAngle),
+              cos(_cursorAngle - lastCursorAngle));
 
-    var deltaAngle = _cursorAngle - _startCursorAngle;
-    var rotatedComponents = TransformComponents.clone(transformComponents);
-    rotatedComponents.rotation += deltaAngle;
+      var deltaAngle = _cursorAngle - _startCursorAngle;
+      rotatedComponents.rotation += deltaAngle;
 
-    var transform = Mat2D();
-    Mat2D.compose(transform, rotatedComponents);
+      lockedRotatedComponents.rotation =
+          _snapToNearest45Degrees(rotatedComponents.rotation);
+    }
+
+    final transform = Mat2D();
+    Mat2D.compose(transform,
+        _rotationLocked ? lockedRotatedComponents : rotatedComponents);
     handle.showSlice(transformComponents.rotation, rotatedComponents.rotation);
 
     for (final node in _nodes) {
@@ -81,7 +107,7 @@ class NodeRotateTransformer extends StageTransformer {
       var rotation = lastRotation +
           atan2(sin(components.rotation - lastRotation),
               cos(components.rotation - lastRotation));
-              
+
       if (threshold(node.rotation, rotation)) {
         node.rotation = rotation;
       }
@@ -91,6 +117,7 @@ class NodeRotateTransformer extends StageTransformer {
   @override
   void complete() {
     handle.hideSlice();
+    lockRotationShortcut?.removeListener(_advanceWithLock);
   }
 
   @override
@@ -118,10 +145,23 @@ class NodeRotateTransformer extends StageTransformer {
 
     _nodes = topComponents(_nodes);
 
+    lockRotationShortcut?.addListener(_advanceWithLock);
+
     for (final node in _nodes) {
       _inHandleSpace[node] =
           Mat2D.multiply(Mat2D(), toHandle, node.worldTransform);
     }
     return _nodes.isNotEmpty;
+  }
+
+  void _advanceWithLock() {
+    _rotationLocked = lockRotationShortcut.value;
+    advance(null);
+  }
+
+  // This takes an arbitrary angle and snaps it to the nearest 45 degrees
+  double _snapToNearest45Degrees(double angle) {
+    final lockInc = pi / 4;
+    return (angle / lockInc).round() * lockInc;
   }
 }
