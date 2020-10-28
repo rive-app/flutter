@@ -123,6 +123,7 @@ class CoopIsolate {
       } else if (data is _CoopServerShutdown) {
         _isolate?.kill();
         _isolate = null;
+        print('Killed isolate for $ownerId-$fileId');
 
         /// This was a requested shutdown
         if (_shutdownCompleter != null) {
@@ -202,12 +203,16 @@ abstract class CoopIsolateProcess {
 
   Future<bool> initProcess(SendPort sendToMainPort, Map<String, String> options,
       int ownerId, int fileId) async {
+    print('initializing process for $ownerId $fileId');
     configureLogger();
     _sendToMainPort = sendToMainPort;
     if (await initialize(ownerId, fileId, options)) {
+      print(
+          'initialized ok, sending sendPort to main thread for $ownerId $fileId');
       _sendToMainPort.send(_receiveFromMainPort.sendPort);
       return true;
     } else {
+      print('init failed, send shutdown for $ownerId $fileId');
       _sendToMainPort.send(_CoopServerShutdown());
     }
     return false;
@@ -220,6 +225,7 @@ abstract class CoopIsolateProcess {
 
   /// Send the list of players to all players.
   void propagatePlayers() {
+    print('propagating players');
     var players = _clients.values.where((client) => client.isReady);
     for (final client in players) {
       if (!client.isReady) {
@@ -239,6 +245,7 @@ abstract class CoopIsolateProcess {
   Future<void> _receive(dynamic data) async {
     if (data is CoopServerAddClient) {
       int actualClientId = data.clientId;
+      print('adding a client $actualClientId');
       // Check if the client id the connection wants to use is valid.
       if (actualClientId == null || actualClientId < 1) {
         actualClientId = nextClientId();
@@ -256,6 +263,7 @@ abstract class CoopIsolateProcess {
       _clients[data.id] =
           CoopServerClient(this, data.id, data.userOwnerId, actualClientId);
     } else if (data is CoopServerRemoveClient) {
+      print('removing a client ${data.id}');
       var client = _clients[data.id];
       if (client != null) {
         _clients.remove(client.id);
@@ -265,6 +273,7 @@ abstract class CoopIsolateProcess {
       _clients[data.id]?.receiveData(data.data);
       // _clients.add(CoopServerClient(this, _clients.length));
     } else if (data is _CoopServerShutdown) {
+      print('received shutdown from main thread');
       await shutdown();
       // Let main thread know the shutdown completed.
       _sendToMainPort.send(data);
@@ -272,6 +281,7 @@ abstract class CoopIsolateProcess {
   }
 
   void onClientReady(CoopServerClient client) {
+    print('client is ready, propagate players');
     propagatePlayers();
   }
 

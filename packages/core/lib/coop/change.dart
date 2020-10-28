@@ -81,6 +81,12 @@ class ChangeSet {
 
   List<ObjectChanges> objects;
 
+  int get numProperties {
+    return objects.fold(0, (previous, object) {
+      return previous + object.changes.length;
+    });
+  }
+
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(id);
     writer.writeVarUint(objects?.length ?? 0);

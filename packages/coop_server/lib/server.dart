@@ -59,6 +59,8 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
 
   @override
   bool attemptChange(CoopServerClient client, ChangeSet changeSet) {
+    print(
+        'attemptChange for client ${client.id}: id(${changeSet.id}) objects(${changeSet.objects.length}) propertyChanges(${changeSet.numProperties})');
     // Make the change on a clone.
     var modifiedFile = file.clone();
     // One thing to note is that the following will increment
@@ -156,6 +158,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
       }
     }
 
+    print('will persist change set');
     // Decide if we want to save the changeset (in the future we could make this
     // depend on whether some flag is enabled for this
     // user/owner/file/whatever). For now save em all.
@@ -163,11 +166,13 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
         client, file, serverChangeId, changeSet, isChangeValid);
 
     if (isChangeValid) {
+      print('change is valid ${changeSet.id}');
       // Changes were good, modify file and propagate them to other clients.
       file = modifiedFile;
       propagateChanges(client, serverChangeSet);
       return true;
     } else {
+      print('change is rejected');
       // do not change the file, reject the change.
       return false;
     }
@@ -175,7 +180,11 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
 
   @override
   ChangeSet buildFileChangeSet() {
-    return file.toChangeSet();
+    print('building changeSet from file to send to client on initial connect');
+    var changeSet = file.toChangeSet();
+    print(
+        'change set details: objects(${changeSet.objects.length}) numProperties(${changeSet.numProperties})');
+    return changeSet;
   }
 
   void serverLog(String message) {

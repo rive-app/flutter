@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 
 import 'package:coop_server_library/server.dart';
+import 'package:system_info/system_info.dart';
 import 'package:utilities/logger.dart';
 
 const dataFolder = 'data-folder';
@@ -96,53 +97,23 @@ Future<void> server(List<String> arguments) async {
   }
 }
 
-/// Attempts to get memory info from the underlying OS
+/// Attempt to get memory info from the underlying OS
 /// If it fails, it returns null.
 Future<Map<String, String>> _meminfo() async {
-  // Converts memory size to MB if necessary
-  int _calculateMemorySize(int value, String symbol) {
-    if (symbol.toLowerCase() == 'kb') {
-      return value ~/ 1024;
-    }
-    return value;
-  }
+  const kilobyte = 1024;
 
-  // Parses a line from /proc/meminfo
-  int _parseMemInfoLine(String line) {
-    final tokens = line.split(RegExp(r'\s+'));
-    if (tokens.length > 2) {
-      final value = int.tryParse(tokens[tokens.length - 2]);
-      if (value != null) {
-        return _calculateMemorySize(value, tokens.last);
-      }
-    }
-    // Parse gone haywire, abort
-    return -1;
+  try {
+    final total = SysInfo.getTotalPhysicalMemory();
+    final free = SysInfo.getFreePhysicalMemory();
+    final percentUsed = 1 - (free / total);
+    print('memory info for heartbeat $free/$total = $percentUsed');
+    return {
+      'memtotal': '${total ~/ kilobyte}',
+      'memuse': percentUsed.toStringAsFixed(2),
+    };
+    // ignore:avoid_catching_errors
+  } on UnsupportedError {
+    print('System info not supported');
+    return null;
   }
-
-  const meminfoPath = '/proc/meminfo';
-  final file = File(meminfoPath);
-  // ignore: avoid_slow_async_io
-  if (await file.exists()) {
-    final infoLines = await file.readAsLines();
-    int total; // total memory in MB
-    int free; // toal free memory in MB
-    for (final line in infoLines) {
-      if (line.toLowerCase().contains('memavailable')) {
-        free = _parseMemInfoLine(line);
-      }
-      if (line.toLowerCase().contains('memtotal')) {
-        total = _parseMemInfoLine(line);
-      }
-    }
-    // Make sure we have values for both and return the params
-    if (total > 0 && free > 0) {
-      final percentUsed = 1 - (free / total);
-      return {
-        'memtotal': total.toString(),
-        'memuse': percentUsed.toStringAsFixed(2),
-      };
-    }
-  }
-  return null;
 }

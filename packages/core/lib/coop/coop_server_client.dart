@@ -42,6 +42,7 @@ class CoopServerClient extends Player with CoopReader {
 
   @override
   void recvChange(ChangeSet changes) {
+    print('got changes(${changes.id}) from client($clientId)');
     if (context.attemptChange(this, changes)) {
       _writer.writeAccept(changes.id);
       debounce(context.persist, duration: const Duration(seconds: 2));
@@ -57,26 +58,31 @@ class CoopServerClient extends Player with CoopReader {
 
   @override
   Future<void> recvSync(List<ChangeSet> changes) async {
-    log.finest("got sync!");
+    print("got sync!");
     // Apply offline changes.
     if (changes.isNotEmpty) {
       for (final change in changes) {
-        log.finest("sync attempt change!");
+        print("sync attempt change!");
         context.attemptChange(this, change);
       }
       debounce(context.persist, duration: const Duration(seconds: 2));
     }
-    log.finest("start the wipe!");
+    print("start the wipe!");
 
     _writer.writeWipe();
-
+    print('wiped');
     final initialChanges = context.buildFileChangeSet();
     if (initialChanges != null) {
+      print('sending initial changeSet to client');
       _writer.writeChanges(initialChanges);
+      print('sent initial changeSet to client');
     }
+    print('telling client they\'re ready');
     _writer.writeReady();
+    print('we\'re ready');
     _isReady = true;
     context.onClientReady(this);
+    print('done recvSync');
   }
 
   @override
