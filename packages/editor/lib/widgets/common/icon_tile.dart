@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/widgets/common/announcement.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart' show RiveTheme;
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -11,11 +12,13 @@ class IconTile extends StatefulWidget {
     this.onTap,
     this.highlight = false,
     this.count = 0,
+    this.hasAnnouncement = false,
     Key key,
   }) : super(key: key);
 
   final String label;
   final bool highlight;
+  final bool hasAnnouncement;
   final VoidCallback onTap;
   final Iterable<PackedIcon> icon;
 
@@ -104,7 +107,9 @@ class _IconTileState extends State<IconTile> {
                           ),
                         ),
                       ),
-                    //const SizedBox(width: 7),
+                    if (widget.count > 0 && widget.hasAnnouncement)
+                      const SizedBox(width: 5),
+                    if (widget.hasAnnouncement) AnnouncementAlert(),
                   ],
                 ),
               ),

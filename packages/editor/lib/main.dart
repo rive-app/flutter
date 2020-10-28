@@ -16,6 +16,7 @@ import 'package:rive_editor/alerts_display.dart';
 import 'package:rive_editor/editor.dart';
 import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/global_messages.dart';
+import 'package:rive_editor/rive/managers/announcements_manager.dart';
 import 'package:rive_editor/rive/managers/global_message_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
@@ -75,6 +76,7 @@ Future<void> main() async {
   SelectionManager();
   RiveManager().rive = rive;
   NotificationManager();
+  AnnouncementsManager();
   WebsocketCommsManager();
   GlobalMessageManager();
 

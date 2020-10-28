@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
+import 'package:rive_api/data_model.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -148,5 +150,42 @@ class AdminManager {
       return json.decode(response.body);
     }
     return false;
+  }
+
+  Future<dynamic> addAnnouncement({
+    String title,
+    String body,
+    String validFrom,
+    String validTo,
+  }) async {
+    String payload = jsonEncode({
+      'data': {
+        'title': title,
+        'body': body,
+        'validFrom': validFrom,
+        'validTo': validTo,
+      }
+    });
+    var response =
+        await api.post(api.host + '/api/announcements', body: payload);
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+    return false;
+  }
+
+  Future<List<Announcement>> getAnnouncements() async {
+    var response = await api.get(api.host + '/api/announcements');
+    if (response.statusCode == 200) {
+      var data = (json.decode(response.body)['data'] as List)
+          .cast<Map<String, dynamic>>();
+
+      return Announcement.fromDMList(AnnouncementDM.fromDataList(data));
+    }
+    return [];
+  }
+
+  Future<void> cancelAnnoucement(int annoucementId) async {
+    await api.delete(api.host + '/api/announcements/$annoucementId');
   }
 }

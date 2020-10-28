@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart' as model;
+import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/managers/announcements_manager.dart';
 
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/widgets/common/announcement.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
@@ -74,6 +79,7 @@ class NotificationsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
+    final announcements = Plumber().peek<List<Announcement>>();
     return Underline(
       color: theme.colors.panelBackgroundLightGrey,
       thickness: 1,
@@ -92,13 +98,24 @@ class NotificationsHeader extends StatelessWidget {
           ),
           const SizedBox(width: 30),
           GestureDetector(
-            child: Text(
-              'Announcements',
-              style: type == PanelTypes.announcements
-                  ? theme.textStyles.notificationHeaderSelected
-                  : theme.textStyles.notificationHeader,
+            child: Row(
+              children: [
+                if (AnnouncementsManager().anyAnnouncementNew(announcements))
+                  Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: AnnouncementAlert()),
+                Text(
+                  'Announcements',
+                  style: type == PanelTypes.announcements
+                      ? theme.textStyles.notificationHeaderSelected
+                      : theme.textStyles.notificationHeader,
+                ),
+              ],
             ),
-            onTap: () => onTap(PanelTypes.announcements),
+            onTap: () {
+              AnnouncementsManager().markAnnouncementsRead();
+              onTap(PanelTypes.announcements);
+            },
           ),
         ],
       ),
@@ -196,22 +213,60 @@ class _AnnouncementsPanelState extends State<AnnouncementsPanel> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    // Feels a bit awkward, is there a better place for this?
+    // perhaps as part of our router?
+    UserManager().loadMe();
+  }
+
+  @override
   Widget build(BuildContext context) => FutureBuilder(
         future: _changelogs,
-        builder: (context, AsyncSnapshot<List<Changelog>> snapshot) =>
-            snapshot.hasData
-                ? ListView(children: [
+        builder: (context, AsyncSnapshot<List<Changelog>> snapshot) => snapshot
+                .hasData
+            ? CustomScrollView(slivers: [
+                SliverList(
+                    delegate: SliverChildListDelegate([
+                  const SizedBox(height: 30),
+                  NotificationsHeader(PanelTypes.announcements, widget.onTap),
+                ])),
+                AnnouncementsView(),
+                SliverList(
+                    delegate: SliverChildListDelegate([
+                  for (final changelog in snapshot.data) ...[
                     const SizedBox(height: 30),
-                    NotificationsHeader(PanelTypes.announcements, widget.onTap),
-                    for (final changelog in snapshot.data) ...[
-                      const SizedBox(height: 30),
-                      NotificationCard(
-                        child: ChangelogNotification(changelog),
-                      )
-                    ]
-                  ])
-                : PanelLoading(PanelTypes.announcements, widget.onTap),
+                    NotificationCard(
+                      child: ChangelogNotification(changelog),
+                    )
+                  ]
+                ])),
+              ])
+            : PanelLoading(PanelTypes.announcements, widget.onTap),
       );
+}
+
+class AnnouncementsView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ValueStreamBuilder<List<model.Announcement>>(
+      stream: Plumber().getStream<List<model.Announcement>>(),
+      builder: (context, snapshot) => snapshot.hasData
+          ? SliverList(
+              delegate: SliverChildListDelegate([
+                for (final announcement in snapshot.data) ...[
+                  const SizedBox(height: 30),
+                  NotificationCard(
+                    child: AnnouncementNotification(announcement),
+                  ),
+                ],
+              ]),
+            )
+          : SliverList(
+              delegate: SliverChildListDelegate([]),
+            ),
+    );
+  }
 }
 
 class NotificationCard extends StatelessWidget {
@@ -233,6 +288,58 @@ class NotificationCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: child,
       ),
+    );
+  }
+}
+
+class AnnouncementNotification extends StatelessWidget {
+  const AnnouncementNotification(this.announcement);
+  final Announcement announcement;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Row(
+          children: [
+            if (AnnouncementsManager().isAnnouncementNew(announcement))
+              Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AnnouncementAlert()),
+            Text(
+              announcement.title,
+              style: theme.textStyles.notificationTitle,
+            )
+          ],
+        ),
+        const SizedBox(height: 10),
+        MarkdownBody(
+          data: announcement.body,
+          styleSheet: MarkdownStyleSheet(
+            a: theme.textStyles.notificationText,
+            p: theme.textStyles.notificationText,
+            code: theme.textStyles.notificationTitle,
+            h1: theme.textStyles.notificationTitle,
+            h2: theme.textStyles.notificationTitle,
+            h3: theme.textStyles.notificationTitle,
+            h4: theme.textStyles.notificationTitle,
+            h5: theme.textStyles.notificationTitle,
+            h6: theme.textStyles.notificationTitle,
+            em: theme.textStyles.notificationText,
+            strong: theme.textStyles.notificationText
+                .copyWith(fontWeight: FontWeight.bold),
+            del: theme.textStyles.notificationTitle,
+            blockquote: theme.textStyles.notificationTitle,
+            img: theme.textStyles.notificationTitle,
+            checkbox: theme.textStyles.notificationText,
+            listBullet: theme.textStyles.notificationText,
+            tableHead: theme.textStyles.notificationTitle,
+            tableBody: theme.textStyles.notificationText,
+          ),
+        )
+      ],
     );
   }
 }

@@ -14,18 +14,18 @@ class RiveUser extends RiveOwner {
   final TeamInviteStatus status;
   final TeamRole role;
 
-  RiveUser({
-    @required int ownerId,
-    @required String name,
-    @required String username,
-    String avatar,
-    this.isAdmin = false,
-    this.isPaid = false,
-    this.notificationCount = 0,
-    this.isVerified = false,
-    this.status,
-    this.role,
-  })  : assert(ownerId != null),
+  RiveUser(
+      {@required int ownerId,
+      @required String name,
+      @required String username,
+      String avatar,
+      this.isAdmin = false,
+      this.isPaid = false,
+      this.notificationCount = 0,
+      this.isVerified = false,
+      this.status,
+      this.role})
+      : assert(ownerId != null),
         assert(name != null || username != null),
         super(id: ownerId, name: name, username: username, avatar: avatar);
 
@@ -36,15 +36,14 @@ class RiveUser extends RiveOwner {
     }
 
     return RiveUser(
-      ownerId: data.getInt('ownerId'),
-      username: data.getString('username'),
-      name: data.getString('name'),
-      avatar: data.getString('avatar'),
-      isAdmin: data.getBool('isAdmin'),
-      isPaid: data.getBool('isPaid'),
-      notificationCount: data.getInt('notificationCount'),
-      isVerified: data.getBool('verified'),
-    );
+        ownerId: data.getInt('ownerId'),
+        username: data.getString('username'),
+        name: data.getString('name'),
+        avatar: data.getString('avatar'),
+        isAdmin: data.getBool('isAdmin'),
+        isPaid: data.getBool('isPaid'),
+        notificationCount: data.getInt('notificationCount'),
+        isVerified: data.getBool('verified'));
   }
 
   factory RiveUser.fromAutoCompleteData(Map<String, dynamic> data) {
