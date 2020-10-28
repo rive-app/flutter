@@ -63,6 +63,20 @@ class PageElement {
             element.click()
         ]);
     }
+
+    async clickAndWaitForTarget(targetRoute) {
+        const element = this;
+        await Promise.all([
+            browser.waitForTarget((target) => {
+                const url = target.url();
+                const isDone = url.includes(targetRoute);
+                console.log("Waiting >>> Done?", isDone, url);
+                return isDone;
+            }),
+            element.click()
+        ]);
+
+    }
 };
 
 describe("Register & Login Flow", () => {
@@ -160,7 +174,7 @@ describe("Register & Login Flow", () => {
 
     before(async () => {
         browser = await puppeteer.launch({
-            headless: false,
+            // headless: false,
             args: [
                 `--window-size=${options.width},${options.height}`
             ]
@@ -172,33 +186,30 @@ describe("Register & Login Flow", () => {
         assert(password);
         assert(username);
         assert(email);
-
+/* 
         page.on('request', interceptedRequest => {
             const headers = interceptedRequest.headers();
             const method = interceptedRequest.method();
             const url = interceptedRequest.url();
+            // console.log("URL is now:", page.url());
         });
-
 
         await page.on("response", async (response) => {
             const url = response.url();
             const status = response.status();
         });
+ */
 
         await page.setViewport({ width: options.width, height: options.height })
-        await page.goto(
-            host,
-            {
-                waitUntil: "networkidle0",
-                fullPage: true
-            }
-        );
+        await page.goto(host, { fullPage: true } );
+
+        await browser.waitForTarget((target) => target.url().includes("/login"));
 
         await fillTextField({ field: firstField, value: username });
         await fillTextField({ field: secondField, value: email });
         await fillTextField({ field: thirdField, value: password });
 
-        await signUpButton.clickAndWaitNavigation();
+        await signUpButton.clickAndWaitForTarget("/files");
         // await delay(100000);
     });
 
@@ -210,19 +221,21 @@ describe("Register & Login Flow", () => {
 
         // Delay to let the Settings panel layout.
         await delay(1000);
-        await logoutButton.clickAndWaitNavigation();
+        console.log("Logging out?");
+        await logoutButton.clickAndWaitForTarget("/login");
         console.log("Logged out!");
-        // Give time to the page to show up.
-        await delay(5000);
     });
 
     it("Log in using credentials", async () => {
         assert(username);
         assert(password);
 
+        // Wait for page to settle.
+        await delay(1000);
+
         await buttonSwitch.click();
 
-        // Give switched view time to settle.
+        // Wait for view to settle.
         await delay(500);
 
         // Click username field.
@@ -234,7 +247,7 @@ describe("Register & Login Flow", () => {
         await page.keyboard.type(password);
 
         // Click on Login button & wait for page to load.
-        await loginButton.clickAndWaitNavigation();
+        await loginButton.clickAndWaitForTarget("/files");
 
         // await delay(100000);
     });
