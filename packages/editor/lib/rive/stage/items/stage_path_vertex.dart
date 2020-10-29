@@ -55,6 +55,10 @@ class StagePathVertex extends StageVertex<PathVertex>
       _in.sibling = _out;
       _out.sibling = _in;
 
+      // Set up control / vertex relationships
+      _in.vertex = this;
+      _out.vertex = this;
+
       stage.addItem(_in);
       stage.addItem(_out);
       stage.addItem(_lineIn);
