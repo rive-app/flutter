@@ -118,12 +118,27 @@ describe("Register & Login Flow", () => {
         mb: firstField.marginBottom - firstField.height - 50
     });
 
-    const signUpButton = new PageElement({
-        w: 140,
-        h: 30,
-        ml: loginButton.marginLeft,
-        mb: thirdField.marginBottom - 60
-    });
+    /** 
+        Measurements for this button have been evaluated on macOS and on Ubuntu  
+        separately. Unfortunately these appear to differ since Chromium lays out
+        Flutter components differently on macOS and Ubuntu.
+     */
+    let signUpButton;
+    if (process.platform === "darwin") {
+        signUpButton = new PageElement({
+            w: 140,
+            h: 30,
+            ml: loginButton.marginLeft,
+            mb: thirdField.marginBottom - 60
+        });
+    } else {
+        signUpButton = new PageElement({
+            w: 140,
+            h: 30,
+            ml: loginButton.marginLeft,
+            mt: 680
+        });
+    }
 
     const buttonSwitch = new PageElement({
         w: 40,
