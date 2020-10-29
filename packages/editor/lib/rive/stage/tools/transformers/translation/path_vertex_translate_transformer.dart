@@ -38,18 +38,20 @@ class PathVertexTranslateTransformer extends StageTransformer {
         _stageVertices.first is StageControlVertex) {
       final controlVertex = _stageVertices.first as StageControlVertex;
       final vertex = controlVertex.vertex;
-      final worldMouse = controlVertex.stage.worldMouse;
+      final worldPosition =
+          details?.world?.current ?? controlVertex.stage.worldMouse;
       // If rotation is locked, contrain to the locking axes
       if (_rotationLocked) {
         final lockAxis = LockAxis(vertex.worldTranslation,
-            _calculateLockAxis(worldMouse, vertex.worldTranslation));
+            _calculateLockAxis(worldPosition, vertex.worldTranslation));
 
-        controlVertex.worldTranslation = lockAxis.translateToAxis(worldMouse);
+        controlVertex.worldTranslation =
+            lockAxis.translateToAxis(worldPosition);
       } else {
         // Just peg to the world mouse; need to do this otherwise the point will
         // not coincide with the mouse location after a lock has been started
         // and then released
-        controlVertex.worldTranslation = worldMouse;
+        controlVertex.worldTranslation = worldPosition;
       }
       return;
     }
