@@ -87,7 +87,8 @@ describe("Register & Login Flow", () => {
     }
 
     const options = {
-        width: 1280, height: 800 + 131
+        width: 1280, 
+        height: 800 + 131 // 131 is the size of the tab & address bar.
     }
 
     const loginButton = new PageElement({
