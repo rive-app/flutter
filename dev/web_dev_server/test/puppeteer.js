@@ -179,35 +179,53 @@ describe("Register & Login Flow", () => {
                 `--window-size=${options.width},${options.height}`
             ]
         });
-        page = await browser.newPage();
-    });
 
-    it("Register user", async () => {
-        assert(password);
-        assert(username);
-        assert(email);
-/* 
+        const pages = await browser.pages();
+        page = pages[0];
+
+        assert(page);
+
+        await page.setViewport({ width: options.width, height: options.height })
+        await page.goto(host, { fullPage: true });
+        await browser.waitForTarget((target) => target.url().includes("/auth/register"));
+
+        // const result = await page.evaluate(() => [window.innerWidth, window.innerHeight]);
+
+        /* 
         page.on('request', interceptedRequest => {
             const headers = interceptedRequest.headers();
             const method = interceptedRequest.method();
             const url = interceptedRequest.url();
-            // console.log("URL is now:", page.url());
+            console.log("URL:", url);
         });
 
         await page.on("response", async (response) => {
             const url = response.url();
             const status = response.status();
         });
- */
+         */
+    });
 
-        await page.setViewport({ width: options.width, height: options.height })
-        await page.goto(host, { fullPage: true } );
+    it("Register user", async () => {
+        assert(password);
+        assert(username);
+        assert(email);
 
-        await browser.waitForTarget((target) => target.url().includes("/login"));
+        const result = await page.evaluate(() => document.location.pathname);
+        assert(result.includes("/auth/register"));
 
+        console.log("Registering user:", username);
+
+        // Wait for page to settle.
+        await delay(1500);
         await fillTextField({ field: firstField, value: username });
         await fillTextField({ field: secondField, value: email });
         await fillTextField({ field: thirdField, value: password });
+
+        await signUpButton.click();
+        await delay(1000);
+
+        // await page.screenshot({ path: 'screenshot/screenshot_register.png' });
 
         await signUpButton.clickAndWaitForTarget("/files");
         // await delay(100000);
@@ -215,28 +233,36 @@ describe("Register & Login Flow", () => {
 
 
     it("Log out", async () => {
+        const result = await page.evaluate(() => document.location.pathname);
+        assert(result.includes("/files"));
+
+        // await page.screenshot({ path: 'screenshot/screenshot_files.png' });
+
+        // Make sure we're on the right page.
+        await browser.waitForTarget((target) => target.url().includes("/files"));
         // Delay to let elements layout.
         await delay(1000);
         await settingsButton.click();
 
         // Delay to let the Settings panel layout.
         await delay(1000);
-        console.log("Logging out?");
-        await logoutButton.clickAndWaitForTarget("/login");
-        console.log("Logged out!");
+
+        // await page.screenshot({ path: 'screenshot/screenshot_settings.png' });
+
+        await logoutButton.clickAndWaitForTarget("/auth/register");
     });
 
     it("Log in using credentials", async () => {
         assert(username);
         assert(password);
 
+        await page.goto(`${host}/auth/login`, { fullPage: true });
+        await browser.waitForTarget((target) => target.url().includes("/auth/login"));
+
         // Wait for page to settle.
-        await delay(1000);
+        await delay(1500);
 
-        await buttonSwitch.click();
-
-        // Wait for view to settle.
-        await delay(500);
+        // await page.screenshot({ path: 'screenshot/screenshot_login.png' });
 
         // Click username field.
         await firstField.click();
