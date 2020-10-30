@@ -101,9 +101,8 @@ class SvgToRiveTask extends PeonTask {
   @override
   Future<bool> peonExecute() async {
     var data = await getS3Key(sourceLocation);
-    var cleanedData = String.fromCharCodes(data);
-    // NOTE: disabling cleaning for the time being.
-    // var cleanedData = await clean(String.fromCharCodes(data));
+    var rawData = String.fromCharCodes(data);
+    var cleanedData = await clean(rawData);
 
     // the key is just there for debugging purposes
     var drawable = await SvgParserStateRived(

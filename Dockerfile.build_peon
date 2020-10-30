@@ -15,10 +15,8 @@ RUN wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha1
 RUN tar -xvf premake-5.0.0-alpha15-linux.tar.gz
 RUN mv premake5 /usr/bin/
 
-
-# SVG cleaner is out fttb
-# # Install SVG Cleaner
-# RUN cargo install svgcleaner
+# Install SVG Cleaner
+RUN cargo install svgcleaner
 
 ADD packages/peon_process/skia/include.tar.gz /app/submodules/rive-cpp/skia/dependencies/skia/
 ADD packages/peon_process/skia/static.tar.gz /app/submodules/rive-cpp/skia/dependencies/skia/out/ 
