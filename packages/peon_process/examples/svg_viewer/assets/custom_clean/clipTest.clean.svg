@@ -1,0 +1,8 @@
+<svg id="Ebene_1" viewBox="0 0 605.51 584.82" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" data-name="Ebene 1">
+    <clipPath id="clip-path" transform="translate(5.51 -2.38)">
+        <path d="m-14.32 149.21h430.82v178.71h-430.82z" transform="matrix(.6 -.8 .8 .6 -110.47 255.34)"/>
+    </clipPath>
+    <g clip-path="url(#clip-path)">
+        <path d="m212.58 9.24h100.97v26.57h-100.97z" fill="#afafaf" transform="matrix(.99038914 -.13830888 .13830888 .99038914 4.92 34.24)"/>
+    </g>
+</svg>

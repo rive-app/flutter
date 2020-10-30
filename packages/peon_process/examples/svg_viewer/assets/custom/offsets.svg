@@ -1,0 +1,45 @@
+<?xml version="1.0" standalone="no"?>
+<svg width="120" height="360" version="1.1"
+  xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="clip1">
+      <rect x="10" y="10" rx="0" ry="0" width="10" height="10"/>
+    </clipPath>
+  </defs>
+  <g id="one" clip-path="url(#clip1)">
+    <rect x="5" y="5" width="20" height="20" fill="red"/>
+  </g>
+  <g id="two" transform="translate(10,10)" clip-path="url(#clip1)">
+    <rect x="5" y="5" width="30" height="30" fill="green"/>
+  </g>
+  <g id="three" transform="translate(20,20)" clip-path="url(#clip1)">
+    <rect x="5" y="5" width="40" height="40" fill="blue"/>
+  </g>
+  <g id="four" transform="translate(10,10)">
+    <g id="five" transform="translate(20,20)" clip-path="url(#clip1)">
+      <rect x="5" y="5" width="40" height="40" fill="yellow"/>
+    </g>
+  </g>
+  <g id="one" transform="translate(30,0)">
+    <clipPath id="clip2">
+      <rect x="10" y="10" rx="0" ry="0" width="10" height="10"/>
+    </clipPath>
+    <g id="one" clip-path="url(#clip2)">
+      <rect x="5" y="5" width="20" height="20" fill="red"/>
+    </g>
+    <g id="two" transform="translate(10,10)" clip-path="url(#clip2)">
+      <rect x="5" y="5" width="30" height="30" fill="green"/>
+    </g>
+    <g id="three" transform="translate(20,20)" clip-path="url(#clip2)">
+      <rect x="5" y="5" width="40" height="40" fill="blue"/>
+    </g>
+    <g id="four" transform="translate(10,10)">
+      <clipPath id="clip3">
+        <rect x="10" y="10" rx="0" ry="0" width="10" height="10"/>
+      </clipPath>
+      <g id="five" transform="translate(20,20)" clip-path="url(#clip3)">
+        <rect x="5" y="5" width="40" height="40" fill="yellow"/>
+      </g>
+    </g>
+  </g>
+</svg>

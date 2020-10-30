@@ -1,0 +1,41 @@
+<svg height="360" width="120" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <clipPath id="clip1">
+        <path d="m10 10h10v10h-10z"/>
+    </clipPath>
+    <clipPath id="clip2">
+        <path d="m10 10h10v10h-10z"/>
+    </clipPath>
+    <clipPath id="clip3">
+        <path d="m10 10h10v10h-10z"/>
+    </clipPath>
+    <g id="one" clip-path="url(#clip1)">
+        <path d="m5 5h20v20h-20z" fill="#f00"/>
+    </g>
+    <g id="two" clip-path="url(#clip1)" transform="translate(10 10)">
+        <path d="m5 5h30v30h-30z" fill="#008000"/>
+    </g>
+    <g id="three" clip-path="url(#clip1)" transform="translate(20 20)">
+        <path d="m5 5h40v40h-40z" fill="#00f"/>
+    </g>
+    <g id="four" transform="translate(10 10)">
+        <g id="five" clip-path="url(#clip1)" transform="translate(20 20)">
+            <path d="m5 5h40v40h-40z" fill="#ff0"/>
+        </g>
+    </g>
+    <g id="one" transform="translate(30)">
+        <g id="one" clip-path="url(#clip2)">
+            <path d="m5 5h20v20h-20z" fill="#f00"/>
+        </g>
+        <g id="two" clip-path="url(#clip2)" transform="translate(10 10)">
+            <path d="m5 5h30v30h-30z" fill="#008000"/>
+        </g>
+        <g id="three" clip-path="url(#clip2)" transform="translate(20 20)">
+            <path d="m5 5h40v40h-40z" fill="#00f"/>
+        </g>
+        <g id="four" transform="translate(10 10)">
+            <g id="five" clip-path="url(#clip3)" transform="translate(20 20)">
+                <path d="m5 5h40v40h-40z" fill="#ff0"/>
+            </g>
+        </g>
+    </g>
+</svg>
