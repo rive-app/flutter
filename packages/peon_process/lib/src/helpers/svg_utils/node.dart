@@ -44,8 +44,10 @@ void addChild(
       var shapeOffset = getShapeOffset(file, drawableShape.path as RivePath);
       node.x = shapeOffset.dx;
       node.y = shapeOffset.dy;
+
       // we do not do this here, as the color already contains this?
-      // ..opacity = drawableShape.style.groupOpacity;
+      // we dont do this to avoid doubling up with paths
+      // node.opacity = drawableShape.style.groupOpacity;
 
       var composer = PathComposer();
       file.addObject(composer);
@@ -102,6 +104,7 @@ void addChild(
               drawableShape.bounds,
               shapeOffset,
             );
+            node.opacity = drawableShape.style.fill.color.opacity;
           }
         }
         if (drawableShape.style.stroke != null &&
