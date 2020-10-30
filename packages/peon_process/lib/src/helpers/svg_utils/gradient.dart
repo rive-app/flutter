@@ -16,7 +16,11 @@ void addGradient(DrawableGradient gradient, RiveFile file, ShapePaint paint,
 
   double _translate(
       double originalValue, double scaleValue, double translateValue) {
-    return translateValue + originalValue * scaleValue;
+    if (gradient.unitMode == GradientUnitMode.objectBoundingBox) {
+      return translateValue + originalValue * scaleValue;
+    } else {
+      return originalValue + translateValue;
+    }
   }
 
   if (gradient is DrawableLinearGradient) {

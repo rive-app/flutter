@@ -50,3 +50,6 @@ flutter:
     - ../svg_viewer/assets/club/
     - ../svg_viewer/assets/custom/
     - ../svg_viewer/assets/custom_clean/
+    - ../svg_viewer/assets/homefail/
+    - ../svg_viewer/assets/homefail_clean/
+

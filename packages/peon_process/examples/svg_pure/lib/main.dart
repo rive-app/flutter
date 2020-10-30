@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // .where((String key) => key.contains('.svg'))
         // .where((String key) => key.contains('avatar.clean'))
         // .where((String key) => key.contains('mini_hulk'))
-        .where((String key) => key.contains('custom'))
+        .where((String key) => key.contains('homefail'))
         // .where((String key) => key.contains('mask_check'))
         .where((String key) => key.contains('.svg'))
         .toList();
@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: Container(
                 // width: 600,
-                decoration: const BoxDecoration(color: Colors.black),
+                decoration: const BoxDecoration(color: Colors.white),
                 child: GridView.extent(
                     // shrinkWrap: true,
                     maxCrossAxisExtent: extent,
@@ -143,7 +143,7 @@ class _SvgWidgetState extends State<SvgWidget> {
         ? const SizedBox()
         : Column(children: [
             Text(widget.assetPath.split('/').last,
-                style: const TextStyle(color: Colors.white)),
+                style: const TextStyle(color: Colors.black)),
             Expanded(child: _svgPicture),
           ]);
   }
