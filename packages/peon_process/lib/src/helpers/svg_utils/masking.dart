@@ -85,7 +85,7 @@ Node getMaskingShape(
       clippingRefs,
       maskingRefs,
       clips,
-      forceNode: true,
+      forceNode: false,
       mask: true,
     );
   });
