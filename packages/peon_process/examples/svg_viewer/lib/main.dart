@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Adjusted SVG reader & Rive Interpretation'),
     );
   }
 }
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     var imagePaths = manifestMap.keys
         // .where((String key) => key.contains('other'))
-        // .where((String key) => key.contains('custom'))
+        .where((String key) => key.contains('custom'))
         // .where((String key) => key.contains('mini'))
         // .where((String key) => key.contains('sde'))
         // .where((String key) => key.contains('club'))
@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // .where((String key) => key.contains('.svg'))
         // .where((String key) => key.contains('avatar.clean'))
         // .where((String key) => key.contains('mini_hulk'))
-        .where((String key) => key.contains('custom'))
+        // .where((String key) => key.contains('mask_check.svg'))
         .where((String key) => key.contains('.svg'))
         .toList();
 

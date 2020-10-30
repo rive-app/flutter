@@ -1,0 +1,24 @@
+<svg height="100" viewBox="0 0 100 100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <mask id="mask1" fill="#fff">
+            <path id="path1" d="m0 0h264v280h-264z" fill="#fff" fill-rule="evenodd"/>
+        </mask>
+        <path id="p2" d="m0 0h264v280h-264z" fill="#aaa" fill-rule="evenodd"/>
+        <rect x="0" y="0" width="10" height="10" style="fill:blue;"/>
+    </defs>
+    <g  mask="url(#mask1)">
+        <rect x="10" y="10" width="10" height="10" style="fill:yellow;"/>
+        <rect x="30" y="10" width="10" height="10" style="fill:blue;"/>
+    </g>
+    <g  mask="url(#mask1)" transform="translate(0,30)">
+        <rect x="10" y="10" width="10" height="10" style="fill:green;"/>
+        <rect x="30" y="10" width="10" height="10" style="fill:gray;"/>
+    </g>
+
+    <g  mask="url(#mask1)" transform="translate(0,30)">
+        <g  mask="url(#mask1)" transform="translate(50,0)">
+            <rect x="10" y="10" width="10" height="10" style="fill:magenta;"/>
+            <rect x="30" y="10" width="10" height="10" style="fill:red;"/>
+        </g>
+    </g>
+</svg>
