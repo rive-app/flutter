@@ -145,7 +145,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
             default:
               var prop = object.properties[change.op] ??= ObjectProperty();
               prop.key = change.op;
-              prop.data = change.value;
+              prop.data = Uint8List.fromList(change.value);
               break;
           }
         }

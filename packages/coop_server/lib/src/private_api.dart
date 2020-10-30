@@ -192,16 +192,11 @@ class PrivateApi {
   Future<void> persistChangeSet(CoopServerClient client, CoopFile file,
       int serverChangeId, ChangeSet changes, bool accepted) async {
     try {
-      var headers = <String, String>{
-        'X-rive-owner-id': client.ownerId.toString(),
-        'X-rive-accepted': accepted ? 'true' : 'false',
-      };
-      var writer = BinaryWriter();
+      var writer = BinaryWriter(alignment: 8 * changes.numProperties);
       changes.serialize(writer);
 
       var response = await http.post(
-        '$origin/changeset/${file.ownerId}/${file.fileId}/${serverChangeId - CoopCommand.minChangeId}',
-        headers: headers,
+        '$origin/changeset/${file.ownerId}/${file.fileId}/${serverChangeId - CoopCommand.minChangeId}?userId=${client.ownerId.toString()}&accepted=${accepted ? 'true' : 'false'}',
         body: writer.uint8Buffer,
       );
       if (response.statusCode == 200) {
