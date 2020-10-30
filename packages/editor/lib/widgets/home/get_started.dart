@@ -55,14 +55,14 @@ class MiddlePanel extends StatelessWidget {
                   thumbnail: 's1-e1.png',
                   type: ContentType.helpCenter,
                   url:
-                      'https://www.youtube.com/watch?v=RsSaYW1wG-0&feature=youtu.be'),
+                      'https://www.youtube.com/watch?v=RsSaYW1wG-0'),
               VideoSeriesEpisode(
                   episodeNumber: 2,
                   title: 'Interface overview',
                   thumbnail: 's1-e2.png',
                   type: ContentType.helpCenter,
                   url:
-                      'https://help.rive.app/editor/fundamentals/interface-overview'),
+                      'https://www.youtube.com/watch?v=S-sSF09NCvs'),
               VideoSeriesEpisode(
                   episodeNumber: 3,
                   title: 'Artboards and shapes',
