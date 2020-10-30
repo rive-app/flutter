@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:peon_process/src/helpers/svg_utils/clipping.dart';
 import 'package:peon_process/src/helpers/svg_utils/gradient.dart';
@@ -21,8 +23,9 @@ void addChild(
   RiveFile file,
   ContainerComponent parent,
   Drawable drawable,
-  Map<String, Node> clippingRefs,
-  Map<Node, String> clips, {
+  Map<String, ClippingReference> clippingRefs,
+  Map<String, MaskingReference> maskingRefs,
+  Map<Node, ClipApplication> clips, {
   bool forceNode = false,
   bool mask = false,
 }) {
@@ -120,6 +123,7 @@ void addChild(
         drawableShape.attributes,
         node,
         clips,
+        shapeOffset,
       );
 
       break;
@@ -160,17 +164,16 @@ void addChild(
         drawableGroup.attributes,
         node,
         clips,
+        const Offset(0.0, 0.0),
       );
 
       for (var i = drawableGroup.clipPaths.length - 1; i >= 0; i--) {
         var clipPath = drawableGroup.clipPaths[i];
-        clippingRefs[clipPath.id] = getClippingShape(
+        clippingRefs[clipPath.id] = ClippingReference(
           clipPath,
           root,
           file,
-          node,
-          clippingRefs,
-          clips,
+          file.artboards.first,
         );
       }
 
@@ -181,21 +184,20 @@ void addChild(
           node,
           drawableGroup.children[i],
           clippingRefs,
+          maskingRefs,
           clips,
           mask: mask,
         );
       }
 
       for (var i = 0; i < drawableGroup.masks.length; i++) {
-        var mask = getMaskingShape(
+        var mask = MaskingReference(
           drawableGroup.masks[i] as DrawableGroup,
           root,
           file,
-          node,
-          clippingRefs,
-          clips,
+          file.artboards.first,
         );
-        clippingRefs['url(#${mask.name})'] = mask;
+        maskingRefs['url(#${mask.name})'] = mask;
       }
 
       break;
@@ -204,19 +206,26 @@ void addChild(
   }
 }
 
+class ClipApplication {
+  final Offset offset;
+  final String clipAttr;
+
+  ClipApplication(this.offset, this.clipAttr);
+}
+
 void registerClips(
-  DrawableStyleable drawable,
-  List<XmlEventAttribute> attributes,
-  Node node,
-  Map<Node, String> clips,
-) {
+    DrawableStyleable drawable,
+    List<XmlEventAttribute> attributes,
+    Node node,
+    Map<Node, ClipApplication> clips,
+    Offset offset) {
   if (drawable.style.clipPath != null) {
     var clipAttr = attributes
         .firstWhere((element) =>
             element.name == 'clip-path' || element.value.contains('clip-path'))
         .value;
     clipAttr = clipAttr.split(':').last;
-    clips[node] = clipAttr;
+    clips[node] = ClipApplication(offset, clipAttr);
   }
   if (drawable.style.mask != null) {
     var clipAttr = attributes
@@ -224,7 +233,7 @@ void registerClips(
             element.name == 'mask' || element.value.contains('mask'))
         .value;
     clipAttr = clipAttr.split(':').last;
-    clips[node] = clipAttr;
+    clips[node] = ClipApplication(offset, clipAttr);
   }
 }
 

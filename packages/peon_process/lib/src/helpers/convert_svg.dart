@@ -11,8 +11,9 @@ import 'package:rive_core/rive_file.dart';
 void addArtboard(RiveFile file, DrawableRoot root) {
   Backboard backboard;
   Artboard artboard;
-  var clippingRefs = <String, Node>{};
-  var clips = <Node, String>{};
+  var clippingRefs = <String, ClippingReference>{};
+  var maskingRefs = <String, MaskingReference>{};
+  var clips = <Node, ClipApplication>{};
   file.batchAdd(() {
     backboard = Backboard();
     artboard = Artboard()
@@ -30,33 +31,64 @@ void addArtboard(RiveFile file, DrawableRoot root) {
   file.batchAdd(() {
     for (var i = root.clipPaths.length - 1; i >= 0; i--) {
       var clipPath = root.clipPaths[i];
-      clippingRefs[clipPath.id] = getClippingShape(
+      clippingRefs[clipPath.id] = ClippingReference(
         clipPath,
         root,
         file,
         artboard,
-        clippingRefs,
-        clips,
       );
     }
     for (var i = root.children.length - 1; i >= 0; i--) {
-      addChild(root, file, artboard, root.children[i], clippingRefs, clips);
+      addChild(
+        root,
+        file,
+        artboard,
+        root.children[i],
+        clippingRefs,
+        maskingRefs,
+        clips,
+      );
     }
 
     for (var i = root.masks.length - 1; i >= 0; i--) {
-      var mask = getMaskingShape(
+      var mask = MaskingReference(
         root.masks[i] as DrawableGroup,
         root,
         file,
         artboard,
-        clippingRefs,
-        clips,
       );
-      clippingRefs['url(#${mask.name})'] = mask;
+      maskingRefs['url(#${mask.name})'] = mask;
     }
+  });
+
+  file.batchAdd(() {
     clips.forEach((key, value) {
-      if (clippingRefs.containsKey(value)) {
-        clip(key, clippingRefs[value], file);
+      if (clippingRefs.containsKey(value.clipAttr)) {
+        var clipShape = getClippingShape(
+            key,
+            value.offset,
+            clippingRefs[value.clipAttr].clipPath,
+            clippingRefs[value.clipAttr].root,
+            clippingRefs[value.clipAttr].file,
+            clippingRefs[value.clipAttr].parent,
+            clippingRefs,
+            maskingRefs,
+            clips);
+        clip(key, clipShape, file);
+      }
+      if (maskingRefs.containsKey(value.clipAttr)) {
+        var maskShape = getMaskingShape(
+            key,
+            value.offset,
+            maskingRefs[value.clipAttr].mask,
+            maskingRefs[value.clipAttr].root,
+            maskingRefs[value.clipAttr].file,
+            maskingRefs[value.clipAttr].parent,
+            clippingRefs,
+            maskingRefs,
+            clips);
+
+        clip(key, maskShape, file);
       }
     });
   });
