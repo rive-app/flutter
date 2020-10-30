@@ -45,3 +45,4 @@ flutter:
   assets:
     - assets/club/
     - assets/custom/
+    - assets/custom_clean/
