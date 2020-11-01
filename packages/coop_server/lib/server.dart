@@ -36,7 +36,7 @@ class RiveCoopServer extends CoopServer {
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
     var process = RiveCoopIsolateProcess();
     await process.initProcess(
-        argument.sendPort, argument.options, argument.ownerId, argument.fileId);
+        argument.sendPort, argument.options, argument.fileId);
   }
 }
 
@@ -45,14 +45,13 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
   int _nextChangeId;
   final PrivateApi _privateApi;
 
-  // We store the fileId/ownerId on the isolate process just incase the one in
+  // We store the fileId on the isolate process just incase the one in
   // the file/revision-data is out of sync or someone sneakily copied the
   // revision data (to do testing like Luigi ran into) from another file. This
   // ensures that the coop server is writing to the file it was given as an id
   // to connect to. N.B. this'll need to update when we move to single id (maybe
   // it'll just be a string).
   int _fileId;
-  int _ownerId;
 
   RiveCoopIsolateProcess({String privateApiHost})
       : _privateApi = PrivateApi(host: privateApiHost);
@@ -182,36 +181,33 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
   ChangeSet buildFileChangeSet() {
     print('building changeSet from file to send to client on initial connect');
     var changeSet = file.toChangeSet();
-    print(
-        'change set details: objects(${changeSet.objects.length}) numProperties(${changeSet.numProperties})');
+    print('change set details: objects(${changeSet.objects.length}) '
+        'numProperties(${changeSet.numProperties})');
     return changeSet;
   }
 
   void serverLog(String message) {
-    print('coop file: ${file?.ownerId}-${file?.fileId} - $message');
+    print('coop file: ${file?.fileId} - $message');
   }
 
   @override
-  Future<bool> initialize(
-      int ownerId, int fileId, Map<String, String> options) async {
-    _ownerId = ownerId;
+  Future<bool> initialize(int fileId, Map<String, String> options) async {
     _fileId = fileId;
     // check data is not null, check signature, if it's RIVE deserialize
     // if it's { or something else, send wtf.
-    var data = await _privateApi.load(ownerId, fileId);
+    var data = await _privateApi.load(fileId);
     if (data == null) {
-      print('failed to load revision from private_api $ownerId-$fileId');
+      print('failed to load revision from private_api $fileId');
       // private api is currently not availble or somehow failed, make sure we
       // terminate the connect (client will retry).
       return false;
     }
 
-    print('revision data is ${data.length} bytes $ownerId-$fileId');
+    print('revision data is ${data.length} bytes $fileId');
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {
-      print('bad data in revision for $ownerId-$fileId, making empty file');
+      print('bad data in revision for $fileId, making empty file');
       file = CoopFile()
-        ..ownerId = ownerId
         ..fileId = fileId
         ..objects = {};
     } else {
@@ -226,7 +222,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
           ),
         ),
       )) {
-        print('failed to deserialize revision for $ownerId-$fileId');
+        print('failed to deserialize revision for $fileId');
         try {
           var stringData = utf8.decode(data, allowMalformed: true);
           print('failed data looks like $stringData');
@@ -234,7 +230,6 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
           print('failed to decode ${data.length} $data');
         }
         file = CoopFile()
-          ..ownerId = ownerId
           ..fileId = fileId
           ..objects = {};
       } else {
@@ -270,7 +265,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     _persistCompleter = completer;
     var writer = BinaryWriter(alignment: max(1, file.objects.length) * 256);
     file.serialize(writer);
-    await _privateApi.save(_ownerId, _fileId, writer.uint8Buffer);
+    await _privateApi.save(_fileId, writer.uint8Buffer);
     completer.complete();
   }
 
@@ -296,7 +291,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     for (final to in clients) {
       to.notifyChangingRevision();
     }
-    var data = await _privateApi.restoreRevision(_ownerId, _fileId, revisionId);
+    var data = await _privateApi.restoreRevision(_fileId, revisionId);
     if (data == null) {
       print('no data from restore?');
       return;

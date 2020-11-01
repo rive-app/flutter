@@ -43,8 +43,8 @@ class FolderDM {
 
   @override
   bool operator ==(Object o) =>
-      o is FolderDM && o.id == id && o.ownerId == ownerId;
+      o is FolderDM && o.id == id;
 
   @override
-  int get hashCode => szudzik(id, ownerId);
+  int get hashCode => id;
 }

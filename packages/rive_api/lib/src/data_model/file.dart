@@ -15,8 +15,10 @@ class FileDM {
   final String thumbnail;
 
   static List<FileDM> fromDataList(
-          List<Map<String, dynamic>> data, CdnDM cdn) =>
-      data.map((d) => FileDM.fromData(d, cdn)).toList(growable: false);
+          List<Map<String, dynamic>> data, Map<String, CdnDM> cdn) =>
+      data
+          .map((d) => FileDM.fromData(d, cdn[d.getInt('oid').toString()]))
+          .toList(growable: false);
 
   factory FileDM.fromData(Map<String, dynamic> data, CdnDM cdn) {
     return FileDM(

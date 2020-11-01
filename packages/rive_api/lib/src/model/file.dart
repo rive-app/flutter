@@ -1,6 +1,5 @@
 import 'package:meta/meta.dart';
 import 'package:rive_api/data_model.dart';
-import 'package:utilities/utilities.dart';
 import 'named.dart';
 
 class File implements Named {
@@ -37,10 +36,10 @@ class File implements Named {
   int get ownerId => _ownerId ?? fileOwnerId;
 
   @override
-  bool operator ==(Object o) => o is File && o.id == id && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is File && o.id == id;
 
   @override
-  int get hashCode => szudzik(id, ownerId);
+  int get hashCode => id;
 
   @override
   String toString() => '< File: $name - Id: $id. Owner: $ownerId >';

@@ -1,8 +1,6 @@
-import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/bones/bone_base.dart';
-import 'package:rive_core/transform_component.dart';
 export 'package:rive_core/src/generated/bones/bone_base.dart';
 
 typedef bool BoneCallback(Bone bone);

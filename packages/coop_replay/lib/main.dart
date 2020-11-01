@@ -115,7 +115,6 @@ void main(List<String> arguments) {
 
 class ReplayFile {
   CoopFile file = CoopFile()
-    ..ownerId = 1
     ..fileId = 1
     ..objects = {};
   int _nextChangeId = 0;

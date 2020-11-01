@@ -13,7 +13,7 @@ void _configureLogging() {
 }
 
 void main() {
-  final segments = ['v$protocolVersion', '2', '3', '4', '5'];
+  final segments = ['v$protocolVersion', '3', '4', '5'];
 
   setUp(_configureLogging);
   group('WebSocketData', () {
@@ -21,7 +21,6 @@ void main() {
       final testSegments = List<String>.from(segments);
       final data = WebSocketData.fromSegments(testSegments);
       expect(data.version, protocolVersion);
-      expect(data.ownerId, 2);
       expect(data.fileId, 3);
       expect(data.userOwnerId, 4);
       expect(data.clientId, 5);

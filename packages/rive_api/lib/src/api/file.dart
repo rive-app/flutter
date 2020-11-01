@@ -15,49 +15,13 @@ class FileApi {
   FileApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<List<FileDM>> files(int ownerId, int folderId) async {
-    final res =
-        await api.get(api.host + '/api/files/$ownerId/$folderId/recent');
-    try {
-      final data = json.decodeList<int>(res.body);
-      return FileDM.fromIdList(data, ownerId);
-    } on FormatException catch (e) {
-      _log.severe('Error formatting teams api response', e);
-      rethrow;
-    }
-  }
+  Future<List<FileDM>> recentFiles() async => _files('/api/files/ids/recent');
 
-  /// Return the user's file ids in most recent order
-  /// This returns the new combo file id format.
-  /// For the moment, this will get converted by to ownerId, fileId
-  /// but in future we can update the code to handle a single file id
-  Future<Iterable<FileDM>> recentFiles() async {
-    final res = await api.get('${api.host}/api/v2/my/recents/');
-    try {
-      final data = json.decodeList<String>(res.body);
-      return FileDM.fromHashedIdList(data);
-    } on FormatException catch (e) {
-      _log.severe('Error formatting recent files api response', e);
-      rethrow;
-    }
-  }
-
-  /// Return the user's recent files details
-  /// This uses the new combo file id format.
-  /// For the moment, this will get converted by to ownerId, fileId
-  /// but in future we can update the code to handle a single file id
-  Future<Iterable<FileDM>> recentFilesDetails() async {
-    final res = await api.get('${api.host}/api/v2/my/recents/files');
-    try {
-      final data = json.decodeMap(res.body);
-      final cdns = CdnDM.fromDataMap(data.getMap<String, dynamic>('cdns'));
-
-      return FileDM.fromHashedIdDataList(data.getList('files'), cdns);
-    } on FormatException catch (e) {
-      _log.severe('Error formatting recent files details api response', e);
-      rethrow;
-    }
-  }
+  Future<List<FileDM>> files(int ownerId, int folderId) async => _files(
+      folderId == null
+          ? '/api/files/ids/$ownerId/recent'
+          : '/api/files/ids/$ownerId/$folderId/recent',
+      ownerId);
 
   Future<void> deleteMyFiles(List<int> fileIds, List<int> folderIds) async {
     return _deleteFiles('/api/my/files', fileIds, folderIds);
@@ -79,12 +43,20 @@ class FileApi {
     await api.delete(api.host + url, body: jsonEncode(payload));
   }
 
-  Future<List<FileDM>> myFileDetails(List<int> fileIds) async =>
-      _fileDetails('/api/my/files', fileIds);
+  Future<List<FileDM>> _files(String url, [int ownerId]) async {
+    final res = await api.get(api.host + url);
+    try {
+      final data = json.decodeList<int>(res.body);
+      
+      return FileDM.fromIdList(data, ownerId);
+    } on FormatException catch (e) {
+      _log.severe('Error formatting teams api response', e);
+      rethrow;
+    }
+  }
 
-  Future<List<FileDM>> teamFileDetails(
-          List<int> fileIds, int teamOwnerId) async =>
-      _fileDetails('/api/teams/$teamOwnerId/files', fileIds);
+  Future<List<FileDM>> fileDetails(List<int> fileIds) async =>
+      _fileDetails('/api/files/details', fileIds);
 
   Future<List<FileDM>> _fileDetails(String url, List fileIds) async {
     var res = await api.post(
@@ -94,7 +66,7 @@ class FileApi {
 
     try {
       final data = json.decodeMap(res.body);
-      final cdn = CdnDM.fromData(data.getMap<String, dynamic>('cdn'));
+      final cdn = CdnDM.fromDataMap(data.getMap<String, dynamic>('cdn'));
       return FileDM.fromDataList(data.getList('files'), cdn);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response', e);
@@ -181,7 +153,7 @@ class FileApi {
   }
 
   /// Find the socket server url to connect to for a specific file.
-  Future<CoopConnectionInfo> establishCoop(int ownerId, int fileId) async {
+  Future<CoopConnectionInfo> establishCoop() async {
     if (api.host.indexOf('https://') == 0) {
       return CoopConnectionInfo(
           'wss://${api.host.substring('https://'.length)}/ws/proxy');

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 /// Tree of directories
 import 'package:meta/meta.dart';
 import 'package:rive_api/plumber.dart';
@@ -17,50 +19,58 @@ class FolderTree {
   }
 
   factory FolderTree.fromFolderList(Owner owner, List<Folder> folders) {
-    final indexMap = <int, List<Folder>>{};
+    var root = FolderTreeItem.root(owner);
+    // Turn folders into tree items.
+    var treeItems = folders
+        .map((folder) => FolderTreeItem(folder: folder, owner: owner))
+        .toList();
 
-    // map em out
-    folders.forEach((Folder folder) {
-      if (folder.parent != null) {
-        indexMap[folder.parent] ??= [];
-        indexMap[folder.parent].add(folder);
-      }
-    });
+    // Build folder id => folder lookup table.
+    var lookup = HashMap<int, FolderTreeItem>();
+    for (final treeItem in treeItems) {
+      lookup[treeItem.folder.id] = treeItem;
+    }
 
-    var _rootFolder =
-        folders.firstWhere((element) => element.name == 'Your Files');
+    // Parent the tree items.
+    for (final treeItem in treeItems) {
+      var parentTreeItem = lookup[treeItem.folder.parent] ?? root;
+      parentTreeItem.children.add(treeItem);
+    }
+
     return FolderTree(
-        owner: owner,
-        root: FolderTreeItem.create(_rootFolder, indexMap, owner));
+      owner: owner,
+      root: root,
+    );
   }
 }
 
 class FolderTreeItem {
-  FolderTreeItem({@required this.folder, @required this.children, this.owner}) {
+  FolderTreeItem({@required this.folder, this.owner}) {
     hover = false;
 
     final currentDirectory = Plumber().peek<CurrentDirectory>();
     if (currentDirectory != null &&
-        (currentDirectory.folder.id == folder?.id &&
+        (currentDirectory.folder?.id == folder?.id &&
             currentDirectory.owner == owner)) {
       selected = true;
     } else {
       selected = false;
     }
   }
+
+  FolderTreeItem.root(Owner owner) : this(folder: null, owner: owner);
+
   final Folder folder;
   final _hover = BehaviorSubject<bool>();
   final _selected = BehaviorSubject<bool>();
   final Owner owner;
-  final List<FolderTreeItem> children;
+  final List<FolderTreeItem> children = [];
 
   String get iconURL {
     return owner?.avatarUrl;
   }
 
-  String get name {
-    return (owner == null) ? folder.name : owner.displayName;
-  }
+  String get name => folder?.name ?? owner.displayName;
 
   BehaviorSubject<bool> get hoverStream => _hover;
   BehaviorSubject<bool> get selectedStream => _selected;
@@ -82,22 +92,6 @@ class FolderTreeItem {
   factory FolderTreeItem.dummy(Owner owner) {
     return FolderTreeItem(
       folder: null,
-      children: [],
-      owner: owner,
-    );
-  }
-
-  factory FolderTreeItem.create(Folder root, Map<int, List<Folder>> indexMap,
-      [Owner owner]) {
-    // Note: Cycles gonna kill us.
-    final List<FolderTreeItem> _children = (indexMap.containsKey(root.id))
-        ? indexMap[root.id]
-            .map((childFolder) => FolderTreeItem.create(childFolder, indexMap))
-            .toList()
-        : [];
-    return FolderTreeItem(
-      folder: root,
-      children: _children,
       owner: owner,
     );
   }

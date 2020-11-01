@@ -1,7 +1,6 @@
 /// Tree of directories
 import 'package:meta/meta.dart';
 import 'package:rive_api/data_model.dart';
-import 'package:utilities/utilities.dart';
 import 'named.dart';
 
 class Folder implements Named {
@@ -43,10 +42,10 @@ class Folder implements Named {
 
   @override
   bool operator ==(Object o) =>
-      o is Folder && o.id == id && o.ownerId == ownerId;
+      o is Folder && o.id == id;
 
   @override
-  int get hashCode => szudzik(id, ownerId);
+  int get hashCode => id;
 
   FolderDM get asDM => FolderDM(
         ownerId: ownerId,

@@ -33,7 +33,6 @@ void main() {
 
   test('CoopFiles can be created', () {
     final file = CoopFile()
-      ..ownerId = 9
       ..fileId = 10
       ..serverChangeId = 0
       ..objects = {
@@ -48,7 +47,6 @@ void main() {
               ),
           }
       };
-    expect(file.ownerId, 9);
     expect(file.fileId, 10);
     expect(file.objects.length, 1);
     expect(file.objects.keys, [const Id(1, 12)]);
@@ -56,7 +54,6 @@ void main() {
 
   test('serialize file', () {
     var file = CoopFile()
-      ..ownerId = 19
       ..fileId = 82
       ..serverChangeId = 31
       ..objects = {
@@ -80,7 +77,6 @@ void main() {
     var reader = BinaryReader(writer.buffer);
     var check = CoopFile()..deserialize(reader);
 
-    expect(file.ownerId, check.ownerId);
     expect(file.fileId, check.fileId);
     expect(file.serverChangeId, 31);
     expect(file.objects.length, check.objects.length);

@@ -13,10 +13,14 @@ class FolderApi {
   FolderApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<List<FolderDM>> folders(int ownerId) async {
-    final res = await api.getFromPath('/api/folders/$ownerId');
+  Future<List<FolderDM>> folders(OwnerDM owner) async =>
+      _folders('/api/folders/${owner.ownerId}', owner.ownerId);
+
+  Future<List<FolderDM>> _folders(String path, int ownerId) async {
+    final res = await api.getFromPath(path);
     try {
-      var data = json.decodeList<Map<String, dynamic>>(res.body);
+      final data = json.decodeList<Map<String, dynamic>>(res.body);
+      // Check that the user's signed in
       return FolderDM.fromDataList(data, ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting folder api response', e);

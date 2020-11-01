@@ -15,13 +15,6 @@ import 'package:utilities/binary_buffer/binary_writer.dart';
 /// Timeout value for communication to the 2D service
 const timeout = Duration(seconds: 5);
 
-class ValidationResult {
-  final int userId;
-  final int ownerId;
-
-  ValidationResult(this.userId, this.ownerId);
-}
-
 class SaveResult {
   final String key;
   final int revisionId;
@@ -107,10 +100,10 @@ class PrivateApi {
     }
   }
 
-  Future<SaveResult> save(int ownerId, int fileId, Uint8List data) async {
+  Future<SaveResult> save(int fileId, Uint8List data) async {
     try {
       var response =
-          await http.post('$origin/revise/$ownerId/$fileId', body: data);
+          await http.post('$origin/revise/$fileId', body: data);
       if (response.statusCode == 200) {
         Map<String, dynamic> data;
         try {
@@ -118,7 +111,6 @@ class PrivateApi {
         } on FormatException catch (e, s) {
           log.severe(
               'Error parsing json saving a revision update for '
-              'owner: $ownerId, '
               'file: $fileId ',
               e,
               s);
@@ -135,7 +127,6 @@ class PrivateApi {
     } on Exception catch (e, s) {
       log.severe(
           'Error saving a revision update for '
-          'owner: $ownerId, '
           'file: $fileId ',
           e,
           s);
@@ -144,10 +135,10 @@ class PrivateApi {
   }
 
   /// Load the latest revision data for a file.
-  Future<Uint8List> load(int ownerId, int fileId) async {
-    print('loading $ownerId-$fileId');
+  Future<Uint8List> load(int fileId) async {
+    print('loading $fileId');
     try {
-      var response = await http.get('$origin/revision/$ownerId/$fileId');
+      var response = await http.get('$origin/revision/$fileId');
       if (response.statusCode == 200) {
         print('good!');
         return response.bodyBytes;
@@ -157,7 +148,6 @@ class PrivateApi {
     } on Exception catch (e, s) {
       log.severe(
           'Error loading a revision '
-          'owner: $ownerId, '
           'file: $fileId, ',
           e,
           s);
@@ -167,20 +157,19 @@ class PrivateApi {
 
   /// Restore a revision by id for a file, and get the data for it.
   Future<Uint8List> restoreRevision(
-      int ownerId, int fileId, int revisionId) async {
-    print('restoring revision $ownerId-$fileId $revisionId');
+      int fileId, int revisionId) async {
+    print('restoring revision $fileId $revisionId');
     try {
       var response =
-          await http.post('$origin/revision/$ownerId/$fileId/$revisionId');
+          await http.post('$origin/revision/$fileId/$revisionId');
       if (response.statusCode == 200) {
-        print('revision restored $ownerId-$fileId $revisionId');
+        print('revision restored $fileId $revisionId');
         return response.bodyBytes;
       }
       return null;
     } on Exception catch (e, s) {
       log.severe(
           'Error restoring a revision for '
-          'owner: $ownerId, '
           'file: $fileId, '
           'revision: $revisionId ',
           e,
@@ -196,7 +185,7 @@ class PrivateApi {
       changes.serialize(writer);
 
       var response = await http.post(
-        '$origin/changeset/${file.ownerId}/${file.fileId}/${serverChangeId - CoopCommand.minChangeId}?userId=${client.ownerId.toString()}&accepted=${accepted ? 'true' : 'false'}',
+        '$origin/changeset/${file.fileId}/${serverChangeId - CoopCommand.minChangeId}?userId=${client.ownerId.toString()}&accepted=${accepted ? 'true' : 'false'}',
         body: writer.uint8Buffer,
       );
       if (response.statusCode == 200) {
@@ -205,7 +194,6 @@ class PrivateApi {
     } on Exception catch (e, s) {
       log.severe(
           'Error persisting change set for '
-          'owner: ${file.ownerId}, '
           'file: ${file.fileId}, '
           'serverChangeId: $serverChangeId '
           'minChangeId: ${CoopCommand.minChangeId} ',

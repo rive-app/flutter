@@ -3,7 +3,6 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/plumber.dart';
-import 'package:utilities/utilities.dart';
 
 class FileManager with Subscriptions {
   static final _instance = FileManager._();
@@ -97,7 +96,7 @@ class FileManager with Subscriptions {
   }
 
   Future<void> loadFolders(Owner owner) async {
-    final _foldersDM = await _folderApi.folders(owner.ownerId);
+    final _foldersDM = await _folderApi.folders(owner.asDM);
     final _folders = Folder.fromDMList(_foldersDM.toList());
     _folderMap[owner] = _folders;
     _plumber.message(_folders, owner.hashCode);
@@ -115,14 +114,8 @@ class FileManager with Subscriptions {
 
   Future<void> loadFiles(Folder folder, Owner owner) async {
     // currently unused.
-    List<File> _files;
-    if (owner is Me) {
-      _files =
-          File.fromDMList(await _fileApi.myFiles(owner.ownerId, folder.id));
-    } else {
-      _files = File.fromDMList(
-          await _fileApi.teamFiles(owner.ownerId, folder.id), owner.ownerId);
-    }
+    List<File> _files =
+        File.fromDMList(await _fileApi.files(owner.ownerId, folder.id));
 
     _fileMap[folder] = _files;
     _plumber.message(_files, folder.hashCode);
@@ -130,12 +123,11 @@ class FileManager with Subscriptions {
 
   /// Load in the user's recent files details
   Future<Iterable<File>> loadRecentFilesDetails() async {
-    final fileDataModels = await _fileApi.recentFilesDetails();
+    final fileDataModels = await _fileApi.recentFiles();
     final files = File.fromDMList(fileDataModels);
     // Place the file details into the caching file details streams
-    // TODO: these should be hashed with the hashed id, not int
     files.forEach((file) =>
-        Plumber().message<File>(file, szudzik(file.id, file.ownerId)));
+        Plumber().message<File>(file, file.id));
 
     return files;
   }
@@ -165,8 +157,7 @@ class FileManager with Subscriptions {
     final targetFolder = _folderMap[currentDirectory.owner].firstWhere(
       (element) => element.id == currentDirectory.folder.parent,
       orElse: () {
-        return _folderMap[currentDirectory.owner]
-            .firstWhere((folder) => folder.id == 1);
+        return null;
       },
     );
     Plumber().message(CurrentDirectory(currentDirectory.owner, targetFolder));

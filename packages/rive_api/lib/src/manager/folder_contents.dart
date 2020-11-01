@@ -62,9 +62,7 @@ class FolderContentsManager with Subscriptions {
     List<int> fileIds = files.map((file) => file.id).toList(growable: false);
 
     // Get the file details from the backend, and update the cache if needed.
-    final fileDetails = await (directory.owner is Team
-        ? _fileApi.teamFileDetails(fileIds, teamOwnerId)
-        : _fileApi.myFileDetails(fileIds));
+    final fileDetails = await _fileApi.fileDetails(fileIds);
 
     final fileDetailsList = File.fromDMList(fileDetails, teamOwnerId);
 
@@ -75,6 +73,16 @@ class FolderContentsManager with Subscriptions {
 
   _FolderContentsCache _initCache(
       List<Folder> folders, int ownerId, int currentFolderId) {
+
+    // TODO: rethink...
+    // Make root folder cache if it's missing.
+    final cacheId = szudzik(ownerId, 0);
+    _cache[cacheId] ??= _FolderContentsCache();
+    // clear folders, the structure will get rebuilt with our folders.
+    _cache[cacheId].folders.clear();
+    // end todo...
+
+
     // Make sure thxat all folders' cache is initialized.
     for (final folder in folders) {
       final cacheId = szudzik(ownerId, folder.id);
@@ -85,36 +93,27 @@ class FolderContentsManager with Subscriptions {
 
     // Add each folder to its parent's cache.
     for (final folder in folders) {
-      if (folder.id == 1) {
-        // Skip 'Your Files': no parent.
-        continue;
-      }
-      final cacheId = szudzik(ownerId, folder.parent);
+      // if (folder.id == 1) {
+      //   // Skip 'Your Files': no parent.
+      //   continue;
+      // }
+      final cacheId = szudzik(ownerId, folder.parent ?? 0);
       final cache = _cache[cacheId] ??= _FolderContentsCache();
       cache.folders.add(folder);
     }
 
     // Return _FolderContentsCache for the current directory.
-    final currentCacheId = szudzik(ownerId, currentFolderId);
+    final currentCacheId = szudzik(ownerId, currentFolderId ?? 0);
     return _cache[currentCacheId];
   }
 
   Future<void> _getFolderContents(CurrentDirectory directory) async {
-    List<FileDM> files;
-    List<FolderDM> folders;
     final owner = directory.owner;
     final ownerId = owner.ownerId;
-    final currentFolderId = directory.folder.id;
+    final currentFolderId = directory.folder?.id;
 
-    files = await _fileApi.files(ownerId, currentFolderId);
-    folders = await _folderApi.folders(ownerId);
-    // if (owner is Team) {
-    // files = await _fileApi.teamFiles(ownerId, currentFolderId);
-    //   folders = await _folderApi.teamFolders(ownerId);
-    // } else {
-    //   files = await _fileApi.myFiles(ownerId, currentFolderId);
-    //   folders = await _folderApi.myFolders(ownerId);
-    // }
+    List<FileDM> files = await _fileApi.files(ownerId, currentFolderId);
+    List<FolderDM> folders = await _folderApi.folders(owner.asDM);
 
     final folderCache =
         _initCache(Folder.fromDMList(folders), ownerId, currentFolderId);

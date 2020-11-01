@@ -261,7 +261,7 @@ class OpenFileContext with RiveFileDelegate {
       // If the spectre cookie doesn't exist, then you're on the web
       // and the browser will handle cookie sending, so don't include
 
-      var filePath = '$ownerId/$fileId';
+      var filePath = '$fileId';
       String spectre;
       if (api.cookies.containsKey('spectre')) {
         spectre = api.cookies['spectre'];
@@ -271,7 +271,7 @@ class OpenFileContext with RiveFileDelegate {
       core = RiveFile(filePath, api: api, localDataPlatform: dataPlatform);
       core.addConnectionDelegate(this);
 
-      var connectionInfo = await fileApi.establishCoop(ownerId, fileId);
+      var connectionInfo = await fileApi.establishCoop();
       if (connectionInfo == null) {
         return false;
       }
