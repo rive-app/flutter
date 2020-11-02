@@ -4,6 +4,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install xvfb libgtk-3-d
 
 ADD build/release /app/packages/peon_process/build/linux/release
 ADD build/rive_thumbnail_generator /usr/local/bin/rive_thumbnail_generator
+ADD build/svgcleaner /usr/local/bin/svgcleaner
 ADD packages/peon_process/run.sh /app/packages/peon_process/run.sh
 WORKDIR /app/packages/peon_process
 
