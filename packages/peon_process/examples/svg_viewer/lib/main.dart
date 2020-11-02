@@ -61,8 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
         json.decode(manifestContent) as Map<String, dynamic>;
 
     var imagePaths = manifestMap.keys
-        .where((String key) => key.contains('homefail'))
-        // .where((String key) => key.contains('maze.clean'))
+        // .where((String key) => key.contains('homefail'))
+        // .where((String key) => key.contains('maxmoon'))
+        // .where((String key) => key.contains('SimplePresent'))
         .where((String key) => key.contains('.svg'))
         .toList();
 

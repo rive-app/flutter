@@ -22,7 +22,7 @@ dependencies:
     # path: ../../../flutter_svg
     git: 
       url: https://github.com/rive-app/flutter_svg.git
-      ref: 2a3ad203190a3974047340ac4863d58825e02fee
+      ref: 35135e98cc2ec0497ae2072ca73f6f4e621a187b
   core:
     path: ../core
   utilities: 
