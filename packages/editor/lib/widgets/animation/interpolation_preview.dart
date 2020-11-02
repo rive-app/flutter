@@ -1,12 +1,15 @@
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/cubic_interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -39,6 +42,7 @@ class InterpolationPreview extends StatelessWidget {
       height: 160,
       child: ValueStreamBuilder<double>(
         stream: timeManager.currentTime,
+        // ignore: missing_return
         builder: (context, snapshot) {
           var frame = snapshot.data;
           double normalizedTime =
@@ -109,8 +113,62 @@ class _CubicManipulator extends StatefulWidget {
   __CubicManipulatorState createState() => __CubicManipulatorState();
 }
 
+/// Calculates the quadrant in which the world mouse is with reference to the
+/// previous vertex
+Offset _calculateLockAxis(Offset position, Offset origin) {
+  // 45 degree increments
+  const lockInc = pi / 4;
+
+  // Calculate the angle
+  final posVec = Vec2D.fromValues(position.dx, position.dy);
+  final originVec = Vec2D.fromValues(origin.dx, origin.dy);
+  final diff = Vec2D.subtract(Vec2D(), posVec, originVec);
+  final angle = atan2(diff[1], diff[0]);
+
+  // Calculate the closest lock angle
+  final lockAngle = (angle / lockInc).round() * lockInc;
+
+  // Calculate the new position
+  final deltaX = position.dx - origin.dx;
+  final deltaY = position.dy - origin.dy;
+  final dist = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
+
+  return Offset(
+    origin.dx + dist * cos(lockAngle),
+    origin.dy + dist * sin(lockAngle),
+  );
+}
+
 class __CubicManipulatorState extends State<_CubicManipulator> {
-  bool _draggingIn = false;
+  // Locks rotation to 45 degree increments
+  final StatefulShortcutAction<bool> lockRotationShortcut =
+      ShortcutAction.symmetricDraw;
+
+  // Tracks if an active darg is happening on either the in or out handle
+  bool _draggingIn;
+
+  // Does the widget need to refresh due to a rotation lock event?
+  bool _rotationLockedRefresh = false;
+
+  // Tracks the last propagating event so that when the lock rotation key is
+  // pressed/released, then this event can be used to reposition the handle
+  // without waiting for a mouse event
+  PropagatingEvent<PointerMoveEvent> _lastMoveEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for lock rotation shortcut keypresses
+    lockRotationShortcut.addListener(_lockRotationListener);
+  }
+
+  @override
+  void dispose() {
+    lockRotationShortcut.removeListener(_lockRotationListener);
+    super.dispose();
+  }
+
+  void _lockRotationListener() => setState(() => _rotationLockedRefresh = true);
 
   void _handleCursor(
       Offset local, void Function(bool isIn, Offset controlPoint) callback) {
@@ -118,23 +176,60 @@ class __CubicManipulatorState extends State<_CubicManipulator> {
     var size = context.size;
     var heightRange = size.height - 2 * _renderPadding;
 
+    // Calculate the in and out offsets from the widget padding
     var offsetIn = Offset(interpolator.x1 * size.width,
         _renderPadding + heightRange - interpolator.y1 * heightRange);
     var offsetOut = Offset(interpolator.x2 * size.width,
         _renderPadding + heightRange - interpolator.y2 * heightRange);
 
+    // Calculate the origins of the in and out handles
+    var inOrigin = Offset(0, size.height - _renderPadding);
+    var outOrigin = Offset(size.width, _renderPadding);
+
+    // Calculate the distance squared from local to in and out handles
     var dIn = (local - offsetIn).distanceSquared;
     var dOut = (local - offsetOut).distanceSquared;
+
+    // If the rotation lock is active, lock the axis of the active or closest
+    // handle
+    var modifiedLocal = local;
+    var draggingIn = _draggingIn ?? (dIn < dOut);
+    if (lockRotationShortcut.value) {
+      modifiedLocal = draggingIn
+          ? _calculateLockAxis(local, inOrigin)
+          : _calculateLockAxis(local, outOrigin);
+    }
+
     callback(
-      dIn < dOut,
-      Offset(local.dx / size.width,
-          (local.dy - _renderPadding - heightRange) / -heightRange),
+      draggingIn,
+      Offset(modifiedLocal.dx / size.width,
+          (modifiedLocal.dy - _renderPadding - heightRange) / -heightRange),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     var interpolator = widget.interpolator;
+
+    // If the rotation lock is activated/deactivated, then refresh the handle
+    // position immediately
+    if (_rotationLockedRefresh && _lastMoveEvent != null) {
+      _rotationLockedRefresh = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleCursor(_lastMoveEvent.pointerEvent.localPosition, (_, control) {
+          CubicInterpolationViewModel cubic;
+          if (_draggingIn) {
+            cubic = CubicInterpolationViewModel(
+                control.dx, control.dy, interpolator.x2, interpolator.y2);
+          } else {
+            cubic = CubicInterpolationViewModel(
+                interpolator.x1, interpolator.y1, control.dx, control.dy);
+          }
+          widget.keyFrameManager.changeCubic.add(cubic);
+        });
+      });
+    }
+
     return PropagatingListener(
       onPointerDown: (details) {
         if (details.pointerEvent.buttons == 2) {
@@ -174,6 +269,10 @@ class __CubicManipulatorState extends State<_CubicManipulator> {
       onPointerMove: (details) {
         _handleCursor(details.pointerEvent.localPosition, (_, control) {
           CubicInterpolationViewModel cubic;
+
+          // Record the last move event in case it's needed for a rotation lock
+          _lastMoveEvent = details;
+
           if (_draggingIn) {
             cubic = CubicInterpolationViewModel(
                 control.dx, control.dy, interpolator.x2, interpolator.y2);
@@ -185,6 +284,8 @@ class __CubicManipulatorState extends State<_CubicManipulator> {
         });
       },
       onPointerUp: (details) {
+        _draggingIn = null;
+        _lastMoveEvent = null;
         interpolator.context.captureJournalEntry();
       },
       child: widget.child,
@@ -247,11 +348,10 @@ abstract class _InterpolationRenderBox extends RenderBox {
       return;
     }
     _theme = value;
-    interpolationPaint.shader = LinearGradient(
-      colors: [
-        value.colors.interpolationControlHandleIn, 
-        value.colors.interpolationControlHandleOut]
-    ).createShader(const Rect.fromLTWH(0, 0, 160, 160));
+    interpolationPaint.shader = LinearGradient(colors: [
+      value.colors.interpolationControlHandleIn,
+      value.colors.interpolationControlHandleOut
+    ]).createShader(const Rect.fromLTWH(0, 0, 160, 160));
     separatorPaint.color = value.colors.interpolationPreviewSeparator;
     background.color = value.colors.interpolationCurveBackground;
     timePaint.color = value.colors.key;
