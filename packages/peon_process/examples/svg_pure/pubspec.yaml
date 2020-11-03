@@ -52,4 +52,6 @@ flutter:
     - ../svg_viewer/assets/custom_clean/
     - ../svg_viewer/assets/homefail/
     - ../svg_viewer/assets/homefail_clean/
+    - ../svg_viewer/assets/jc/
+    - ../svg_viewer/assets/jc_clean/
 

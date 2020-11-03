@@ -1,0 +1,8 @@
+<svg enable-background="new 0 0 1366 768" viewBox="0 0 1366 768" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <radialGradient id="SVGID_1_" cx="100" cy="100" fx="100" fy="10" gradientUnits="userSpaceOnUse" r="100">
+        <stop offset=".1094" stop-color="#f7f2f1"/>
+        <stop offset=".438" stop-color="#e7cfc9"/>
+        <stop offset="1" stop-color="#b47871"/>
+    </radialGradient>
+    <circle cx="100" cy="100" fill="url(#SVGID_1_)" r="100"/>
+</svg>
