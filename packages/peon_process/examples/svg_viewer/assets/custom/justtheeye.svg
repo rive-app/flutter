@@ -1,0 +1,29 @@
+<svg enable-background="new 0 0 1366 768" viewBox="0 0 1366 768" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <radialGradient id="SVGID_1_" cx="100" cy="100" fx="100" fy="100" gradientUnits="userSpaceOnUse" r="100">
+        <stop offset=".1094" stop-color="#f7f2f1"/>
+        <stop offset=".438" stop-color="#e7cfc9"/>
+        <stop offset="1" stop-color="#b47871"/>
+    </radialGradient>
+    <radialGradient id="SVGID_2_" cx="1" cy="1" r=".5">
+        <stop offset=".1094" stop-color="#f7f2f1"/>
+        <stop offset=".438" stop-color="#e7cfc9"/>
+        <stop offset="1" stop-color="#b47871"/>
+    </radialGradient>
+    <circle cx="0" cy="0" fill="url(#SVGID_1_)" r="100"/>
+    <g id="Base">
+        <circle cx="200" cy="200" fill="url(#SVGID_1_)" r="100"/>
+        <g transform="translate(100 100)">
+            <circle cx="200" cy="200" fill="url(#SVGID_1_)" r="100"/>
+        </g>
+    </g>
+    <g transform="translate(300 0)">
+        <circle cx="0" cy="0" fill="url(#SVGID_2_)" r="100"/>
+        <g id="Base">
+            
+            <g transform="translate(100 100)">
+                <circle cx="200" cy="200" fill="url(#SVGID_2_)" r="100"/>
+            </g>
+            <circle cx="200" cy="200" fill="url(#SVGID_2_)" r="100"/>
+        </g>
+    </g>
+</svg>
