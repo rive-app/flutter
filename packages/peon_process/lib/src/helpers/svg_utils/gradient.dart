@@ -14,63 +14,43 @@ void addGradient(DrawableGradient gradient, RiveFile file, ShapePaint paint,
     Rect bounds, Offset shapeOffset) {
   rive_linear_gradient.LinearGradient tmp;
 
-  double _translate(
-      double originalValue, double scaleValue, double translateValue) {
-    if (gradient.unitMode == GradientUnitMode.objectBoundingBox) {
-      return translateValue + originalValue * scaleValue;
-    } else {
-      return originalValue + translateValue;
-    }
-  }
-
   if (gradient is DrawableLinearGradient) {
     tmp = rive_linear_gradient.LinearGradient();
 
-    tmp.startX = _translate(
-      gradient.from.dx,
-      bounds.width,
-      bounds.left - shapeOffset.dx,
-    );
-    tmp.startY = _translate(
-      gradient.from.dy,
-      bounds.height,
-      bounds.top - shapeOffset.dy,
-    );
-    tmp.endX = _translate(
-      gradient.to.dx,
-      bounds.width,
-      bounds.left - shapeOffset.dx,
-    );
-    tmp.endY = _translate(
-      gradient.to.dy,
-      bounds.height,
-      bounds.top - shapeOffset.dy,
-    );
+    if (gradient.unitMode == GradientUnitMode.objectBoundingBox) {
+      tmp.startX =
+          gradient.from.dx * bounds.width + bounds.left - shapeOffset.dx;
+      tmp.startY =
+          gradient.from.dy * bounds.height + bounds.top - shapeOffset.dy;
+      tmp.endX = gradient.to.dx * bounds.width + bounds.left - shapeOffset.dx;
+      tmp.endY = gradient.to.dy * bounds.height + bounds.top - shapeOffset.dy;
+    } else {
+      tmp.startX = gradient.from.dx - shapeOffset.dx;
+      tmp.startY = gradient.from.dy - shapeOffset.dy;
+      tmp.endX = gradient.to.dx - shapeOffset.dx;
+      tmp.endY = gradient.to.dy - shapeOffset.dy;
+    }
   } else if (gradient is DrawableRadialGradient) {
     tmp = rive_radial_gradient.RadialGradient();
 
     var offset = sqrt(pow(gradient.radius, 2) / 2);
-
-    tmp.startX = _translate(
-      gradient.center.dx,
-      bounds.width,
-      bounds.left - shapeOffset.dx,
-    );
-    tmp.startY = _translate(
-      gradient.center.dy,
-      bounds.height,
-      bounds.top - shapeOffset.dy,
-    );
-    tmp.endX = _translate(
-      gradient.center.dx - offset,
-      bounds.width,
-      bounds.left - shapeOffset.dx,
-    );
-    tmp.endY = _translate(
-      gradient.center.dy - offset,
-      bounds.height,
-      bounds.top - shapeOffset.dy,
-    );
+    if (gradient.unitMode == GradientUnitMode.objectBoundingBox) {
+      tmp.startX =
+          gradient.center.dx * bounds.width + bounds.left - shapeOffset.dx;
+      tmp.startY =
+          gradient.center.dy * bounds.height + bounds.top - shapeOffset.dy;
+      tmp.endX = (gradient.center.dx - offset) * bounds.width +
+          bounds.left -
+          shapeOffset.dx;
+      tmp.endY = (gradient.center.dy - offset) * bounds.height +
+          bounds.top -
+          shapeOffset.dy;
+    } else {
+      tmp.startX = gradient.center.dx - shapeOffset.dx;
+      tmp.startY = gradient.center.dy - shapeOffset.dy;
+      tmp.endX = gradient.center.dx - shapeOffset.dx - offset;
+      tmp.endY = gradient.center.dy - shapeOffset.dy - offset;
+    }
   }
   file.addObject(tmp);
   var i = 0;
