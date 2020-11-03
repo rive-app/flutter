@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:collection';
+
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
@@ -122,12 +125,18 @@ class FileManager with Subscriptions {
   }
 
   /// Load in the user's recent files details
-  Future<Iterable<File>> loadRecentFilesDetails() async {
+  Future<Iterable<File>> loadRecentFiles() async {
     final fileDataModels = await _fileApi.recentFiles();
     final files = File.fromDMList(fileDataModels);
-    // Place the file details into the caching file details streams
-    files.forEach((file) =>
-        Plumber().message<File>(file, file.id));
+    final plumber = Plumber();
+    files.forEach((file) {
+      var cached = cachedDetails(file.id);
+      if (cached != null) {
+        plumber.message<File>(cached, cached.hashCode);
+      } else {
+        plumber.message<File>(file, file.hashCode);
+      }
+    });
 
     return files;
   }
@@ -172,4 +181,71 @@ class FileManager with Subscriptions {
 
     Plumber().message(CurrentDirectory(owner, targetFolder));
   }
+
+  final _detailsBatch = HashSet<File>();
+  Timer _loadDetailsTimer;
+
+  /// Let the manager know the details for this file are necessary, get schedule
+  /// fetching them (we delay so we can batch and debounce when scrolling
+  /// through lots of content).
+  void needDetails(File file) {
+    _detailsBatch.add(file);
+
+    _loadDetailsTimer ??=
+        Timer(const Duration(milliseconds: 200), _loadBatchedDetails);
+  }
+
+  /// No longer need the details, remove them from the batched load set if
+  /// they're in there.
+  void dontNeedDetails(File file) {
+    _detailsBatch.remove(file);
+  }
+
+  final _detailsCache = HashMap<int, _DetailsCacheEntry>();
+
+  File cachedDetails(int fileId) => _detailsCache[fileId]?.file;
+
+  Future<void> _loadBatchedDetails() async {
+    // invalidate expired cached details (note: do we get a notification to our
+    // WS if someone renames a file or something? we could remove it from cache
+    // early)
+    _detailsCache.removeWhere((id, detail) => detail.isExpired);
+
+    final plumber = Plumber();
+    List<int> loadList = [];
+    for (final file in _detailsBatch) {
+      var cached = _detailsCache[file.id];
+      if (cached != null) {
+        plumber.message<File>(cached.file, cached.file.hashCode);
+      } else {
+        loadList.add(file.id);
+      }
+    }
+
+    // Clear the batch so further sets can accumulate while we load.
+    _detailsBatch.clear();
+    _loadDetailsTimer = null;
+    if (loadList.isEmpty) {
+      return;
+    }
+
+    // Get the file details from the backend, and update the cache if needed.
+    final fileDetails = await _fileApi.fileDetails(loadList);
+
+    final fileDetailsList = File.fromDMList(fileDetails);
+
+    for (final file in fileDetailsList) {
+      _detailsCache[file.id] = _DetailsCacheEntry(file);
+      plumber.message<File>(file, file.hashCode);
+    }
+  }
+}
+
+class _DetailsCacheEntry {
+  final DateTime expiration;
+  final File file;
+  _DetailsCacheEntry(this.file)
+      : expiration = DateTime.now().add(const Duration(seconds: 120));
+
+  bool get isExpired => DateTime.now().isAfter(expiration);
 }

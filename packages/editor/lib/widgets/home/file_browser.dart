@@ -692,17 +692,19 @@ class FileBrowser extends StatelessWidget {
         (context, index) {
           var file = files.elementAt(index);
           return ValueStreamBuilder<File>(
-              stream: Plumber().getStream<File>(file.hashCode),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
-                  return BrowserFile(
-                      snapshot.data,
-                      selection?.files?.contains(snapshot.data) == true,
-                      suspended);
-                }
-              });
+            stream: Plumber().getStream<File>(file.hashCode),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return BrowserFile(
+                  snapshot.data,
+                  selection?.files?.contains(snapshot.data) == true,
+                  suspended,
+                );
+              }
+            },
+          );
         },
         childCount: files.length,
       ),
@@ -870,6 +872,9 @@ class FileBrowser extends StatelessWidget {
             horizontal: horizontalPadding,
           ),
           child: CustomScrollView(
+            // don't mount widgets out of view at all
+            cacheExtent: 0,
+
             primary: false,
             controller: scrollController,
             slivers: slivers,

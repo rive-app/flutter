@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:pedantic/pedantic.dart';
 
 import 'package:rive_api/api.dart';
@@ -53,27 +55,8 @@ class FolderContentsManager with Subscriptions {
     });
   }
 
-  Future<void> _loadFileDetails(
-      List<File> files, CurrentDirectory directory) async {
-    final plumber = Plumber();
-
-    final teamOwnerId =
-        directory.owner is Team ? directory.owner.ownerId : null;
-    List<int> fileIds = files.map((file) => file.id).toList(growable: false);
-
-    // Get the file details from the backend, and update the cache if needed.
-    final fileDetails = await _fileApi.fileDetails(fileIds);
-
-    final fileDetailsList = File.fromDMList(fileDetails, teamOwnerId);
-
-    for (final file in fileDetailsList) {
-      plumber.message<File>(file, file.hashCode);
-    }
-  }
-
   _FolderContentsCache _initCache(
       List<Folder> folders, int ownerId, int currentFolderId) {
-
     // TODO: rethink...
     // Make root folder cache if it's missing.
     final cacheId = szudzik(ownerId, 0);
@@ -81,7 +64,6 @@ class FolderContentsManager with Subscriptions {
     // clear folders, the structure will get rebuilt with our folders.
     _cache[cacheId].folders.clear();
     // end todo...
-
 
     // Make sure thxat all folders' cache is initialized.
     for (final folder in folders) {
@@ -121,8 +103,15 @@ class FolderContentsManager with Subscriptions {
     List<File> fileList = File.fromDMList(files);
     folderCache.setFiles(fileList);
 
-    if (files.isNotEmpty) {
-      unawaited(_loadFileDetails(fileList, directory));
+    final plumber = Plumber();
+    final fileManager = FileManager();
+    for (final file in fileList) {
+      var cached = fileManager.cachedDetails(file.id);
+      if (cached != null) {
+        plumber.message<File>(cached, cached.hashCode);
+      } else {
+        plumber.message<File>(file, file.hashCode);
+      }
     }
 
     Plumber().message<FolderContents>(
