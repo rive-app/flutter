@@ -146,9 +146,7 @@ class FileManager with Subscriptions {
   /// file data in the stream, allowing the file browser to update.
   Future<void> renameFile(File file, String name) async {
     // if me's not set you have other problems.
-    final changed = (_me != null && _me.ownerId == file.fileOwnerId)
-        ? await _fileApi.renameMyFile(file.fileOwnerId, file.id, name)
-        : await _fileApi.renameProjectFile(file.fileOwnerId, file.id, name);
+    final changed = await _fileApi.renameFile(file.id, name);
     if (changed) {
       File updatedFile = File(
         id: file.id,
@@ -157,6 +155,7 @@ class FileManager with Subscriptions {
         fileOwnerId: file.fileOwnerId,
         thumbnail: file.thumbnail,
       );
+      _detailsCache[file.id] = _DetailsCacheEntry(updatedFile);
 
       Plumber().message<File>(updatedFile);
     }

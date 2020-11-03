@@ -96,13 +96,8 @@ class FileApi {
     return newFile;
   }
 
-  Future<bool> renameMyFile(int ownerId, int fileId, String name) async {
-    return _renameFile(api.host + '/api/files/$ownerId/$fileId/name', name);
-  }
-
-  Future<bool> renameProjectFile(int ownerId, int fileId, String name) async {
-    return _renameFile(
-        api.host + '/api/projects/$ownerId/files/$fileId/name', name);
+  Future<bool> renameFile(int fileId, String name) async {
+    return _renameFile(api.host + '/api/files/$fileId/name', name);
   }
 
   Future<bool> _renameFile(String url, String name) async {
@@ -112,10 +107,9 @@ class FileApi {
     return response.statusCode == 200;
   }
 
-  // /api/my/files/:product/create/:folder_id?
   Future<FileDM> _createFile(int folderId) async {
     var response =
-        await api.post(api.host + '/api/my/files/rive/create/$folderId');
+        await api.post(api.host + '/api/my/files/create/$folderId');
     return _parseFileResponse(response);
   }
 
@@ -127,7 +121,7 @@ class FileApi {
       'data': {'fileName': 'New File'}
     });
     var response = await api.post(
-        api.host + '/api/projects/$projectId/folders/$folderId/new/rive/',
+        api.host + '/api/projects/$projectId/folders/$folderId/new',
         body: payload);
     return _parseFileResponse(response);
   }
