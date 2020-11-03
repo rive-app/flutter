@@ -47,7 +47,7 @@ class FileApi {
     final res = await api.get(api.host + url);
     try {
       final data = json.decodeList<int>(res.body);
-      
+
       return FileDM.fromIdList(data, ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response', e);
@@ -86,14 +86,8 @@ class FileApi {
     return 0;
   }
 
-  Future<FileDM> createFile(int folderId, [int projectId]) async {
-    FileDM newFile;
-    if (projectId != null) {
-      newFile = await _createProjectFile(folderId, projectId);
-    } else {
-      newFile = await _createFile(folderId);
-    }
-    return newFile;
+  Future<FileDM> createFile(int ownerId, int folderId) async {
+    return _createFile(ownerId, folderId);
   }
 
   Future<bool> renameFile(int fileId, String name) async {
@@ -107,9 +101,11 @@ class FileApi {
     return response.statusCode == 200;
   }
 
-  Future<FileDM> _createFile(int folderId) async {
-    var response =
-        await api.post(api.host + '/api/my/files/create/$folderId');
+  Future<FileDM> _createFile(int ownerId, int folderId) async {
+    var response = await api.post(api.host +
+        (folderId == null
+            ? '/api/files/$ownerId/create'
+            : '/api/files/$ownerId/create/$folderId'));
     return _parseFileResponse(response);
   }
 
