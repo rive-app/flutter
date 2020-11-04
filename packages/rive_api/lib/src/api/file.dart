@@ -9,7 +9,6 @@ import 'package:rive_api/data_model.dart';
 import 'package:utilities/deserialize.dart';
 
 final _log = Logger('File Api');
-const specialFolderIds = {0, 1};
 
 class FileApi {
   FileApi([RiveApi api]) : api = api ?? RiveApi();
@@ -23,19 +22,12 @@ class FileApi {
           : '/api/files/ids/$ownerId/$folderId/recent',
       ownerId);
 
-  Future<void> deleteMyFiles(List<int> fileIds, List<int> folderIds) async {
-    return _deleteFiles('/api/my/files', fileIds, folderIds);
-  }
-
-  Future<void> deleteTeamFiles(
-      int teamOwnerId, List<int> fileIds, List<int> folderIds) async {
-    return _deleteFiles('/api/teams/$teamOwnerId/files', fileIds, folderIds);
+  Future<void> deleteFiles(List<int> fileIds, List<int> folderIds) async {
+    return _deleteFiles('/api/files', fileIds, folderIds);
   }
 
   Future<void> _deleteFiles(
       String url, List<int> fileIds, List<int> folderIds) async {
-    // TODO: changing input is pretty yuk.
-    folderIds.removeWhere((folderId) => specialFolderIds.contains(folderId));
     var payload = <String, List<int>>{
       'files': fileIds ?? [],
       'folders': folderIds ?? [],
@@ -106,19 +98,6 @@ class FileApi {
         (folderId == null
             ? '/api/files/$ownerId/create'
             : '/api/files/$ownerId/create/$folderId'));
-    return _parseFileResponse(response);
-  }
-
-  Future<FileDM> _createProjectFile(
-    int folderId,
-    int projectId,
-  ) async {
-    String payload = json.encode({
-      'data': {'fileName': 'New File'}
-    });
-    var response = await api.post(
-        api.host + '/api/projects/$projectId/folders/$folderId/new',
-        body: payload);
     return _parseFileResponse(response);
   }
 

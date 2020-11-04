@@ -35,7 +35,7 @@ class FolderDM {
         ownerId: ownerId,
         name: data.getString('name'),
         order: data.getInt('order'),
-        parent: data.optInt('parent'),
+        parent: data.optInt('parent_id'),
       );
 
   @override

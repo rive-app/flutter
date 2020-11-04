@@ -78,14 +78,8 @@ class FileManager with Subscriptions {
   }
 
   Future<Folder> createFolder(Owner owner, [Folder folder]) async {
-    folder ??= _folderMap[owner].firstWhere((element) => element.id == 1);
-    FolderDM folderDM;
-    if (owner is Team) {
-      folderDM = await _folderApi.createTeamFolder(folder.id, folder.ownerId);
-    } else {
-      folderDM =
-          await _folderApi.createPersonalFolder(folder.id, folder.ownerId);
-    }
+    FolderDM folderDM =
+        await _folderApi.createFolder(owner.ownerId, folder?.id);
 
     return Folder.fromDM(folderDM);
   }

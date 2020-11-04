@@ -79,6 +79,7 @@ class FolderContentsManager with Subscriptions {
       //   // Skip 'Your Files': no parent.
       //   continue;
       // }
+
       final cacheId = szudzik(ownerId, folder.parent ?? 0);
       final cache = _cache[cacheId] ??= _FolderContentsCache();
       cache.folders.add(folder);
@@ -130,18 +131,11 @@ class FolderContentsManager with Subscriptions {
     }
 
     var currentDirectory = Plumber().peek<CurrentDirectory>();
-    if (currentDirectory.owner is Team) {
-      await FileApi().deleteTeamFiles(
-        currentDirectory.owner.ownerId,
-        selection.files.map((e) => e.id).toList(),
-        selection.folders.map((e) => e.id).toList(),
-      );
-    } else {
-      await FileApi().deleteMyFiles(
-        selection.files.map((e) => e.id).toList(),
-        selection.folders.map((e) => e.id).toList(),
-      );
-    }
+
+    await FileApi().deleteFiles(
+      selection.files.map((e) => e.id).toList(),
+      selection.folders.map((e) => e.id).toList(),
+    );
 
     unawaited(_getFolderContents(currentDirectory));
     unawaited(FileManager().loadFolders(currentDirectory.owner));
@@ -153,16 +147,11 @@ class FolderContentsManager with Subscriptions {
       await FileManager().renameFile(target, newName);
     }
     if (target is Folder) {
-      if (currentDirectory.owner is User) {
-        await FolderApi().renameMyFolder(target.ownerId, target.asDM, newName);
-      } else {
-        await FolderApi().updateTeamFolder(
-          target.ownerId,
-          target.asDM,
-          newName,
-          target.parent,
-        );
-      }
+      await FolderApi().updateFolder(
+        target.asDM,
+        newName,
+        target.parent,
+      );
     }
 
     unawaited(_getFolderContents(currentDirectory));

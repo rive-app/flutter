@@ -23,14 +23,7 @@ class Folder implements Named {
   }
 
   factory Folder.fromDM(FolderDM folder) {
-    // NOTE:
-    // Lets just pretend 'deleted files' lives inside your files
-    // Your Files is id 1
-    // Deleted Files is id 0
     var _parent = folder.parent;
-    if (_parent == null && folder.id != 1) {
-      _parent = 1;
-    }
     return Folder(
       ownerId: folder.ownerId,
       name: folder.name,
