@@ -51,10 +51,8 @@ final _webHost = getVariable(
   'WEB_HOST',
   defaultValue: const String.fromEnvironment(
     'WEB_HOST',
-    // defaultValue: 'https://zuul.rive.app',
-    // defaultValue: 'http://localhost.charlesproxy.com:3002',
-    defaultValue: 'http://localhost:3000',
-  ),
+    defaultValue: 'https://zuul.rive.app',
+),
 );
 
 /// Now uses a singleton
