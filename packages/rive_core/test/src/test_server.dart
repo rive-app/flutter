@@ -69,9 +69,8 @@ class TestCoopIsolate extends CoopIsolate {
   TestCoopIsolate(
     this.privateApiHost,
     CoopServer server,
-    int ownerId,
     int fileId,
-  ) : super(server, ownerId, fileId);
+  ) : super(server, fileId);
 
   bool _manualDrive = false;
   bool get manualDrive => _manualDrive;
@@ -150,13 +149,7 @@ class TestCoopServer extends CoopServer {
     var process =
         _TestCoopIsolateProcess(privateApiHost: argument.privateApiHost);
     await process.initProcess(
-        argument.sendPort, argument.options, argument.ownerId, argument.fileId);
-  }
-
-  @override
-  Future<int> validate(
-      HttpRequest request, int ownerId, int fileId, String token) {
-    return Future.value(1);
+        argument.sendPort, argument.options, argument.fileId);
   }
 
   @override
@@ -173,10 +166,9 @@ class TestCoopServer extends CoopServer {
   }
 
   @override
-  CoopIsolate makeIsolateInterface(int ownerId, int fileId) => TestCoopIsolate(
+  CoopIsolate makeIsolateInterface(int fileId) => TestCoopIsolate(
         privateApiHost,
         this,
-        ownerId,
         fileId,
       );
 }

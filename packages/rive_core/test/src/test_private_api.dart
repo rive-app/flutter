@@ -24,13 +24,13 @@ class TestPrivateApi {
   Future<void> startServing() async {
     await for (final request in _server) {
       var segs = request.uri.pathSegments;
-      if (segs.length == 3) {
+      if (segs.length == 2) {
         switch (segs[0]) {
           case 'revise':
             var data = (await request.fold(
                     BytesBuilder(), (BytesBuilder b, d) => b..add(d)))
                 .takeBytes();
-            String key = '${segs[1]}-${segs[2]}';
+            String key = segs[1];
             filesData[key] = data;
             if (responseDelay != null) {
               await Future<void>.delayed(responseDelay);

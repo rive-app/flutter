@@ -13,7 +13,7 @@ import 'src/test_private_api.dart';
 import 'src/test_rive_file.dart';
 import 'src/test_server.dart';
 
-const String filePath = '1203/3203/1203';
+const String filePath = '3203/1203';
 
 const int coopPort = 8124;
 const int privateApiPort = 3006;
