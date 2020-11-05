@@ -28,6 +28,7 @@ class NodeRotateTransformer extends StageTransformer {
 
   NodeRotateTransformer({this.handle, this.lockRotationShortcut}) {
     Mat2D.decompose(handle.transform, transformComponents);
+    _rotationLocked = lockRotationShortcut.value;
   }
 
   double _cursorAngle = 0;
