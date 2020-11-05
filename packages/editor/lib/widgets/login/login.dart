@@ -111,7 +111,7 @@ class _LoginState extends State<Login> {
   // This, in turn, will trigger _onPageChanged() with the new information.
   void _selectPanel(LoginPage page) {
     final nomad = RiveContext.of(context).nomad;
-    nomad.travel('/auth/${page.name}');
+    nomad.travel('/lobby/${page.name}');
   }
 
   void _onPageChanged(LoginPageData data) {

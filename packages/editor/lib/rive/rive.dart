@@ -75,8 +75,8 @@ class Rive {
 
     nomad.route('/files', _traveledHome);
     nomad.route('/file/:name/:hash', _traveledFile);
-    nomad.route('/auth/:page', _traveledLogin);
-    nomad.route('/auth/:page/:token?', _traveledLogin);
+    nomad.route('/lobby/:page', _traveledLogin);
+    nomad.route('/lobby/:page/:token?', _traveledLogin);
   }
 
   Future<void> _traveledLogin(Trip trip) async {
@@ -98,7 +98,7 @@ class Rive {
     var meStream = Plumber().getStream<Me>();
     var me = await meStream.first;
     if (!me.signedIn) {
-      nomad.travel('/auth/${LoginPage.register.name}', replace: true);
+      nomad.travel('/lobby/${LoginPage.register.name}', replace: true);
       return false;
     }
     return true;
@@ -236,7 +236,7 @@ class Rive {
       } else {
         final authPage =
             firstMe?.socialLink != null ? LoginPage.link : LoginPage.register;
-        nomad.travel('/auth/${authPage.name}', replace: true);
+        nomad.travel('/lobby/${authPage.name}', replace: true);
       }
     }
 
@@ -279,7 +279,7 @@ class Rive {
       }
 
       if (travel) {
-        nomad.travel('/auth/${LoginPage.register.name}');
+        nomad.travel('/lobby/${LoginPage.register.name}');
       }
       return;
     }
