@@ -28,7 +28,7 @@ void main() {
     test('WebSocketData throws format exception if "v" ommitted from version',
         () {
       final testSegments = List<String>.from(segments);
-      testSegments[0] = '3';
+      testSegments[0] = '5';
       expect(() => WebSocketData.fromSegments(testSegments),
           throwsA(const TypeMatcher<FormatException>()));
     });
@@ -41,7 +41,7 @@ void main() {
     test('WebSocketData does not throw an exception for an invalid client id',
         () {
       final testSegments = List<String>.from(segments);
-      testSegments[4] = 'bob';
+      testSegments[3] = 'bob';
       final data = WebSocketData.fromSegments(testSegments);
       expect(data.clientId, 0);
     });

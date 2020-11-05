@@ -149,7 +149,7 @@ class WebSocketData {
       try {
         clientId = int.parse(segments[3]);
       } on FormatException catch (e, s) {
-        _log.severe('Invalid clientid: ${segments[4]}', e, s);
+        _log.severe('Invalid clientid: ${segments[3]}', e, s);
         // Don't rethrow, just give a default client id
         clientId = 0;
       }
@@ -175,13 +175,11 @@ String _segmentsToString(List<String> segments) {
     } else if (i == 1) {
       str.write('version: ${segments[1]}');
     } else if (i == 2) {
-      str.write('ownerid: ${segments[2]}');
+      str.write('fileid: ${segments[2]}');
     } else if (i == 3) {
-      str.write('fileid: ${segments[3]}');
+      str.write('userOwnerId: ${segments[3]}');
     } else if (i == 4) {
-      str.write('userOwnerId: ${segments[4]}');
-    } else if (i == 5) {
-      str.write('clientid: ${segments[5]}');
+      str.write('clientid: ${segments[4]}');
     } else {
       str.write('$i: ${segments[i]}');
     }
