@@ -87,7 +87,7 @@ class RiveAuth {
       {@required _RiveAuthActions action, @required String provider}) async {
     if (kIsWeb) {
       final onlySignin = action == _RiveAuthActions.signin;
-      win_utils.openWebView(
+      await win_utils.openWebView(
         _authWebViewKey,
         '${api.host}/signin/$provider?onlySignin=$onlySignin',
       );

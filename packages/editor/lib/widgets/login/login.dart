@@ -562,23 +562,19 @@ class _LoginState extends State<Login> {
             text: TextSpan(
               style: styles.loginText,
               children: <TextSpan>[
-                TextSpan(text: 'By clicking Sign Up you agree to our '),
+                const TextSpan(text: 'By clicking Sign Up you agree to our '),
                 TextSpan(
-                    text: 'Terms of Service',
-                    style: styles.hyperLinkSubtext,
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchTermsUrl();
-                      }),
-                TextSpan(text: ' and '),
+                  text: 'Terms of Service',
+                  style: styles.hyperLinkSubtext,
+                  recognizer: TapGestureRecognizer()..onTap = launchTermsUrl,
+                ),
+                const TextSpan(text: ' and '),
                 TextSpan(
-                    text: 'Privacy Policy',
-                    style: styles.hyperLinkSubtext,
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchPrivacyUrl();
-                      }),
-                TextSpan(text: '.'),
+                  text: 'Privacy Policy',
+                  style: styles.hyperLinkSubtext,
+                  recognizer: TapGestureRecognizer()..onTap = launchPrivacyUrl,
+                ),
+                const TextSpan(text: '.'),
               ],
             ),
           ),
