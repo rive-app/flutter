@@ -46,13 +46,14 @@ typedef void StatusCodeHandler(http.Response response);
 /// Web Service class to help facilitate making requests that have some form
 /// of state maintained in cookies.
 class WebServiceClient {
-  final Map<String, String> headers = {'content-type': 'text/json'};
   final Map<String, String> cookies = {};
-  final Map<int, List<StatusCodeHandler>> statusCodeHandlers = {};
+
+  final Map<String, String> _headers = {'content-type': 'text/json'};
+  final Map<int, List<StatusCodeHandler>> _statusCodeHandlers = {};
 
   /// Optional list of acceptable status codes; if not returned, then
   /// the handler for unacceptable codes is run
-  final Set<StatusCodeClass> acceptableStatusCodes = <StatusCodeClass>{};
+  final Set<StatusCodeClass> _acceptableStatusCodes = <StatusCodeClass>{};
   StatusCodeHandler handleUnacceptableStatusCode;
 
   /// We use this timer to schedule saving cookies locally.
@@ -60,30 +61,30 @@ class WebServiceClient {
 
   /// Encrypter we use to read/write the local session storage.
   final Encrypter _encrypter;
-  final LocalDataPlatform localDataPlatform;
-  final String context;
+  final LocalDataPlatform _localDataPlatform;
+  final String _context;
   LocalData localData;
 
-  WebServiceClient(this.context,
+  WebServiceClient(this._context,
       [String key = '}Mk#33zm^PiiP9C2riMozVynojddVc6/'])
       : _encrypter = Encrypter(AES(Key.fromUtf8(key))),
-        localDataPlatform = LocalDataPlatform.make();
+        _localDataPlatform = LocalDataPlatform.make();
 
   void addStatusCodeHandler(int code, StatusCodeHandler handler) {
-    List<StatusCodeHandler> handlers = statusCodeHandlers[code];
+    List<StatusCodeHandler> handlers = _statusCodeHandlers[code];
     handlers ??= [];
     handlers.add(handler);
-    statusCodeHandlers[code] = handlers;
+    _statusCodeHandlers[code] = handlers;
   }
 
   bool removeStatusCodeHandler(int code, StatusCodeHandler handler) =>
-      statusCodeHandlers[code]?.remove(handler) ?? false;
+      _statusCodeHandlers[code]?.remove(handler) ?? false;
 
   /// Add acceptable status codes, and what to do if they aren't received
   void addAcceptableStatusCodes(
       List<StatusCodeClass> classes, StatusCodeHandler handler) {
     assert(classes != null && handler != null);
-    acceptableStatusCodes.addAll(classes);
+    _acceptableStatusCodes.addAll(classes);
     handleUnacceptableStatusCode = handler;
   }
 
@@ -106,14 +107,14 @@ class WebServiceClient {
         _persistTimer = Timer(const Duration(seconds: 2), persist);
       }
 
-      headers['cookie'] = _generateCookieHeader();
+      _headers['cookie'] = _generateCookieHeader();
     }
 
     // Call status code handlers.
-    statusCodeHandlers[res.statusCode]?.forEach((f) => f.call(res));
+    _statusCodeHandlers[res.statusCode]?.forEach((f) => f.call(res));
 
     // Check the acceptable status codes
-    if (acceptableStatusCodes
+    if (_acceptableStatusCodes
         .every((c) => c != statusCodeClass(res.statusCode))) {
       handleUnacceptableStatusCode(res);
     }
@@ -132,7 +133,8 @@ class WebServiceClient {
 
   void setCookie(String key, String value) {
     cookies[key] = value;
-    headers['cookie'] = _generateCookieHeader();
+    _headers['cookie'] = _generateCookieHeader();
+    print('Setting cookies: $_headers');
   }
 
   Future<void> clearCookies() async {
@@ -142,7 +144,7 @@ class WebServiceClient {
     // web app, which lets the browser manage cookies for it. fixes #647
     if (cookies.isNotEmpty) {
       cookies.clear();
-      headers['cookie'] = _generateCookieHeader();
+      _headers['cookie'] = _generateCookieHeader();
       await persist();
     }
   }
@@ -192,9 +194,9 @@ class WebServiceClient {
       });
 
       // final timer = Stopwatch()..start();
-      final response = await client.get(url, headers: headers);
+      final response = await client.get(url, headers: _headers);
       completed = true;
-      // print('getting $url took: ${timer.elapsed}');
+
       _processResponse(response);
 
       return response;
@@ -218,7 +220,7 @@ class WebServiceClient {
       final client = getClient();
       print('posting to $url');
       var response = await client.post(url,
-          body: body, headers: headers, encoding: encoding);
+          body: body, headers: _headers, encoding: encoding);
 
       _processResponse(response);
       return response;
@@ -240,7 +242,7 @@ class WebServiceClient {
       final client = getClient();
       print('patching to $url');
       var response = await client.patch(url,
-          body: body, headers: headers, encoding: encoding);
+          body: body, headers: _headers, encoding: encoding);
 
       _processResponse(response);
       return response;
@@ -262,7 +264,7 @@ class WebServiceClient {
       final client = getClient();
       print('putting $url');
       var response = await client.put(url,
-          body: body, headers: headers, encoding: encoding);
+          body: body, headers: _headers, encoding: encoding);
 
       _processResponse(response);
       return response;
@@ -290,7 +292,7 @@ class WebServiceClient {
       // the base request stuff gets called.
       final request = http.Request('delete', Uri.parse(url));
       request.body = body;
-      request.headers.addAll(headers);
+      request.headers.addAll(_headers);
       // request.encoding = Encoding;
       var stream = await getClient().send(request);
       var response = await http.Response.fromStream(stream);
@@ -309,8 +311,8 @@ class WebServiceClient {
   }
 
   Future<bool> initialize() async {
-    await localDataPlatform.initialize();
-    localData = LocalData.make(localDataPlatform, context);
+    await _localDataPlatform.initialize();
+    localData = LocalData.make(_localDataPlatform, _context);
     await localData.initialize();
 
     var contents = await localData.load('cookie');
@@ -325,7 +327,7 @@ class WebServiceClient {
       return false;
     }
     _setCookiesFromString(decrypted);
-    headers['cookie'] = _generateCookieHeader();
+    _headers['cookie'] = _generateCookieHeader();
 
     return true;
   }
