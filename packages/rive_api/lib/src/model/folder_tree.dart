@@ -15,11 +15,10 @@ class FolderTree {
   final FolderTreeItem root;
 
   factory FolderTree.fromOwner(Owner owner) {
-    return FolderTree(owner: owner, root: FolderTreeItem.dummy(owner));
+    return FolderTree(owner: owner, root: FolderTreeItem.placeholder(owner));
   }
 
   factory FolderTree.fromFolderList(Owner owner, List<Folder> folders) {
-    var root = FolderTreeItem.root(owner);
     // Turn folders into tree items.
     var treeItems = folders
         .map((folder) => FolderTreeItem(folder: folder, owner: owner))
@@ -33,13 +32,17 @@ class FolderTree {
 
     // Parent the tree items.
     for (final treeItem in treeItems) {
-      var parentTreeItem = lookup[treeItem.folder.parent] ?? root;
-      parentTreeItem.children.add(treeItem);
+      var parentTreeItem = lookup[treeItem.folder.parent];
+      if (parentTreeItem != null) {
+        parentTreeItem.children.add(treeItem);
+      }
     }
 
     return FolderTree(
       owner: owner,
-      root: root,
+      root: treeItems.firstWhere(
+        (item) => item.folder.isRoot,
+      ),
     );
   }
 }
@@ -58,8 +61,6 @@ class FolderTreeItem {
     }
   }
 
-  FolderTreeItem.root(Owner owner) : this(folder: null, owner: owner);
-
   final Folder folder;
   final _hover = BehaviorSubject<bool>();
   final _selected = BehaviorSubject<bool>();
@@ -70,7 +71,8 @@ class FolderTreeItem {
     return owner?.avatarUrl;
   }
 
-  String get name => folder?.name ?? owner.displayName;
+  String get name => folder.name ?? owner.displayName;
+  bool get isRoot => folder.isRoot;
 
   BehaviorSubject<bool> get hoverStream => _hover;
   BehaviorSubject<bool> get selectedStream => _selected;
@@ -89,9 +91,10 @@ class FolderTreeItem {
     }
   }
 
-  factory FolderTreeItem.dummy(Owner owner) {
+  // Placeholder used until the real data set is loaded.
+  factory FolderTreeItem.placeholder(Owner owner) {
     return FolderTreeItem(
-      folder: null,
+      folder: Folder.root(owner),
       owner: owner,
     );
   }

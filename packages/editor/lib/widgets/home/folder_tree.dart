@@ -99,9 +99,10 @@ class FolderTreeView extends StatelessWidget {
                 ),
               ),
             ),
-            if (item.data.owner is Me ||
-                (item.data.owner is Team &&
-                    canEditTeam((item.data.owner as Team).permission)))
+            if (item.data.isRoot &&
+                (item.data.owner is Me ||
+                    (item.data.owner is Team &&
+                        canEditTeam((item.data.owner as Team).permission))))
               FolderTreeItemButton(
                 itemData: item.data,
                 isSelected: isSelected(selectedStream),
@@ -111,7 +112,7 @@ class FolderTreeView extends StatelessWidget {
                   await showSettings(item.data.owner, context: context);
                 },
               ),
-            if (item.data.owner != null)
+            if (item.data.isRoot)
               Padding(
                 padding: const EdgeInsets.only(right: 7),
                 child: FolderTreeItemButton(
@@ -156,27 +157,26 @@ class FolderTreeIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     var colors = RiveTheme.of(context).colors;
 
-    if (item.folder != null) {
-      return Center(
-        child: SizedBox(
-          width: 15,
-          height: 15,
-          child: TintedIcon(
-            // TODO: set trash icon for trash folder
-            icon: PackedIcon.folder,
-            color: (iconColor == null)
-                ? colors.fileUnselectedFolderIcon
-                : iconColor,
-          ),
-        ),
-      );
-    } else {
+    if (item.folder.isRoot) {
       return AvatarView(
         diameter: 15,
         borderWidth: 0,
         imageUrl: item.owner.avatarUrl,
         name: item.owner.displayName,
         color: StageCursor.colorFromPalette(item.owner.ownerId),
+      );
+    } else {
+      return Center(
+        child: SizedBox(
+          width: 15,
+          height: 15,
+          child: TintedIcon(
+            icon: item.folder.isTrash ? PackedIcon.trash : PackedIcon.folder,
+            color: (iconColor == null)
+                ? colors.fileUnselectedFolderIcon
+                : iconColor,
+          ),
+        ),
       );
     }
   }

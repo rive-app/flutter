@@ -16,11 +16,22 @@ class FileApi {
 
   Future<List<FileDM>> recentFiles() async => _files('/api/files/ids/recent');
 
-  Future<List<FileDM>> files(int ownerId, int folderId) async => _files(
-      folderId == null
-          ? '/api/files/ids/$ownerId/recent'
-          : '/api/files/ids/$ownerId/$folderId/recent',
-      ownerId);
+  Future<List<FileDM>> files(int ownerId, int folderId) {
+    String route;
+    switch (folderId) {
+      case FolderDM.allId:
+        route = '/api/files/ids/$ownerId/recent';
+        break;
+      case FolderDM.trashId:
+        route = '/api/trash/ids/$ownerId/recent';
+        break;
+
+      default:
+        route = '/api/files/ids/$ownerId/$folderId/recent';
+        break;
+    }
+    return _files(route, ownerId);
+  }
 
   Future<void> deleteFiles(List<int> fileIds, List<int> folderIds) async {
     return _deleteFiles('/api/files', fileIds, folderIds);

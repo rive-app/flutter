@@ -412,6 +412,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         startScrollOffset = null;
         updateMarquee();
         var selection = Plumber().peek<Selection>() ?? Selection();
+        var currentDirectory = Plumber().peek<CurrentDirectory>();
         if (rightClick && selection != null) {
           ListPopup.show(context,
               margin: 5,
@@ -442,12 +443,13 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                     leftMargin: 15,
                     height: 35,
                   ),
-                PopupContextItem(
-                  'Delete',
-                  select: () => FolderContentsManager().delete(),
-                  leftMargin: 15,
-                  height: 35,
-                ),
+                if (!(currentDirectory?.folder?.isTrash ?? false))
+                  PopupContextItem(
+                    'Delete',
+                    select: () => FolderContentsManager().delete(),
+                    leftMargin: 15,
+                    height: 35,
+                  ),
                 if (selection.files.length == 1) PopupContextItem.separator(),
                 if (selection.files.length == 1)
                   PopupContextItem(
