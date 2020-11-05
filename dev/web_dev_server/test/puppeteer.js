@@ -203,7 +203,7 @@ describe("Register & Login Flow", () => {
 
         await page.setViewport({ width: options.width, height: options.height })
         await page.goto(host, { fullPage: true });
-        await browser.waitForTarget((target) => target.url().includes("/auth/register"));
+        await browser.waitForTarget((target) => target.url().includes("/lobby/register"));
 
         // const result = await page.evaluate(() => [window.innerWidth, window.innerHeight]);
 
@@ -228,7 +228,7 @@ describe("Register & Login Flow", () => {
         assert(email);
 
         const result = await page.evaluate(() => document.location.pathname);
-        assert(result.includes("/auth/register"));
+        assert(result.includes("/lobby/register"));
 
         console.log("Registering user:", username);
 
@@ -265,15 +265,15 @@ describe("Register & Login Flow", () => {
 
         // await page.screenshot({ path: 'screenshot/screenshot_settings.png' });
 
-        await logoutButton.clickAndWaitForTarget("/auth/register");
+        await logoutButton.clickAndWaitForTarget("/lobby/register");
     });
 
     it("Log in using credentials", async () => {
         assert(username);
         assert(password);
 
-        await page.goto(`${host}/auth/login`, { fullPage: true });
-        await browser.waitForTarget((target) => target.url().includes("/auth/login"));
+        await page.goto(`${host}/lobby/login`, { fullPage: true });
+        await browser.waitForTarget((target) => target.url().includes("/lobby/login"));
 
         // Wait for page to settle.
         await delay(1500);

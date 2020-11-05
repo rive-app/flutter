@@ -1,3 +1,3 @@
 import 'http_app.dart' if (dart.library.html) 'http_web.dart';
 
-final getClient = getClientImplementation;
+const getClient = getClientImplementation;

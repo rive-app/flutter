@@ -39,10 +39,13 @@ class AnnouncementsManager with Subscriptions {
 
   /// Initiatize the state
   void _attach() {
-    _fetchAnnouncements();
-
     /// When the logged in user is changed, fetch announcements for the new user
-    subscribe<model.Me>((_) => _fetchAnnouncements());
+    subscribe<model.Me>((me) {
+      if (me == null || !me.signedIn) {
+        return;
+      }
+      _fetchAnnouncements();
+    });
   }
 
   void _poll() {
