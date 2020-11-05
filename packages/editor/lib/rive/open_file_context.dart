@@ -320,13 +320,15 @@ class OpenFileContext with RiveFileDelegate {
   void dispose() {
     _labeledAlert?.dismissed?.removeListener(_alertDismissed);
     _disposeManagers();
-    core?.disconnect();
+    _connectedCore?.disconnect();
     _stage.value?.dispose();
     _previewListener?.cancel();
     _previewListener = null;
     _selectPreviewListener?.cancel();
     _selectPreviewListener = null;
   }
+
+  RiveFile get _connectedCore => _activeRevision ?? core;
 
   @override
   void markNeedsAdvance() {
@@ -345,8 +347,8 @@ class OpenFileContext with RiveFileDelegate {
     return false;
   }
 
-  void reconnect() {
-    core.reconnect(now: true);
+  void reconnect({bool now = true}) {
+    _connectedCore.reconnect(now: now);
   }
 
   void delaySleep() {
@@ -356,7 +358,7 @@ class OpenFileContext with RiveFileDelegate {
         stateChanged.notify();
 
         _sleepTimer?.cancel();
-        core.reconnect();
+        reconnect(now:false);
         break;
       case OpenFileState.open:
         _sleepTimer?.cancel();
@@ -397,7 +399,7 @@ class OpenFileContext with RiveFileDelegate {
       stateChanged.notify();
     }
 
-    core?.disconnect();
+    _connectedCore?.disconnect();
   }
 
   @override
@@ -785,7 +787,7 @@ class OpenFileContext with RiveFileDelegate {
     _selectPreviewListener?.cancel();
 
     var revisionManager =
-        RevisionManager(api: api, ownerId: ownerId, fileId: fileId);
+        RevisionManager(api: api, fileId: fileId);
     _revisionManager.value = revisionManager;
 
     _selectPreviewListener =

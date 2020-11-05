@@ -17,11 +17,10 @@ class TempRiveFile extends RiveFile {
 /// displayed by hooking it up to a Stage.
 class RevisionManager {
   final RevisionApi revisionApi;
-  RevisionManager({RiveApi api, int ownerId, int fileId})
+  RevisionManager({RiveApi api, int fileId})
       : revisionApi = RevisionApi(
           api: api,
           fileId: fileId,
-          ownerId: ownerId,
         ) {
     _selectedRevision.add(null);
     _selectRevision.stream.listen(_onSelectRevision);
