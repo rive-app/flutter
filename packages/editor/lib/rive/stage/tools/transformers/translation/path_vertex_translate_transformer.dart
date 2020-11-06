@@ -2,14 +2,22 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:rive_core/component.dart';
+import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
+import 'package:rive_editor/rive/stage/items/stage_node.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
@@ -106,6 +114,26 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
     lockRotationShortcut?.addListener(_advanceWithRotationLock);
 
+    // -----> testing out snapper stuff
+
+    _stageVertices.first.component.stageItem.stage.snapper
+        .add(_stageVertices.map((sv) => _VertexSnappingItem(sv.component)),
+            (item, exclusion) {
+      if (exclusion.contains(item)) {
+        return false;
+      }
+      // Filter out components that are not shapes or nodes, or not in the
+      // active artboard
+      final activeArtboard = details.artboard;
+      if (item is StageShape || item is StageNode || item is StageArtboard) {
+        final itemArtboard = (item.component as Component).artboard;
+        return activeArtboard == itemArtboard;
+      }
+      return false;
+    });
+
+    // -----> testing out snapper stuff
+
     return valid.isNotEmpty;
   }
 
@@ -187,4 +215,46 @@ Vec2D _calculateLockAxis(Vec2D position, Vec2D origin) {
   var lockInc = pi / 4;
   var lockAngle = (angle / lockInc).round() * lockInc;
   return Vec2D.fromValues(cos(lockAngle), sin(lockAngle));
+}
+
+class _VertexSnappingItem extends SnappingItem {
+  final PathVertex vertex;
+  final Mat2D toParent;
+  final Vec2D worldTranslation;
+
+  factory _VertexSnappingItem(PathVertex v) {
+    final artboard = v.artboard;
+
+    final world = artboard.transform(v.parent is TransformComponent
+        ? (v.parent as TransformComponent).worldTransform
+        : Mat2D());
+    var inverse = Mat2D();
+    if (!Mat2D.invert(inverse, world)) {
+      return null;
+    }
+    return _VertexSnappingItem._(
+      v,
+      inverse,
+      Mat2D.getTranslation(
+        artboard.transform(Mat2D()),
+        Vec2D(),
+      ),
+    );
+  }
+
+  _VertexSnappingItem._(this.vertex, this.toParent, this.worldTranslation);
+  @override
+  void addSources(SnappingAxes snap, bool isSingleSelection) =>
+      snap.addVec(AABB.center(Vec2D(), stageItem.aabb));
+
+  @override
+  StageItem get stageItem => vertex.stageItem;
+
+  @override
+  void translateWorld(Vec2D diff) {
+    var world = Vec2D.add(Vec2D(), worldTranslation, diff);
+    var local = Vec2D.transformMat2D(Vec2D(), world, toParent);
+    vertex.x = local[0];
+    vertex.y = local[1];
+  }
 }
