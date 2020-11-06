@@ -48,9 +48,15 @@ class InterpolationPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildPanel(BuildContext context, InterpolationViewModel interpolation,
-      HashSet<KeyFrame> selection, KeyFrameManager manager) {
-    var theme = RiveTheme.of(context);
+  Widget _buildPanel(
+    BuildContext context,
+    InterpolationViewModel interpolation,
+    HashSet<KeyFrame> selection,
+    KeyFrameManager manager,
+  ) {
+    final theme = RiveTheme.of(context);
+    final hasEditableInterpolation = selection.isNotEmpty &&
+        selection.any((keyframe) => keyframe.canInterpolate);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -68,13 +74,12 @@ class InterpolationPanel extends StatelessWidget {
               ),
               ComboBox(
                   underlineColor: theme.colors.interpolationUnderline,
-                  disabled: selection.isEmpty ||
-                      selection.any((keyframe) => !keyframe.canInterpolate),
+                  disabled: !hasEditableInterpolation,
                   sizing: ComboSizing.content,
                   options: KeyFrameInterpolation.values,
                   value: interpolation.type,
                   change: (KeyFrameInterpolation interpolation) =>
-                    manager.changeInterpolation.add(interpolation),
+                      manager.changeInterpolation.add(interpolation),
                   toLabel: (KeyFrameInterpolation interpolation) =>
                       interpolation == null
                           ? ''
@@ -87,51 +92,64 @@ class InterpolationPanel extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: ActiveFile.of(context).editingAnimationManager,
             builder: (context, EditingAnimationManager animationManager, _) =>
-              InterpolationPreview(
-                interpolation: interpolation,
-                selection: selection,
-                manager: manager,
-                timeManager: animationManager,
-              ),
+                SizedBox(
+              height: 160,
+              child: Stack(children: [
+                Positioned.fill(
+                  child: InterpolationPreview(
+                    interpolation: interpolation,
+                    selection: selection,
+                    manager: manager,
+                    timeManager: animationManager,
+                  ),
+                ),
+                if (!hasEditableInterpolation)
+                  Center(
+                    child: Text(
+                      UIStrings.find(context).withKey('select_key'),
+                      style: theme.textStyles.inspectorPropertyLabel,
+                    ),
+                  ),
+              ]),
+            ),
           ),
           const SizedBox(height: 13),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Points',
-                style: theme.textStyles.inspectorPropertyLabel),
+          if (hasEditableInterpolation)
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text('Points', style: theme.textStyles.inspectorPropertyLabel),
               const SizedBox(width: 6),
               Expanded(
                 child: InspectorTextField(
-                  value: interpolation,
-                  converter: InterpolationValueConverter.instance,
-                  underlineColor: theme.colors.interpolationUnderline,
-                  change: (InterpolationViewModel _) {},
-                  completeChange: (InterpolationViewModel newInterpolation) {
-                    switch (newInterpolation.type) {
-                      case KeyFrameInterpolation.cubic:
-                        final interpolator =  newInterpolation.interpolator;
-                        if (interpolator is CubicInterpolator) {
-                          final cubic = CubicInterpolationViewModel(
-                            interpolator.x1, interpolator.y1,
-                            interpolator.x2, interpolator.y2);
-                            if (interpolation.type != 
-                              KeyFrameInterpolation.cubic) {
-                              manager.changeInterpolation.add(
-                                newInterpolation.type);
+                    value: interpolation,
+                    converter: InterpolationValueConverter.instance,
+                    underlineColor: theme.colors.interpolationUnderline,
+                    change: (InterpolationViewModel _) {},
+                    completeChange: (InterpolationViewModel newInterpolation) {
+                      switch (newInterpolation.type) {
+                        case KeyFrameInterpolation.cubic:
+                          final interpolator = newInterpolation.interpolator;
+                          if (interpolator is CubicInterpolator) {
+                            final cubic = CubicInterpolationViewModel(
+                                interpolator.x1,
+                                interpolator.y1,
+                                interpolator.x2,
+                                interpolator.y2);
+                            if (interpolation.type !=
+                                KeyFrameInterpolation.cubic) {
+                              manager.changeInterpolation
+                                  .add(newInterpolation.type);
                             }
                             manager.changeCubic.add(cubic);
-                        }
-                        break;
-                      default:
-                        manager.changeInterpolation.add(newInterpolation.type);
-                        break;
-                    }
-                  }
-                ),
+                          }
+                          break;
+                        default:
+                          manager.changeInterpolation
+                              .add(newInterpolation.type);
+                          break;
+                      }
+                    }),
               )
-            ]
-          )
+            ])
         ],
       ),
     );

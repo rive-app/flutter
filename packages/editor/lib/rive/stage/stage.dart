@@ -953,12 +953,24 @@ class Stage extends Debouncer {
       case ShortcutAction.nudgeRight:
         _nudgeSelectedItems(NudgeDirection.right);
         break;
+      case ShortcutAction.megaNudgeUp:
+        _nudgeSelectedItems(NudgeDirection.up, 10);
+        break;
+      case ShortcutAction.megaNudgeDown:
+        _nudgeSelectedItems(NudgeDirection.down, 10);
+        break;
+      case ShortcutAction.megaNudgeLeft:
+        _nudgeSelectedItems(NudgeDirection.left, 10);
+        break;
+      case ShortcutAction.megaNudgeRight:
+        _nudgeSelectedItems(NudgeDirection.right, 10);
+        break;
     }
     return false;
   }
 
   /// Nudge the set of selected items in a given direction
-  void _nudgeSelectedItems(NudgeDirection direction) {
+  void _nudgeSelectedItems(NudgeDirection direction, [int step = 1]) {
     final nudgableComponents = tops<Component>(
       file.selection.items
           .whereType<StageItem>()
@@ -972,28 +984,28 @@ class Stage extends Debouncer {
           // nasty if/else to handle casting to either Node or RootBone
           if (component is Node)
             // ignore: curly_braces_in_flow_control_structures
-            component.y--;
-          else if (component is RootBone) component.y--;
+            component.y -= step;
+          else if (component is RootBone) component.y -= step;
           break;
         case NudgeDirection.down:
           if (component is Node)
             // ignore: curly_braces_in_flow_control_structures
-            component.y++;
-          else if (component is RootBone) component.y++;
+            component.y += step;
+          else if (component is RootBone) component.y += step;
           break;
           break;
         case NudgeDirection.left:
           if (component is Node)
             // ignore: curly_braces_in_flow_control_structures
-            component.x--;
-          else if (component is RootBone) component.x--;
+            component.x -= step;
+          else if (component is RootBone) component.x -= step;
           break;
           break;
         case NudgeDirection.right:
           if (component is Node)
             // ignore: curly_braces_in_flow_control_structures
-            component.x++;
-          else if (component is RootBone) component.x++;
+            component.x += step;
+          else if (component is RootBone) component.x += step;
           break;
       }
     }
@@ -1473,7 +1485,7 @@ class Stage extends Debouncer {
         item.onSoloChanged(false);
       }
     }
-    
+
     file.selection.clear();
     _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
     _updateHover();

@@ -115,6 +115,14 @@ class ShortcutAction {
       ShortcutAction('nudge-right', repeats: true);
   static const ShortcutAction nudgeUp =
       ShortcutAction('nudge-up', repeats: true);
+  static const ShortcutAction megaNudgeDown =
+      ShortcutAction('mega-nudge-down', repeats: true);
+  static const ShortcutAction megaNudgeLeft =
+      ShortcutAction('mega-nudge-left', repeats: true);
+  static const ShortcutAction megaNudgeRight =
+      ShortcutAction('mega-nudge-right', repeats: true);
+  static const ShortcutAction megaNudgeUp =
+      ShortcutAction('mega-nudge-up', repeats: true);
 
   static const ShortcutAction resetRulers = ShortcutAction('reset-rulers');
   static const ShortcutAction toggleRulers = ShortcutAction('rulers');
