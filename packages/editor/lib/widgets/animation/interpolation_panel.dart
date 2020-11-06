@@ -92,22 +92,26 @@ class InterpolationPanel extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: ActiveFile.of(context).editingAnimationManager,
             builder: (context, EditingAnimationManager animationManager, _) =>
-                hasEditableInterpolation
-                    ? InterpolationPreview(
-                        interpolation: interpolation,
-                        selection: selection,
-                        manager: manager,
-                        timeManager: animationManager,
-                      )
-                    : SizedBox(
-                        height: 160,
-                        child: Center(
-                          child: Text(
-                            UIStrings.find(context).withKey('select_key'),
-                            style: theme.textStyles.inspectorPropertyLabel,
-                          ),
-                        ),
-                      ),
+                SizedBox(
+              height: 160,
+              child: Stack(children: [
+                Positioned.fill(
+                  child: InterpolationPreview(
+                    interpolation: interpolation,
+                    selection: selection,
+                    manager: manager,
+                    timeManager: animationManager,
+                  ),
+                ),
+                if (!hasEditableInterpolation)
+                  Center(
+                    child: Text(
+                      UIStrings.find(context).withKey('select_key'),
+                      style: theme.textStyles.inspectorPropertyLabel,
+                    ),
+                  ),
+              ]),
+            ),
           ),
           const SizedBox(height: 13),
           if (hasEditableInterpolation)
