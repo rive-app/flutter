@@ -4,13 +4,11 @@ import 'dart:ui';
 
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
-import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
-import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
@@ -39,38 +37,40 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
   @override
   void advance(DragTransformDetails details) {
-    // First attempt to handle rotation locking; only makes sense is one vertex
-    // is selected and it is an in or out control point. This is hideous, but it
-    // works ...
-    if (_stageVertices.length == 1 &&
-        _stageVertices.first is StageControlVertex) {
-      final controlVertex = _stageVertices.first as StageControlVertex;
-      final vertex = controlVertex.vertex;
-      final worldPosition =
-          details?.world?.current ?? controlVertex.stage.worldMouse;
-      // If rotation is locked, contrain to the locking axes
-      if (_rotationLocked) {
-        final lockAxis = LockAxis(vertex.worldTranslation,
-            _calculateLockAxis(worldPosition, vertex.worldTranslation));
+    // Only handle advancing here if there are only in/out handles selected
+    if (_onlyInsAndOuts(_stageVertices)) {
+      // First attempt to handle rotation locking; only makes sense is one
+      // vertex is selected and it is an in or out control point. This is
+      // hideous, but it works ...
+      if (_stageVertices.length == 1) {
+        final controlVertex = _stageVertices.first as StageControlVertex;
+        final vertex = controlVertex.vertex;
+        final worldPosition =
+            details?.world?.current ?? controlVertex.stage.worldMouse;
+        // If rotation is locked, contrain to the locking axes
+        if (_rotationLocked) {
+          final lockAxis = LockAxis(vertex.worldTranslation,
+              _calculateLockAxis(worldPosition, vertex.worldTranslation));
 
-        controlVertex.worldTranslation =
-            lockAxis.translateToAxis(worldPosition);
-      } else {
-        // Just peg to the world mouse; need to do this otherwise the point will
-        // not coincide with the mouse location after a lock has been started
-        // and then released
-        controlVertex.worldTranslation = worldPosition;
+          controlVertex.worldTranslation =
+              lockAxis.translateToAxis(worldPosition);
+        } else {
+          // Just peg to the world mouse; need to do this otherwise the point
+          // will not coincide with the mouse location after a lock has been
+          // started and then released
+          controlVertex.worldTranslation = worldPosition;
+        }
+        return;
       }
-      return;
-    }
 
-    if (details == null) {
-      return;
-    }
-    final delta = details.world.delta;
-    for (final stageVertex in _stageVertices) {
-      stageVertex.worldTranslation =
-          Vec2D.add(Vec2D(), stageVertex.worldTranslation, delta);
+      if (details == null) {
+        return;
+      }
+      final delta = details.world.delta;
+      for (final stageVertex in _stageVertices) {
+        stageVertex.worldTranslation =
+            Vec2D.add(Vec2D(), stageVertex.worldTranslation, delta);
+      }
     }
   }
 
@@ -87,7 +87,6 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
-    print("Init PathVertexTranslateTransformer");
     var valid = _stageVertices = <StageVertex<PathVertex>>[];
     var vertices = items.whereType<StageVertex<PathVertex>>().toSet();
     for (final stageVertex in vertices) {
@@ -115,8 +114,10 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
     lockRotationShortcut?.addListener(_advanceWithRotationLock);
 
-    // -----> testing out snapper stuff
-    if (_stageVertices != null && _stageVertices.isNotEmpty) {
+    // Snappy McSnapFace
+    if (_stageVertices != null &&
+        _stageVertices.isNotEmpty &&
+        _noInsAndOuts(_stageVertices)) {
       _stageVertices.first.component.stageItem.stage.snapper
           .add(_stageVertices.map((sv) => _VertexSnappingItem(sv.component)),
               (item, exclusion) {
@@ -133,8 +134,6 @@ class PathVertexTranslateTransformer extends StageTransformer {
         return false;
       });
     }
-
-    // -----> testing out snapper stuff
 
     return valid.isNotEmpty;
   }
@@ -221,30 +220,16 @@ Vec2D _calculateLockAxis(Vec2D position, Vec2D origin) {
 
 class _VertexSnappingItem extends SnappingItem {
   final PathVertex vertex;
-  final Mat2D toParent;
   final Vec2D worldTranslation;
 
-  factory _VertexSnappingItem(PathVertex v) {
-    final artboard = v.artboard;
-
-    final world = artboard.transform(v.parent is TransformComponent
-        ? (v.parent as TransformComponent).worldTransform
-        : Mat2D());
-    var inverse = Mat2D();
-    if (!Mat2D.invert(inverse, world)) {
-      return null;
-    }
+  factory _VertexSnappingItem(PathVertex vertex) {
     return _VertexSnappingItem._(
-      v,
-      inverse,
-      Mat2D.getTranslation(
-        artboard.transform(Mat2D()),
-        Vec2D(),
-      ),
+      vertex,
+      Vec2D.fromValues(vertex.x, vertex.y),
     );
   }
 
-  _VertexSnappingItem._(this.vertex, this.toParent, this.worldTranslation);
+  _VertexSnappingItem._(this.vertex, this.worldTranslation);
   @override
   void addSources(SnappingAxes snap, bool isSingleSelection) =>
       snap.addVec(AABB.center(Vec2D(), stageItem.aabb));
@@ -255,8 +240,21 @@ class _VertexSnappingItem extends SnappingItem {
   @override
   void translateWorld(Vec2D diff) {
     var world = Vec2D.add(Vec2D(), worldTranslation, diff);
-    var local = Vec2D.transformMat2D(Vec2D(), world, toParent);
-    vertex.x = local[0];
-    vertex.y = local[1];
+    vertex.x = world[0];
+    vertex.y = world[1];
   }
 }
+
+bool _noInsAndOuts(Iterable<StageVertex> vertices) {
+  for (final vertex in vertices) {
+    if (vertex is StageControlIn || vertex is StageControlOut) {
+      return false;
+    }
+    return true;
+  }
+}
+
+bool _onlyInsAndOuts(Iterable<StageVertex> vertices) => vertices.fold(
+    true,
+    (prev, vertex) =>
+        (vertex is StageControlIn || vertex is StageControlOut) && prev);
