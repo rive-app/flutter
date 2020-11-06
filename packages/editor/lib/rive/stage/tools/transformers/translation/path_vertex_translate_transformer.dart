@@ -4,11 +4,13 @@ import 'dart:ui';
 
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
@@ -220,16 +222,33 @@ Vec2D _calculateLockAxis(Vec2D position, Vec2D origin) {
 
 class _VertexSnappingItem extends SnappingItem {
   final PathVertex vertex;
+  final Mat2D toParent;
   final Vec2D worldTranslation;
+  final Vec2D localOrigin;
 
   factory _VertexSnappingItem(PathVertex vertex) {
+    final artboard = vertex.artboard;
+    final world = artboard.transform(vertex.parent is TransformComponent
+        ? (vertex.parent as TransformComponent).worldTransform
+        : Mat2D());
+
+    final inverse = Mat2D();
+    if (!Mat2D.invert(inverse, world)) {
+      return null;
+    }
+
     return _VertexSnappingItem._(
       vertex,
-      Vec2D.fromValues(vertex.x, vertex.y),
+      inverse,
+      Mat2D.getTranslation(
+        artboard.transform(vertex.path.worldTransform),
+        Vec2D(),
+      ),
     );
   }
 
-  _VertexSnappingItem._(this.vertex, this.worldTranslation);
+  _VertexSnappingItem._(this.vertex, this.toParent, this.worldTranslation)
+      : localOrigin = Vec2D.fromValues(vertex.x, vertex.y);
   @override
   void addSources(SnappingAxes snap, bool isSingleSelection) =>
       snap.addVec(AABB.center(Vec2D(), stageItem.aabb));
@@ -239,21 +258,34 @@ class _VertexSnappingItem extends SnappingItem {
 
   @override
   void translateWorld(Vec2D diff) {
-    var world = Vec2D.add(Vec2D(), worldTranslation, diff);
-    vertex.x = world[0];
-    vertex.y = world[1];
+    // Transform the vertex's origin to world space
+    final worldOrigin = Vec2D.transformMat2D(
+        Vec2D(), localOrigin, vertex.artboard.worldTransform);
+
+    // Apply the diff to world space
+    final worldDiff = Vec2D.add(Vec2D(), worldTranslation, diff);
+
+    // Now offset by the vertex's origin
+    final world = Vec2D.add(Vec2D(), worldOrigin, worldDiff);
+
+    // Push back into local space
+    final local = Vec2D.transformMat2D(Vec2D(), world, toParent);
+    vertex.x = local[0];
+    vertex.y = local[1];
   }
 }
 
+/// Returns true if the iterable of vertices contains no ins or outs
 bool _noInsAndOuts(Iterable<StageVertex> vertices) {
   for (final vertex in vertices) {
     if (vertex is StageControlIn || vertex is StageControlOut) {
       return false;
     }
-    return true;
   }
+  return true;
 }
 
+/// Returns true of the iterable of vertices contains only ins and outs
 bool _onlyInsAndOuts(Iterable<StageVertex> vertices) => vertices.fold(
     true,
     (prev, vertex) =>
