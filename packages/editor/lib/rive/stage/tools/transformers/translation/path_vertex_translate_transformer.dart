@@ -87,6 +87,7 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
+    print("Init PathVertexTranslateTransformer");
     var valid = _stageVertices = <StageVertex<PathVertex>>[];
     var vertices = items.whereType<StageVertex<PathVertex>>().toSet();
     for (final stageVertex in vertices) {
@@ -115,22 +116,23 @@ class PathVertexTranslateTransformer extends StageTransformer {
     lockRotationShortcut?.addListener(_advanceWithRotationLock);
 
     // -----> testing out snapper stuff
-
-    _stageVertices.first.component.stageItem.stage.snapper
-        .add(_stageVertices.map((sv) => _VertexSnappingItem(sv.component)),
-            (item, exclusion) {
-      if (exclusion.contains(item)) {
+    if (_stageVertices != null && _stageVertices.isNotEmpty) {
+      _stageVertices.first.component.stageItem.stage.snapper
+          .add(_stageVertices.map((sv) => _VertexSnappingItem(sv.component)),
+              (item, exclusion) {
+        if (exclusion.contains(item)) {
+          return false;
+        }
+        // Filter out components that are not shapes or nodes, or not in the
+        // active artboard
+        final activeArtboard = details.artboard;
+        if (item is StageShape || item is StageNode || item is StageArtboard) {
+          final itemArtboard = (item.component as Component).artboard;
+          return activeArtboard == itemArtboard;
+        }
         return false;
-      }
-      // Filter out components that are not shapes or nodes, or not in the
-      // active artboard
-      final activeArtboard = details.artboard;
-      if (item is StageShape || item is StageNode || item is StageArtboard) {
-        final itemArtboard = (item.component as Component).artboard;
-        return activeArtboard == itemArtboard;
-      }
-      return false;
-    });
+      });
+    }
 
     // -----> testing out snapper stuff
 
