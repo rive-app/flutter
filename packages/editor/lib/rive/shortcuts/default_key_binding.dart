@@ -33,6 +33,22 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(ShortcutAction.nudgeRight, {ShortcutKey.right}),
     Shortcut(ShortcutAction.nudgeUp, {ShortcutKey.up}),
     Shortcut(ShortcutAction.nudgeDown, {ShortcutKey.down}),
+    Shortcut(
+      ShortcutAction.megaNudgeLeft,
+      {ShortcutKey.shift, ShortcutKey.left},
+    ),
+    Shortcut(
+      ShortcutAction.megaNudgeRight,
+      {ShortcutKey.shift, ShortcutKey.right},
+    ),
+    Shortcut(
+      ShortcutAction.megaNudgeUp,
+      {ShortcutKey.shift, ShortcutKey.up},
+    ),
+    Shortcut(
+      ShortcutAction.megaNudgeDown,
+      {ShortcutKey.shift, ShortcutKey.down},
+    ),
 
     Shortcut(ShortcutAction.confirm, {ShortcutKey.enter}),
     Shortcut(
