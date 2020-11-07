@@ -37,7 +37,7 @@ class _AnimationPanelState extends State<AnimationPanel>
                     hitSize: 10,
                     direction: ResizeDirection.vertical,
                     side: ResizeSide.start,
-                    min: 300,
+                    min: 50,
                     max: 600,
                     child: child,
                   )
