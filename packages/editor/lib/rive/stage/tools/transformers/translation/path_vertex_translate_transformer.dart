@@ -259,15 +259,12 @@ class _VertexSnappingItem extends SnappingItem {
   @override
   void translateWorld(Vec2D diff) {
     // Transform the vertex's origin to world space
-    final worldOrigin = Vec2D.transformMat2D(
+    var worldOrigin = Vec2D.transformMat2D(
         Vec2D(), localOrigin, vertex.artboard.worldTransform);
-
     // Apply the diff to world space
     final worldDiff = Vec2D.add(Vec2D(), worldTranslation, diff);
-
     // Now offset by the vertex's origin
     final world = Vec2D.add(Vec2D(), worldOrigin, worldDiff);
-
     // Push back into local space
     final local = Vec2D.transformMat2D(Vec2D(), world, toParent);
     vertex.x = local[0];
