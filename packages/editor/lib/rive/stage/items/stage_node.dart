@@ -31,10 +31,19 @@ class StageNode extends HideableStageItem<Node>
   StageItem get selectionTarget => ShortcutAction.deepClick.value
       ? this
       : StageExpandable.findNonExpanded(this);
-      
+
+  /// Can't check if we should draw if it's a group here, as this will also
+  /// cause the bounds not to be drawn. Should we have two checks, isVisible and
+  /// isBoundsVisible and then let the stage manage what's being hidden?
+  @override
+  bool get isVisible => super.isVisible; // !isGroup && super.isVisible;
+
+  /// Returns true of this node is a group (i.e. it has children)
+  bool get isGroup => component.children.isNotEmpty;
+
   @override
   Iterable<StageDrawPass> get drawPasses => [
-        if (obb == null)
+        if (obb == null && !isGroup)
           StageDrawPass(
             draw,
             inWorldSpace: true,
@@ -47,6 +56,7 @@ class StageNode extends HideableStageItem<Node>
             order: 10,
           ),
       ];
+
   StageNodeDisplay get display =>
       obb == null ? StageNodeDisplay.node : StageNodeDisplay.group;
 

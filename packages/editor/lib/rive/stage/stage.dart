@@ -29,6 +29,7 @@ import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -467,7 +468,7 @@ class Stage extends Debouncer {
 
   int _handleSuppression = 0;
 
-  /// General setting for hiding/showing handles on the stage. Can be used  by
+  /// General setting for hiding/showing handles on the stage. Can be used by
   /// things like the transform tools and the color inspector to hide the
   /// transform handles when the color inspector is opened.
   Restorer hideHandles() {
@@ -981,31 +982,24 @@ class Stage extends Debouncer {
     for (final component in nudgableComponents) {
       switch (direction) {
         case NudgeDirection.up:
-          // nasty if/else to handle casting to either Node or RootBone
-          if (component is Node)
-            // ignore: curly_braces_in_flow_control_structures
+          if (component is TransformComponent) {
             component.y -= step;
-          else if (component is RootBone) component.y -= step;
+          }
           break;
         case NudgeDirection.down:
-          if (component is Node)
-            // ignore: curly_braces_in_flow_control_structures
+          if (component is TransformComponent) {
             component.y += step;
-          else if (component is RootBone) component.y += step;
-          break;
+          }
           break;
         case NudgeDirection.left:
-          if (component is Node)
-            // ignore: curly_braces_in_flow_control_structures
+          if (component is TransformComponent) {
             component.x -= step;
-          else if (component is RootBone) component.x -= step;
-          break;
+          }
           break;
         case NudgeDirection.right:
-          if (component is Node)
-            // ignore: curly_braces_in_flow_control_structures
+          if (component is TransformComponent) {
             component.x += step;
-          else if (component is RootBone) component.x += step;
+          }
           break;
       }
     }
@@ -1504,10 +1498,4 @@ class Stage extends Debouncer {
   final ValueNotifier<HashSet<StageItem>> _soloNotifier =
       ValueNotifier<HashSet<StageItem>>(null);
   ValueListenable<HashSet<StageItem>> get soloListenable => _soloNotifier;
-
-  /// Hide an item on the stage
-  void hideItem(StageItem item) => removeItem(item);
-
-  /// Unhide an item on the stage
-  void unhideItem(StageItem item) => addItem(item);
 }

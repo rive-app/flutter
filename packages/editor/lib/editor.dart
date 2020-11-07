@@ -297,10 +297,13 @@ class _EditorState extends State<Editor> {
                   ),
                   if (file.state == OpenFileState.timeout)
                     Positioned.fill(
-                        child: Center(
-                      child: CountDown(
-                          targetTime: file.nextConnectionAttempt, file: file),
-                    ))
+                      child: Center(
+                        child: CountDown(
+                          targetTime: file.nextConnectionAttempt,
+                          file: file,
+                        ),
+                      ),
+                    )
                 ],
               ),
             );
