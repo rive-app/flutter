@@ -36,14 +36,14 @@ class StageNode extends HideableStageItem<Node>
   /// cause the bounds not to be drawn. Should we have two checks, isVisible and
   /// isBoundsVisible and then let the stage manage what's being hidden?
   @override
-  bool get isVisible => super.isVisible; // !isGroup && super.isVisible;
+  bool get isVisible => super.isVisible;
 
   /// Returns true of this node is a group (i.e. it has children)
   bool get isGroup => component.children.isNotEmpty;
 
   @override
   Iterable<StageDrawPass> get drawPasses => [
-        if (obb == null && !isGroup)
+        if (display != StageNodeDisplay.group)
           StageDrawPass(
             draw,
             inWorldSpace: true,
@@ -58,7 +58,7 @@ class StageNode extends HideableStageItem<Node>
       ];
 
   StageNodeDisplay get display =>
-      obb == null ? StageNodeDisplay.node : StageNodeDisplay.group;
+      isGroup ? StageNodeDisplay.group : StageNodeDisplay.node;
 
   @override
   bool computeBounds() {
