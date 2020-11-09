@@ -73,75 +73,40 @@ final successSearchResponse = Response("""
 }]""", 200);
 
 final successFoldersResponse = Response("""
-{
-    "folders": [{
-        "id": 0,
-        "name": "Your Files",
-        "parent": null,
-        "order": 0
-    }, {
-        "id": 19,
-        "name": "New Folder",
-        "parent": 1,
-        "order": 0
-    }, {
-        "id": 18,
-        "name": "New Folder",
-        "parent": 0,
-        "order": 0
-    }, {
-        "id": 1,
-        "name": "Deleted Files",
-        "parent": null,
-        "order": 1
-    }],
-    "sortOptions": [{
-        "name": "Recent",
-        "route": "/api/my/files/recent/"
-    }, {
-        "name": "Oldest",
-        "route": "/api/my/files/oldest/"
-    }, {
-        "name": "A - Z",
-        "route": "/api/my/files/a-z/"
-    }, {
-        "name": "Z - A",
-        "route": "/api/my/files/z-a/"
-    }]
-}
+[{
+    "id": 12,
+    "name": "Your Files",
+    "parent": null,
+    "order": 0
+}, {
+    "id": 19,
+    "name": "New Folder",
+    "parent": 1,
+    "order": 0
+}, {
+    "id": 18,
+    "name": "New Folder",
+    "parent": 0,
+    "order": 0
+}]
 """, 200);
 
 final successTeamFoldersResponse = Response("""
-{
-    "folders": [{
-        "id": 1,
-        "name": "Your Files",
-        "parent": null,
-        "order": 0,
-        "project_name": "default",
-        "project_owner_id": 3
-    }, {
-        "id": 0,
-        "name": "Deleted Files",
-        "parent": null,
-        "order": 1,
-        "project_name": "default",
-        "project_owner_id": 3
-    }],
-    "sortOptions": [{
-        "name": "Recent",
-        "route": "/api/teams/40857/folders/"
-    }, {
-        "name": "Oldest",
-        "route": "/api/teams/40857/folders/"
-    }, {
-        "name": "A - Z",
-        "route": "/api/teams/40857/folders/"
-    }, {
-        "name": "Z - A",
-        "route": "/api/teams/40857/folders/"
-    }]
-}
+[{
+    "id": 3,
+    "name": "Some files",
+    "parent": null,
+    "order": 0,
+    "project_name": "default",
+    "project_owner_id": 3
+}, {
+    "id": 4,
+    "name": "More files",
+    "parent": null,
+    "order": 1,
+    "project_name": "default",
+    "project_owner_id": 3
+}]
 """, 200);
 
 final successFilesResponse = Response("""
@@ -166,26 +131,18 @@ final successFilesResponse = Response("""
 
 final successRecentFilesResponse = Response("""
 [
-"1ZTWDy",
-"0gu1Pn",
-"64uLPb"
+1,
+2,
+4
 ]""", 200);
-
-final successRecentFilesDetailsResponse = Response("""{
-"cdns":{
-  "40842":{"base":"foo", "params":"?fii"}
-},
-"files":[
-{"id":"64uLPb","name":"Bill","isPublic":true,"route":"/a/matt/files/rive/bill","preview":"krypton/40842-43-revis-7-krypton-preview","product":"rive","state":"READY"},
-{"id":"DeCo6G","name":"july","isPublic":true,"route":"/a/matt/files/rive/july","preview":"krypton/40842-40-revis-13-krypton-preview","product":"rive","state":"READY"}
-]}
-""", 200);
 
 final successFileDetailsResponse = Response("""
 {
   "cdn": {
-    "base": "http://foofo.com/",
-    "params": "?param"
+    "1" : {
+      "base": "http://foofo.com/",
+      "params": "?param"
+    }
   },
   "files":[ {
     "id":1,
