@@ -132,7 +132,7 @@ class FolderTreeView extends StatelessWidget {
                       Plumber().message(currentDirectory);
                     }
 
-                    await RiveContext.of(context).open(createdFile);
+                    RiveContext.of(context).open(createdFile);
                   },
                 ),
               )

@@ -97,7 +97,7 @@ class FolderTreeManager with Subscriptions {
         _plumber.shutdown<FolderTreeItemController>(owner.hashCode);
         _publishFolderTreeControllers();
       } else {
-        ingestFolders(owner, folderList);
+        _ingestFolders(owner, folderList);
       }
     }
 
@@ -105,7 +105,7 @@ class FolderTreeManager with Subscriptions {
   }
 
   void _initFolderTree(Owner owner) {
-    _plumber.message(
+    _plumber.message<FolderTreeItemController>(
       FolderTreeItemController(FolderTree.fromOwner(owner)),
       owner.hashCode,
     );
@@ -116,10 +116,11 @@ class FolderTreeManager with Subscriptions {
     _sortedOwners.forEach((owner) {
       _plumber.shutdown<FolderTreeItemController>(owner.hashCode);
     });
-    _plumber.message(<FolderTreeItemController>[]);
+    _plumber
+        .message<List<FolderTreeItemController>>(<FolderTreeItemController>[]);
   }
 
-  Future<void> ingestFolders(Owner owner, List<Folder> folders) async {
+  Future<void> _ingestFolders(Owner owner, List<Folder> folders) async {
     final _folderTree = FolderTree.fromFolderList(owner, folders);
     final _curentController =
         _plumber.peek<FolderTreeItemController>(owner.hashCode);
@@ -141,12 +142,12 @@ class FolderTreeManager with Subscriptions {
         }
       });
       _curentController.refreshExpanded();
-      _plumber.message(
+      _plumber.message<FolderTreeItemController>(
         _curentController,
         owner.hashCode,
       );
     } else {
-      _plumber.message(
+      _plumber.message<FolderTreeItemController>(
         FolderTreeItemController(_folderTree),
         owner.hashCode,
       );
@@ -161,6 +162,6 @@ class FolderTreeManager with Subscriptions {
         .map((owner) => _plumber.peek<FolderTreeItemController>(owner.hashCode))
         .where((controller) => controller != null)
         .toList();
-    _plumber.message(sortedControllers);
+    _plumber.message<List<FolderTreeItemController>>(sortedControllers);
   }
 }
