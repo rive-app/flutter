@@ -1,0 +1,142 @@
+{
+    "artboards": {
+        "type": "artboards",
+        "id": 985,
+        "name": "Artboards",
+        "main": 0,
+        "children": [
+            {
+                "type": "artboard",
+                "id": 986,
+                "name": "Artboard",
+                "translation": [
+                    0,
+                    0
+                ],
+                "origin": [
+                    0,
+                    0
+                ],
+                "width": 1024,
+                "height": 768,
+                "color": [
+                    0.364705890417099,
+                    0.364705890417099,
+                    0.364705890417099,
+                    1
+                ],
+                "clipContents": true,
+                "animations": [],
+                "children": [
+                    {
+                        "type": "shape",
+                        "id": 987,
+                        "name": "Rectangle",
+                        "translation": [
+                            457.78143310546875,
+                            570.963623046875
+                        ],
+                        "clipsOptions": [
+                            true,
+                            true,
+                            true,
+                            true
+                        ],
+                        "blendMode": "srcOver",
+                        "drawOrder": 1,
+                        "transformAffectsStroke": false,
+                        "children": [
+                            {
+                                "type": "colorStroke",
+                                "id": 988,
+                                "name": "Color",
+                                "opacity": 1,
+                                "color": [
+                                    0.800000011920929,
+                                    0.800000011920929,
+                                    0.800000011920929,
+                                    1
+                                ],
+                                "width": 1,
+                                "cap": "butt",
+                                "join": "miter",
+                                "trim": "off",
+                                "trimStart": 0,
+                                "trimEnd": 1,
+                                "trimOffset": 0
+                            },
+                            {
+                                "type": "rectangle",
+                                "id": 990,
+                                "name": "Rectangle Path",
+                                "width": 444,
+                                "height": 338,
+                                "cornerRadius": 0
+                            },
+                            {
+                                "type": "colorFill",
+                                "id": 1000,
+                                "name": "Color",
+                                "opacity": 1,
+                                "color": [
+                                    0.9309523701667786,
+                                    0.05585714429616928,
+                                    0.05585714429616928,
+                                    1
+                                ],
+                                "fillRule": "nonzero"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "shape",
+                        "id": 992,
+                        "name": "Ellipse",
+                        "translation": [
+                            457.0870361328125,
+                            364.522216796875
+                        ],
+                        "clipsOptions": [
+                            true,
+                            true,
+                            true,
+                            true,
+                            true
+                        ],
+                        "blendMode": "srcOver",
+                        "drawOrder": 2,
+                        "transformAffectsStroke": false,
+                        "clips": [
+                            {
+                                "id": 987
+                            }
+                        ],
+                        "children": [
+                            {
+                                "type": "colorFill",
+                                "id": 994,
+                                "name": "Color",
+                                "opacity": 1,
+                                "color": [
+                                    0.356964647769928,
+                                    0.27548810839653015,
+                                    0.7547619342803955,
+                                    1
+                                ],
+                                "fillRule": "nonzero"
+                            },
+                            {
+                                "type": "ellipse",
+                                "id": 995,
+                                "name": "Ellipse Path",
+                                "width": 409,
+                                "height": 338
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "settings": {}
+}

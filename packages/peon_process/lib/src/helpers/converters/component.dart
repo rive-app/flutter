@@ -15,6 +15,8 @@ abstract class ComponentConverter {
     });
   }
 
+  ComponentConverter.init(this._component);
+
   final Component _component;
   Component get component => _component;
   // RiveCoreContext context;

@@ -1,0 +1,104 @@
+{
+  "artboards": {
+    "type": "artboards",
+    "id": 985,
+    "name": "Artboards",
+    "main": 0,
+    "children": [
+      {
+        "type": "artboard",
+        "id": 986,
+        "name": "Artboard",
+        "translation": [
+          0,
+          0
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "width": 1024,
+        "height": 768,
+        "color": [
+          0.364705890417099,
+          0.364705890417099,
+          0.364705890417099,
+          1
+        ],
+        "clipContents": true,
+        "animations": [],
+        "children": [
+          {
+            "type": "shape",
+            "id": 987,
+            "name": "Rectangle",
+            "translation": [
+              464,
+              316
+            ],
+            "blendMode": "srcOver",
+            "drawOrder": 1,
+            "transformAffectsStroke": false,
+            "children": [
+              {
+                "type": "colorStroke",
+                "id": 988,
+                "name": "Color",
+                "opacity": 1,
+                "color": [
+                  0.800000011920929,
+                  0.800000011920929,
+                  0.800000011920929,
+                  1
+                ],
+                "width": 1,
+                "cap": "butt",
+                "join": "miter",
+                "trim": "off",
+                "trimStart": 0,
+                "trimEnd": 1,
+                "trimOffset": 0
+              },
+              {
+                "type": "rectangle",
+                "id": 990,
+                "name": "Rectangle Path",
+                "width": 444,
+                "height": 338,
+                "cornerRadius": 0
+              },
+              {
+                "type": "gradientFill",
+                "id": 991,
+                "name": "Color",
+                "opacity": 1,
+                "colorStops": [
+                  0.9261904954910278,
+                  0.06483332812786102,
+                  0.06483332812786102,
+                  1,
+                  0,
+                  0.308678537607193,
+                  0.9214285612106323,
+                  0.847898542881012,
+                  1,
+                  1
+                ],
+                "start": [
+                  0,
+                  -169
+                ],
+                "end": [
+                  0,
+                  169
+                ],
+                "fillRule": "nonzero"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "settings": {}
+}
