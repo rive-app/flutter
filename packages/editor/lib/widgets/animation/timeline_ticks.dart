@@ -90,6 +90,8 @@ class TimelineTicks extends StatelessWidget {
                                     customCursorIcon:
                                         PackedIcon.cursorResizeHorizontal,
                                     dragContext: context,
+                                    endDrag:
+                                        editingAnimation.captureJournalEntry,
                                     drag: (absolute, _) => _dragWorkAreaMarker(
                                       context,
                                       absolute,
@@ -116,6 +118,8 @@ class TimelineTicks extends StatelessWidget {
                                     customCursorIcon:
                                         PackedIcon.cursorResizeHorizontal,
                                     dragContext: context,
+                                    endDrag:
+                                        editingAnimation.captureJournalEntry,
                                     drag: (absolute, _) => _dragWorkAreaMarker(
                                         context, absolute, theme, viewport,
                                         (frame) {
