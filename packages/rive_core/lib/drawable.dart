@@ -63,6 +63,14 @@ abstract class Drawable extends DrawableBase {
   }
 
   @override
+  void parentChanged(ContainerComponent from, ContainerComponent to) {
+    super.parentChanged(from, to);
+    // Make sure we re-compute clipping shapes when we change parents. Issue
+    // #1586
+    addDirt(ComponentDirt.clip);
+  }
+
+  @override
   void update(int dirt) {
     super.update(dirt);
     if (dirt & ComponentDirt.clip != 0) {
