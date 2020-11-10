@@ -110,6 +110,11 @@ class UserManager with Subscriptions {
     return signedOut;
   }
 
+  Future<void> delete(String password) async {
+    await _meApi.deleteApi(password);
+    logout();
+  }
+
   /// On FlutterWeb: read the error message from the cookies, if present.
   /// On desktop: empty response.
   Future<String> get errorMessage async {

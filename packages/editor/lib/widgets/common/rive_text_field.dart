@@ -3,28 +3,32 @@ import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class RiveTextField extends StatefulWidget {
-  final bool enabled;
+  final bool autocorrect;
   final bool autofocus;
+  final bool enabled;
+  final bool enableSuggestions;
   final bool obscureText;
-  final String initialValue;
-  final String hintText;
-  final String errorText;
-  final double fontSize;
   final double errorFontSize;
+  final double fontSize;
   final EdgeInsets contentPadding;
-  final int maxCharacters;
   final FocusNode focusNode;
-  final ValueChanged<String> onSubmit;
-  final ValueChanged<String> onChanged;
-  final TextEditingController controller;
+  final GlobalKey<EditableTextState> editableKey;
+  final int maxCharacters;
   final List<TextInputFormatter> formatters;
   final MainAxisAlignment errorAlignment;
-  final GlobalKey<EditableTextState> editableKey;
+  final String errorText;
+  final String hintText;
+  final String initialValue;
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmit;
 
   const RiveTextField({
     this.enabled = true,
     this.autofocus = false,
     this.obscureText = false,
+    this.enableSuggestions = true,
+    this.autocorrect = true,
     this.initialValue,
     this.hintText,
     this.errorText,
@@ -111,6 +115,8 @@ class _RiveTextFieldState extends State<RiveTextField>
           key: editableTextKey,
           enabled: widget.enabled,
           autofocus: widget.autofocus,
+          enableSuggestions: widget.enableSuggestions,
+          autocorrect: widget.autocorrect,
           obscureText: widget.obscureText,
           onFieldSubmitted: widget.onSubmit,
           onChanged: widget.onChanged,

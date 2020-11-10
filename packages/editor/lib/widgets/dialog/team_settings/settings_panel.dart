@@ -17,6 +17,7 @@ import 'package:rive_editor/widgets/dialog/team_settings/plan.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/profile_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_header.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_members.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/user_account.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:tree_widget/flat_tree_item.dart';
@@ -75,14 +76,9 @@ class _SettingsState extends State<Settings> {
   Team get team => isTeam ? widget.owner as Team : null;
 
   Widget _panel(Widget child) {
-    var maxWidth = riveDialogMaxWidth;
-
-    if (!isTeam) {
-      maxWidth -= settingsTabNavWidth;
-    }
-
     return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth), child: child);
+        constraints: BoxConstraints(maxWidth: riveDialogMaxWidth),
+        child: child);
   }
 
   Widget _label(SettingsScreen screen, int index) => _SettingsTabItem(
@@ -182,7 +178,7 @@ class _SettingsState extends State<Settings> {
     return _panel(
       Row(
         children: [
-          if (isTeam) _nav(screens, colors.fileBackgroundLightGrey),
+          _nav(screens, colors.fileBackgroundLightGrey),
           _contents(
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -302,8 +298,6 @@ class SettingsScreen {
             _getApi(ctx),
           ),
         ),
-        // SettingsScreen('Groups', (ctx) => const SizedBox()),
-        // SettingsScreen('Purchase Permissions', (ctx) => const SizedBox()),
       ];
     } else {
       return [
@@ -311,8 +305,11 @@ class SettingsScreen {
           'Profile',
           (ctx) => ProfileSettings(owner),
         ),
-        // SettingsScreen('Store'),
-        // SettingsScreen('Billing History'),
+        SettingsScreen('Account', (ctx) => UserAccount()
+            //   owner,
+            //   _getApi(ctx),
+            // ),
+            ),
       ];
     }
   }
