@@ -147,8 +147,9 @@ void main() {
   });
 
   const flareRevisionFiles = [
+    'bones',
     'circles_revision',
-    'gradient_revision',
+    'gradient',
     'interpolation',
     'keyframe_gradient',
     'keyframes',
@@ -171,7 +172,7 @@ void main() {
     final converter = FlareToRive(filename)..toFile(fileString);
     final exporter = RuntimeExporter(
       core: converter.riveFile,
-      info: RuntimeHeader(ownerId: ownerId, fileId: 0),
+      info: RuntimeHeader(ownerId: ownerId, fileId: 0, version: riveVersion),
     );
     final bytes = exporter.export();
     File('$prefix/out/$filename.riv')

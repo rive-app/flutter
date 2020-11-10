@@ -1,0 +1,55 @@
+import 'dart:math';
+
+import 'package:peon_process/converters.dart';
+import 'package:rive_core/container_component.dart';
+import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/transform_component.dart';
+
+abstract class TransformComponentConverter extends ComponentConverter {
+  TransformComponentConverter(
+    TransformComponent component,
+    RiveFile context,
+    ContainerComponent maybeParent,
+  ) : super(component, context, maybeParent);
+
+  @override
+  void deserialize(Map<String, Object> jsonData) {
+    super.deserialize(jsonData);
+    final translation = jsonData['translation'];
+    final rotation = jsonData['rotation'];
+    final scale = jsonData['scale'];
+    final opacity = jsonData['opacity'];
+    // TODO:
+    final displayType = jsonData['displayType'];
+    final clips = jsonData['clips'];
+    final clipsOptions = jsonData['clipsOptions'];
+    // TODO: render opacity?
+
+    // print('Node');
+    // print('Translation: $translation');
+    // print('Scale: $scale');
+    // print('Opacity: $opacity');
+
+    final transformComponent = component as TransformComponent;
+
+    if (translation is List) {
+      transformComponent
+        ..x = (translation[0] as num).toDouble()
+        ..y = (translation[1] as num).toDouble();
+    }
+
+    if (rotation is num) {
+      transformComponent.rotation = rotation.toDouble() * pi / 180;
+    }
+
+    if (scale is List) {
+      transformComponent
+        ..scaleX = (scale[0] as num).toDouble()
+        ..scaleY = (scale[1] as num).toDouble();
+    }
+
+    if (opacity is num) {
+      transformComponent.opacity = opacity.toDouble();
+    }
+  }
+}

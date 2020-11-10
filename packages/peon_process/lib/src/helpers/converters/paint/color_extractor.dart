@@ -26,13 +26,9 @@ abstract class ColorExtractor {
         ((color[2] as num) * 255).toInt(),
         (opacity as num).toDouble(),
       );
-      final solidColor = SolidColor()..color = colorValue;
 
-      final ctx = paint.context;
-      ctx.batchAdd(() {
-        ctx.addObject(solidColor);
-        paint.appendChild(solidColor);
-      });
+      var fillColor = paint.children.firstWhere((child) => child is SolidColor);
+      (fillColor as SolidColor).color = colorValue;
     }
   }
 

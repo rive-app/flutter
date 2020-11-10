@@ -4,6 +4,8 @@ import 'package:local_data/local_data.dart';
 import 'package:peon_process/converters.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
@@ -165,6 +167,14 @@ class FlareToRive {
       case 'point':
         final pointType = object['pointType'] as String;
         converter = PathPointConverter(pointType, riveFile, maybeParent)
+          ..deserialize(object);
+        break;
+      case 'rootBone':
+        converter = BoneConverter(RootBone(), riveFile, maybeParent)
+          ..deserialize(object);
+        break;
+      case 'bone':
+        converter = BoneConverter(Bone(), riveFile, maybeParent)
           ..deserialize(object);
         break;
       default:
