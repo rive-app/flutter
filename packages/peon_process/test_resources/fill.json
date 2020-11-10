@@ -1,0 +1,90 @@
+{
+    "artboards": {
+        "type": "artboards",
+        "id": 985,
+        "name": "Artboards",
+        "main": 0,
+        "children": [
+            {
+                "type": "artboard",
+                "id": 986,
+                "name": "Artboard",
+                "translation": [
+                    0,
+                    0
+                ],
+                "origin": [
+                    0,
+                    0
+                ],
+                "width": 1024,
+                "height": 768,
+                "color": [
+                    0.364705890417099,
+                    0.364705890417099,
+                    0.364705890417099,
+                    1
+                ],
+                "clipContents": true,
+                "animations": [],
+                "children": [
+                    {
+                        "type": "shape",
+                        "id": 987,
+                        "name": "Rectangle",
+                        "translation": [
+                            464,
+                            316
+                        ],
+                        "blendMode": "srcOver",
+                        "drawOrder": 1,
+                        "transformAffectsStroke": false,
+                        "children": [
+                            {
+                                "type": "colorStroke",
+                                "id": 988,
+                                "name": "Color",
+                                "opacity": 1,
+                                "color": [
+                                    0.800000011920929,
+                                    0.800000011920929,
+                                    0.800000011920929,
+                                    1
+                                ],
+                                "width": 1,
+                                "cap": "butt",
+                                "join": "miter",
+                                "trim": "off",
+                                "trimStart": 0,
+                                "trimEnd": 1,
+                                "trimOffset": 0
+                            },
+                            {
+                                "type": "colorFill",
+                                "id": 989,
+                                "name": "Color",
+                                "opacity": 1,
+                                "color": [
+                                    0.9833333492279053,
+                                    0.12291666865348816,
+                                    0.12291666865348816,
+                                    1
+                                ],
+                                "fillRule": "nonzero"
+                            },
+                            {
+                                "type": "rectangle",
+                                "id": 990,
+                                "name": "Rectangle Path",
+                                "width": 444,
+                                "height": 338,
+                                "cornerRadius": 0
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "settings": {}
+}

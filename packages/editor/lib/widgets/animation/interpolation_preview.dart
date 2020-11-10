@@ -38,62 +38,58 @@ class InterpolationPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 160,
-      child: ValueStreamBuilder<double>(
-        stream: timeManager.currentTime,
-        // ignore: missing_return
-        builder: (context, snapshot) {
-          var frame = snapshot.data;
-          double normalizedTime =
-              equalValue<KeyFrame, double>(selection, (key) {
-                    var keyedProperty = key.keyedProperty;
-                    var next = keyedProperty.after(key);
-                    return next == null
-                        ? -1
-                        : (frame - key.frame) / (next.frame - key.frame);
-                  }) ??
-                  -1;
-          switch (interpolation.type) {
-            case KeyFrameInterpolation.hold:
-              return _HoldPreviewRenderer(
-                theme: RiveTheme.of(context),
-                normalizedTime: normalizedTime,
-              );
-            case KeyFrameInterpolation.linear:
-              return _LinearPreviewRenderer(
-                theme: RiveTheme.of(context),
-                normalizedTime: normalizedTime,
-              );
-            case KeyFrameInterpolation.cubic:
-              var commonInterpolator = interpolation.interpolator;
+    return ValueStreamBuilder<double>(
+      stream: timeManager.currentTime,
+      // ignore: missing_return
+      builder: (context, snapshot) {
+        var frame = snapshot.data;
+        double normalizedTime = equalValue<KeyFrame, double>(selection, (key) {
+              var keyedProperty = key.keyedProperty;
+              var next = keyedProperty.after(key);
+              return next == null
+                  ? -1
+                  : (frame - key.frame) / (next.frame - key.frame);
+            }) ??
+            -1;
+        switch (interpolation.type) {
+          case KeyFrameInterpolation.hold:
+            return _HoldPreviewRenderer(
+              theme: RiveTheme.of(context),
+              normalizedTime: normalizedTime,
+            );
+          case KeyFrameInterpolation.linear:
+            return _LinearPreviewRenderer(
+              theme: RiveTheme.of(context),
+              normalizedTime: normalizedTime,
+            );
+          case KeyFrameInterpolation.cubic:
+            var commonInterpolator = interpolation.interpolator;
 
-              if (commonInterpolator is CubicInterpolator) {
-                return _CubicManipulator(
-                  interpolator: commonInterpolator,
-                  keyFrameManager: manager,
-                  child: _CubicPreviewRenderer(
-                    theme: RiveTheme.of(context),
-                    normalizedTime: normalizedTime,
-                    controlIn:
-                        Offset(commonInterpolator.x1, commonInterpolator.y1),
-                    controlOut:
-                        Offset(commonInterpolator.x2, commonInterpolator.y2),
-                  ),
-                );
-              }
-              // I HATE THIS!
-              // https://media.giphy.com/media/lWnWVVvNLL9hC/giphy.gif
-              continue empty;
-            empty:
-            default:
-              return _EmptyPreviewRenderer(
-                theme: RiveTheme.of(context),
-                normalizedTime: normalizedTime,
+            if (commonInterpolator is CubicInterpolator) {
+              return _CubicManipulator(
+                interpolator: commonInterpolator,
+                keyFrameManager: manager,
+                child: _CubicPreviewRenderer(
+                  theme: RiveTheme.of(context),
+                  normalizedTime: normalizedTime,
+                  controlIn:
+                      Offset(commonInterpolator.x1, commonInterpolator.y1),
+                  controlOut:
+                      Offset(commonInterpolator.x2, commonInterpolator.y2),
+                ),
               );
-          }
-        },
-      ),
+            }
+            // I HATE THIS!
+            // https://media.giphy.com/media/lWnWVVvNLL9hC/giphy.gif
+            continue empty;
+          empty:
+          default:
+            return _EmptyPreviewRenderer(
+              theme: RiveTheme.of(context),
+              normalizedTime: normalizedTime,
+            );
+        }
+      },
     );
   }
 }

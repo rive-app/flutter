@@ -412,6 +412,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         startScrollOffset = null;
         updateMarquee();
         var selection = Plumber().peek<Selection>() ?? Selection();
+        var currentDirectory = Plumber().peek<CurrentDirectory>();
         if (rightClick && selection != null) {
           ListPopup.show(context,
               margin: 5,
@@ -442,12 +443,13 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                     leftMargin: 15,
                     height: 35,
                   ),
-                PopupContextItem(
-                  'Delete',
-                  select: () => FolderContentsManager().delete(),
-                  leftMargin: 15,
-                  height: 35,
-                ),
+                if (!(currentDirectory?.folder?.isTrash ?? false))
+                  PopupContextItem(
+                    'Delete',
+                    select: () => FolderContentsManager().delete(),
+                    leftMargin: 15,
+                    height: 35,
+                  ),
                 if (selection.files.length == 1) PopupContextItem.separator(),
                 if (selection.files.length == 1)
                   PopupContextItem(
@@ -692,17 +694,19 @@ class FileBrowser extends StatelessWidget {
         (context, index) {
           var file = files.elementAt(index);
           return ValueStreamBuilder<File>(
-              stream: Plumber().getStream<File>(file.hashCode),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
-                  return BrowserFile(
-                      snapshot.data,
-                      selection?.files?.contains(snapshot.data) == true,
-                      suspended);
-                }
-              });
+            stream: Plumber().getStream<File>(file.hashCode),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return BrowserFile(
+                  snapshot.data,
+                  selection?.files?.contains(snapshot.data) == true,
+                  suspended,
+                );
+              }
+            },
+          );
         },
         childCount: files.length,
       ),
@@ -870,6 +874,9 @@ class FileBrowser extends StatelessWidget {
             horizontal: horizontalPadding,
           ),
           child: CustomScrollView(
+            // don't mount widgets out of view at all
+            cacheExtent: 0,
+
             primary: false,
             controller: scrollController,
             slivers: slivers,

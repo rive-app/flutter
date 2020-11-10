@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 
 final _log = Logger('coop_server');
 
-String _isolateKey(int ownerId, int fileId) => '$ownerId-$fileId';
+String _isolateKey(int fileId) => '$fileId';
 
 abstract class CoopServer {
   final Map<String, CoopIsolate> _isolates = <String, CoopIsolate>{};
@@ -30,8 +30,7 @@ abstract class CoopServer {
       _isolates.values.fold(0, (count, isolate) => count + isolate.clientCount);
 
   bool remove(CoopIsolate isolate) {
-    return _isolates.remove(_isolateKey(isolate.ownerId, isolate.fileId)) !=
-        null;
+    return _isolates.remove(_isolateKey(isolate.fileId)) != null;
   }
 
   Future<bool> close() async {
@@ -41,12 +40,12 @@ abstract class CoopServer {
 
   /// Allow implementations to override the isolate process interface.
   @protected
-  CoopIsolate makeIsolateInterface(int ownerId, int fileId) =>
-      CoopIsolate(this, ownerId, fileId);
+  CoopIsolate makeIsolateInterface(int fileId) => CoopIsolate(this, fileId);
 
   /// Listen for incoming connections and upgrade them to web sockets if valid
-  /// This is assumed to be coming from a trusted source and so no user permissions
-  /// will be checked here. This should only be called inside a private network.
+  /// This is assumed to be coming from a trusted source and so no user
+  /// permissions will be checked here. This should only be called inside a
+  /// private network.
   Future<bool> listen({int port = 8000, Map<String, String> options}) async {
     try {
       _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
@@ -58,8 +57,8 @@ abstract class CoopServer {
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
 
-      // If there are not 5 segments, return health status
-      if (segments.length != 5) {
+      // If there are not 4 segments, return health status
+      if (segments.length != 4) {
         request.response.statusCode = 200;
         request.response.write('Healthy');
         await request.response.close();
@@ -69,7 +68,7 @@ abstract class CoopServer {
       // This replaces the code for parsing segments of length 5
       // when the co-op server moves inside the VPC
       // The format expected is:
-      // 'v<version>/<ownerId>/<fileId>/<userOwnerId>/<clientId>
+      // 'v<version>/<fileId>/<userOwnerId>/<clientId>
       try {
         _log.finest('Web socket request');
         final data = WebSocketData.fromSegments(segments);
@@ -85,10 +84,10 @@ abstract class CoopServer {
           return;
         }
 
-        String key = _isolateKey(data.ownerId, data.fileId);
+        String key = _isolateKey(data.fileId);
         var isolate = _isolates[key];
         if (isolate == null) {
-          isolate = makeIsolateInterface(data.ownerId, data.fileId);
+          isolate = makeIsolateInterface(data.fileId);
           // Immediately make it available...
           _isolates[key] = isolate;
           if (!await isolate.spawn(handler, options)) {
@@ -130,13 +129,12 @@ abstract class CoopServer {
 /// connect with a client (proxied by the 2D service)
 class WebSocketData {
   int version;
-  int ownerId;
   int fileId;
   int userOwnerId;
   int clientId;
 
   WebSocketData.fromSegments(List<String> segments)
-      : assert(segments.length == 5) {
+      : assert(segments.length == 4) {
     try {
       // Parse the version nr
       if (segments[0].length < 2) {
@@ -146,13 +144,12 @@ class WebSocketData {
       // Remove 'v' in 'v2'
       version = int.parse(segments[0].substring(1));
       // Parse all the other segments, which should be ints
-      ownerId = int.parse(segments[1]);
-      fileId = int.parse(segments[2]);
-      userOwnerId = int.parse(segments[3]);
+      fileId = int.parse(segments[1]);
+      userOwnerId = int.parse(segments[2]);
       try {
-        clientId = int.parse(segments[4]);
+        clientId = int.parse(segments[3]);
       } on FormatException catch (e, s) {
-        _log.severe('Invalid clientid: ${segments[4]}', e, s);
+        _log.severe('Invalid clientid: ${segments[3]}', e, s);
         // Don't rethrow, just give a default client id
         clientId = 0;
       }
@@ -164,7 +161,6 @@ class WebSocketData {
 
   @override
   String toString() => 'version: $version, '
-      'ownerId: $ownerId'
       'fileId: $fileId'
       'userOwnerId: $userOwnerId'
       'clientId: $clientId';
@@ -179,13 +175,11 @@ String _segmentsToString(List<String> segments) {
     } else if (i == 1) {
       str.write('version: ${segments[1]}');
     } else if (i == 2) {
-      str.write('ownerid: ${segments[2]}');
+      str.write('fileid: ${segments[2]}');
     } else if (i == 3) {
-      str.write('fileid: ${segments[3]}');
+      str.write('userOwnerId: ${segments[3]}');
     } else if (i == 4) {
-      str.write('userOwnerId: ${segments[4]}');
-    } else if (i == 5) {
-      str.write('clientid: ${segments[5]}');
+      str.write('clientid: ${segments[4]}');
     } else {
       str.write('$i: ${segments[i]}');
     }

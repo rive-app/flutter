@@ -53,10 +53,7 @@ class FolderTreeView extends StatelessWidget {
           height: 20,
           child: Center(
             child: FolderTreeIcon(
-              owner: item.data.owner,
-              icon: item.data.folder?.id == 0
-                  ? PackedIcon.trash
-                  : PackedIcon.folder,
+              item: item.data,
               iconColor: isSelected(selectedStream)
                   ? colors.fileSelectedFolderIcon
                   : colors.fileUnselectedFolderIcon,
@@ -89,24 +86,23 @@ class FolderTreeView extends StatelessWidget {
         builder: (context, selectedStream) => Expanded(
           child: Row(children: [
             Expanded(
-              child: Container(
-                child: IgnorePointer(
-                  child: Text(
-                    item.data.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isSelected(selectedStream)
-                          ? Colors.white
-                          : colors.fileTreeText,
-                    ),
+              child: IgnorePointer(
+                child: Text(
+                  item.data.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isSelected(selectedStream)
+                        ? Colors.white
+                        : colors.fileTreeText,
                   ),
                 ),
               ),
             ),
-            if (item.data.owner is Me ||
-                (item.data.owner is Team &&
-                    canEditTeam((item.data.owner as Team).permission)))
+            if (item.data.isRoot &&
+                (item.data.owner is Me ||
+                    (item.data.owner is Team &&
+                        canEditTeam((item.data.owner as Team).permission))))
               FolderTreeItemButton(
                 itemData: item.data,
                 isSelected: isSelected(selectedStream),
@@ -116,7 +112,7 @@ class FolderTreeView extends StatelessWidget {
                   await showSettings(item.data.owner, context: context);
                 },
               ),
-            if (item.data.owner != null)
+            if (item.data.isRoot)
               Padding(
                 padding: const EdgeInsets.only(right: 7),
                 child: FolderTreeItemButton(
@@ -136,7 +132,7 @@ class FolderTreeView extends StatelessWidget {
                       Plumber().message(currentDirectory);
                     }
 
-                    await RiveContext.of(context).open(createdFile);
+                    RiveContext.of(context).open(createdFile);
                   },
                 ),
               )
@@ -149,40 +145,38 @@ class FolderTreeView extends StatelessWidget {
 
 class FolderTreeIcon extends StatelessWidget {
   const FolderTreeIcon({
-    this.owner,
+    this.item,
     this.iconColor,
-    this.size = const Size(15, 15),
-    this.icon = PackedIcon.folder,
     Key key,
   }) : super(key: key);
 
-  final Owner owner;
-  final Size size;
-  final Iterable<PackedIcon> icon;
   final Color iconColor;
+  final FolderTreeItem item;
 
   @override
   Widget build(BuildContext context) {
     var colors = RiveTheme.of(context).colors;
 
-    if (owner == null) {
-      return Center(
-          child: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: TintedIcon(
-            icon: icon,
-            color: (iconColor == null)
-                ? colors.fileUnselectedFolderIcon
-                : iconColor),
-      ));
-    } else {
+    if (item.folder.isRoot) {
       return AvatarView(
         diameter: 15,
         borderWidth: 0,
-        imageUrl: owner.avatarUrl,
-        name: owner.displayName,
-        color: StageCursor.colorFromPalette(owner.ownerId),
+        imageUrl: item.owner.avatarUrl,
+        name: item.owner.displayName,
+        color: StageCursor.colorFromPalette(item.owner.ownerId),
+      );
+    } else {
+      return Center(
+        child: SizedBox(
+          width: 15,
+          height: 15,
+          child: TintedIcon(
+            icon: item.folder.isTrash ? PackedIcon.trash : PackedIcon.folder,
+            color: (iconColor == null)
+                ? colors.fileUnselectedFolderIcon
+                : iconColor,
+          ),
+        ),
       );
     }
   }

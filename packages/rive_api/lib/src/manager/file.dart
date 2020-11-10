@@ -1,9 +1,11 @@
+import 'dart:async';
+import 'dart:collection';
+
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/plumber.dart';
-import 'package:utilities/utilities.dart';
 
 class FileManager with Subscriptions {
   static final _instance = FileManager._();
@@ -70,28 +72,14 @@ class FileManager with Subscriptions {
   }
 
   Future<File> createFile(Owner owner, [Folder folder]) async {
-    var _folder = (folder == null)
-        ? _folderMap[owner].firstWhere((element) => element.id == 1)
-        : folder;
-    FileDM fileDM;
-    if (owner is Team) {
-      fileDM = await _fileApi.createFile(_folder.id, _folder.ownerId);
-    } else {
-      fileDM = await _fileApi.createFile(_folder.id);
-    }
+    FileDM fileDM = await _fileApi.createFile(owner.ownerId, folder?.id);
 
     return File.fromDM(fileDM, owner.ownerId);
   }
 
   Future<Folder> createFolder(Owner owner, [Folder folder]) async {
-    folder ??= _folderMap[owner].firstWhere((element) => element.id == 1);
-    FolderDM folderDM;
-    if (owner is Team) {
-      folderDM = await _folderApi.createTeamFolder(folder.id, folder.ownerId);
-    } else {
-      folderDM =
-          await _folderApi.createPersonalFolder(folder.id, folder.ownerId);
-    }
+    FolderDM folderDM =
+        await _folderApi.createFolder(owner.ownerId, folder?.id);
 
     return Folder.fromDM(folderDM);
   }
@@ -115,27 +103,26 @@ class FileManager with Subscriptions {
 
   Future<void> loadFiles(Folder folder, Owner owner) async {
     // currently unused.
-    List<File> _files;
-    if (owner is Me) {
-      _files =
-          File.fromDMList(await _fileApi.myFiles(owner.ownerId, folder.id));
-    } else {
-      _files = File.fromDMList(
-          await _fileApi.teamFiles(owner.ownerId, folder.id), owner.ownerId);
-    }
+    List<File> _files =
+        File.fromDMList(await _fileApi.files(owner.ownerId, folder.id));
 
     _fileMap[folder] = _files;
     _plumber.message(_files, folder.hashCode);
   }
 
   /// Load in the user's recent files details
-  Future<Iterable<File>> loadRecentFilesDetails() async {
-    final fileDataModels = await _fileApi.recentFilesDetails();
+  Future<Iterable<File>> loadRecentFiles() async {
+    final fileDataModels = await _fileApi.recentFiles();
     final files = File.fromDMList(fileDataModels);
-    // Place the file details into the caching file details streams
-    // TODO: these should be hashed with the hashed id, not int
-    files.forEach((file) =>
-        Plumber().message<File>(file, szudzik(file.id, file.ownerId)));
+    final plumber = Plumber();
+    files.forEach((file) {
+      var cached = cachedDetails(file.id);
+      if (cached != null) {
+        plumber.message<File>(cached, cached.hashCode);
+      } else {
+        plumber.message<File>(file, file.hashCode);
+      }
+    });
 
     return files;
   }
@@ -145,9 +132,7 @@ class FileManager with Subscriptions {
   /// file data in the stream, allowing the file browser to update.
   Future<void> renameFile(File file, String name) async {
     // if me's not set you have other problems.
-    final changed = (_me != null && _me.ownerId == file.fileOwnerId)
-        ? await _fileApi.renameMyFile(file.fileOwnerId, file.id, name)
-        : await _fileApi.renameProjectFile(file.fileOwnerId, file.id, name);
+    final changed = await _fileApi.renameFile(file.id, name);
     if (changed) {
       File updatedFile = File(
         id: file.id,
@@ -156,6 +141,7 @@ class FileManager with Subscriptions {
         fileOwnerId: file.fileOwnerId,
         thumbnail: file.thumbnail,
       );
+      _detailsCache[file.id] = _DetailsCacheEntry(updatedFile);
 
       Plumber().message<File>(updatedFile);
     }
@@ -165,8 +151,7 @@ class FileManager with Subscriptions {
     final targetFolder = _folderMap[currentDirectory.owner].firstWhere(
       (element) => element.id == currentDirectory.folder.parent,
       orElse: () {
-        return _folderMap[currentDirectory.owner]
-            .firstWhere((folder) => folder.id == 1);
+        return null;
       },
     );
     Plumber().message(CurrentDirectory(currentDirectory.owner, targetFolder));
@@ -181,4 +166,71 @@ class FileManager with Subscriptions {
 
     Plumber().message(CurrentDirectory(owner, targetFolder));
   }
+
+  final _detailsBatch = HashSet<File>();
+  Timer _loadDetailsTimer;
+
+  /// Let the manager know the details for this file are necessary, get schedule
+  /// fetching them (we delay so we can batch and debounce when scrolling
+  /// through lots of content).
+  void needDetails(File file) {
+    _detailsBatch.add(file);
+
+    _loadDetailsTimer ??=
+        Timer(const Duration(milliseconds: 200), _loadBatchedDetails);
+  }
+
+  /// No longer need the details, remove them from the batched load set if
+  /// they're in there.
+  void dontNeedDetails(File file) {
+    _detailsBatch.remove(file);
+  }
+
+  final _detailsCache = HashMap<int, _DetailsCacheEntry>();
+
+  File cachedDetails(int fileId) => _detailsCache[fileId]?.file;
+
+  Future<void> _loadBatchedDetails() async {
+    // invalidate expired cached details (note: do we get a notification to our
+    // WS if someone renames a file or something? we could remove it from cache
+    // early)
+    _detailsCache.removeWhere((id, detail) => detail.isExpired);
+
+    final plumber = Plumber();
+    List<int> loadList = [];
+    for (final file in _detailsBatch) {
+      var cached = _detailsCache[file.id];
+      if (cached != null) {
+        plumber.message<File>(cached.file, cached.file.hashCode);
+      } else {
+        loadList.add(file.id);
+      }
+    }
+
+    // Clear the batch so further sets can accumulate while we load.
+    _detailsBatch.clear();
+    _loadDetailsTimer = null;
+    if (loadList.isEmpty) {
+      return;
+    }
+
+    // Get the file details from the backend, and update the cache if needed.
+    final fileDetails = await _fileApi.fileDetails(loadList);
+
+    final fileDetailsList = File.fromDMList(fileDetails);
+
+    for (final file in fileDetailsList) {
+      _detailsCache[file.id] = _DetailsCacheEntry(file);
+      plumber.message<File>(file, file.hashCode);
+    }
+  }
+}
+
+class _DetailsCacheEntry {
+  final DateTime expiration;
+  final File file;
+  _DetailsCacheEntry(this.file)
+      : expiration = DateTime.now().add(const Duration(seconds: 120));
+
+  bool get isExpired => DateTime.now().isAfter(expiration);
 }

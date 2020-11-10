@@ -9,63 +9,36 @@ import 'package:rive_api/data_model.dart';
 import 'package:utilities/deserialize.dart';
 
 final _log = Logger('File Api');
-const specialFolderIds = {0, 1};
 
 class FileApi {
   FileApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<List<FileDM>> myFiles(int ownerId, int folderId) async =>
-      _files('/api/my/files/recent/rive/$folderId', ownerId);
+  Future<List<FileDM>> recentFiles() async => _files('/api/files/ids/recent');
 
-  Future<List<FileDM>> teamFiles(int ownerId, int folderId) async =>
-      _files('/api/teams/$ownerId/files/recent/rive/$folderId', ownerId);
+  Future<List<FileDM>> files(int ownerId, int folderId) {
+    String route;
+    switch (folderId) {
+      case FolderDM.allId:
+        route = '/api/files/ids/$ownerId/recent';
+        break;
+      case FolderDM.trashId:
+        route = '/api/trash/ids/$ownerId/recent';
+        break;
 
-  /// Return the user's file ids in most recent order
-  /// This returns the new combo file id format.
-  /// For the moment, this will get converted by to ownerId, fileId
-  /// but in future we can update the code to handle a single file id
-  Future<Iterable<FileDM>> recentFiles() async {
-    final res = await api.get('${api.host}/api/v2/my/recents/');
-    try {
-      final data = json.decodeList<String>(res.body);
-      return FileDM.fromHashedIdList(data);
-    } on FormatException catch (e) {
-      _log.severe('Error formatting recent files api response', e);
-      rethrow;
+      default:
+        route = '/api/files/ids/$ownerId/$folderId/recent';
+        break;
     }
+    return _files(route, ownerId);
   }
 
-  /// Return the user's recent files details
-  /// This uses the new combo file id format.
-  /// For the moment, this will get converted by to ownerId, fileId
-  /// but in future we can update the code to handle a single file id
-  Future<Iterable<FileDM>> recentFilesDetails() async {
-    final res = await api.get('${api.host}/api/v2/my/recents/files');
-    try {
-      final data = json.decodeMap(res.body);
-      final cdns = CdnDM.fromDataMap(data.getMap<String, dynamic>('cdns'));
-
-      return FileDM.fromHashedIdDataList(data.getList('files'), cdns);
-    } on FormatException catch (e) {
-      _log.severe('Error formatting recent files details api response', e);
-      rethrow;
-    }
-  }
-
-  Future<void> deleteMyFiles(List<int> fileIds, List<int> folderIds) async {
-    return _deleteFiles('/api/my/files', fileIds, folderIds);
-  }
-
-  Future<void> deleteTeamFiles(
-      int teamOwnerId, List<int> fileIds, List<int> folderIds) async {
-    return _deleteFiles('/api/teams/$teamOwnerId/files', fileIds, folderIds);
+  Future<void> deleteFiles(List<int> fileIds, List<int> folderIds) async {
+    return _deleteFiles('/api/files', fileIds, folderIds);
   }
 
   Future<void> _deleteFiles(
       String url, List<int> fileIds, List<int> folderIds) async {
-    // TODO: changing input is pretty yuk.
-    folderIds.removeWhere((folderId) => specialFolderIds.contains(folderId));
     var payload = <String, List<int>>{
       'files': fileIds ?? [],
       'folders': folderIds ?? [],
@@ -77,6 +50,7 @@ class FileApi {
     final res = await api.get(api.host + url);
     try {
       final data = json.decodeList<int>(res.body);
+
       return FileDM.fromIdList(data, ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response', e);
@@ -84,12 +58,8 @@ class FileApi {
     }
   }
 
-  Future<List<FileDM>> myFileDetails(List<int> fileIds) async =>
-      _fileDetails('/api/my/files', fileIds);
-
-  Future<List<FileDM>> teamFileDetails(
-          List<int> fileIds, int teamOwnerId) async =>
-      _fileDetails('/api/teams/$teamOwnerId/files', fileIds);
+  Future<List<FileDM>> fileDetails(List<int> fileIds) async =>
+      _fileDetails('/api/files/details', fileIds);
 
   Future<List<FileDM>> _fileDetails(String url, List fileIds) async {
     var res = await api.post(
@@ -99,7 +69,7 @@ class FileApi {
 
     try {
       final data = json.decodeMap(res.body);
-      final cdn = CdnDM.fromData(data.getMap<String, dynamic>('cdn'));
+      final cdn = CdnDM.fromDataMap(data.getMap<String, dynamic>('cdn'));
       return FileDM.fromDataList(data.getList('files'), cdn);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response', e);
@@ -119,23 +89,12 @@ class FileApi {
     return 0;
   }
 
-  Future<FileDM> createFile(int folderId, [int projectId]) async {
-    FileDM newFile;
-    if (projectId != null) {
-      newFile = await _createProjectFile(folderId, projectId);
-    } else {
-      newFile = await _createFile(folderId);
-    }
-    return newFile;
+  Future<FileDM> createFile(int ownerId, int folderId) async {
+    return _createFile(ownerId, folderId);
   }
 
-  Future<bool> renameMyFile(int ownerId, int fileId, String name) async {
-    return _renameFile(api.host + '/api/files/$ownerId/$fileId/name', name);
-  }
-
-  Future<bool> renameProjectFile(int ownerId, int fileId, String name) async {
-    return _renameFile(
-        api.host + '/api/projects/$ownerId/files/$fileId/name', name);
+  Future<bool> renameFile(int fileId, String name) async {
+    return _renameFile(api.host + '/api/files/$fileId/name', name);
   }
 
   Future<bool> _renameFile(String url, String name) async {
@@ -145,23 +104,11 @@ class FileApi {
     return response.statusCode == 200;
   }
 
-  // /api/my/files/:product/create/:folder_id?
-  Future<FileDM> _createFile(int folderId) async {
-    var response =
-        await api.post(api.host + '/api/my/files/rive/create/$folderId');
-    return _parseFileResponse(response);
-  }
-
-  Future<FileDM> _createProjectFile(
-    int folderId,
-    int projectId,
-  ) async {
-    String payload = json.encode({
-      'data': {'fileName': 'New File'}
-    });
-    var response = await api.post(
-        api.host + '/api/projects/$projectId/folders/$folderId/new/rive/',
-        body: payload);
+  Future<FileDM> _createFile(int ownerId, int folderId) async {
+    var response = await api.post(api.host +
+        (folderId == null
+            ? '/api/files/$ownerId/create'
+            : '/api/files/$ownerId/create/$folderId'));
     return _parseFileResponse(response);
   }
 
@@ -186,7 +133,7 @@ class FileApi {
   }
 
   /// Find the socket server url to connect to for a specific file.
-  Future<CoopConnectionInfo> establishCoop(int ownerId, int fileId) async {
+  Future<CoopConnectionInfo> establishCoop() async {
     if (api.host.indexOf('https://') == 0) {
       return CoopConnectionInfo(
           'wss://${api.host.substring('https://'.length)}/ws/proxy');

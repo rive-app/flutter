@@ -105,6 +105,8 @@ HashMap<String, String> _defaultUIStrings =
   'vertex-mirrored': 'Mirrored',
   'vertex-detached': 'Detached',
   'vertex-asymmetric': 'Asymmetric',
+  'select_key': 'Select a key',
+
   // Billing strings
   'normal': 'team',
   'premium': 'org',

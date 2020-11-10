@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 /// Tree of directories
 import 'package:meta/meta.dart';
 import 'package:rive_api/plumber.dart';
@@ -13,54 +15,64 @@ class FolderTree {
   final FolderTreeItem root;
 
   factory FolderTree.fromOwner(Owner owner) {
-    return FolderTree(owner: owner, root: FolderTreeItem.dummy(owner));
+    return FolderTree(owner: owner, root: FolderTreeItem.placeholder(owner));
   }
 
   factory FolderTree.fromFolderList(Owner owner, List<Folder> folders) {
-    final indexMap = <int, List<Folder>>{};
+    // Turn folders into tree items.
+    var treeItems = folders
+        .map((folder) => FolderTreeItem(folder: folder, owner: owner))
+        .toList();
 
-    // map em out
-    folders.forEach((Folder folder) {
-      if (folder.parent != null) {
-        indexMap[folder.parent] ??= [];
-        indexMap[folder.parent].add(folder);
+    // Build folder id => folder lookup table.
+    var lookup = HashMap<int, FolderTreeItem>();
+    for (final treeItem in treeItems) {
+      lookup[treeItem.folder.id] = treeItem;
+    }
+
+    // Parent the tree items.
+    for (final treeItem in treeItems) {
+      var parentTreeItem = lookup[treeItem.folder.parent];
+      if (parentTreeItem != null) {
+        parentTreeItem.children.add(treeItem);
       }
-    });
+    }
 
-    var _rootFolder =
-        folders.firstWhere((element) => element.name == 'Your Files');
     return FolderTree(
-        owner: owner,
-        root: FolderTreeItem.create(_rootFolder, indexMap, owner));
+      owner: owner,
+      root: treeItems.firstWhere(
+        (item) => item.folder.isRoot,
+      ),
+    );
   }
 }
 
 class FolderTreeItem {
-  FolderTreeItem({@required this.folder, @required this.children, this.owner}) {
+  FolderTreeItem({@required this.folder, this.owner}) {
     hover = false;
 
     final currentDirectory = Plumber().peek<CurrentDirectory>();
     if (currentDirectory != null &&
-        (currentDirectory.folder.id == folder?.id &&
+        (currentDirectory.folder?.id == folder?.id &&
             currentDirectory.owner == owner)) {
       selected = true;
     } else {
       selected = false;
     }
   }
+
   final Folder folder;
   final _hover = BehaviorSubject<bool>();
   final _selected = BehaviorSubject<bool>();
   final Owner owner;
-  final List<FolderTreeItem> children;
+  final List<FolderTreeItem> children = [];
 
   String get iconURL {
     return owner?.avatarUrl;
   }
 
-  String get name {
-    return (owner == null) ? folder.name : owner.displayName;
-  }
+  String get name => folder.name ?? owner.displayName;
+  bool get isRoot => folder.isRoot;
 
   BehaviorSubject<bool> get hoverStream => _hover;
   BehaviorSubject<bool> get selectedStream => _selected;
@@ -79,25 +91,10 @@ class FolderTreeItem {
     }
   }
 
-  factory FolderTreeItem.dummy(Owner owner) {
+  // Placeholder used until the real data set is loaded.
+  factory FolderTreeItem.placeholder(Owner owner) {
     return FolderTreeItem(
-      folder: null,
-      children: [],
-      owner: owner,
-    );
-  }
-
-  factory FolderTreeItem.create(Folder root, Map<int, List<Folder>> indexMap,
-      [Owner owner]) {
-    // Note: Cycles gonna kill us.
-    final List<FolderTreeItem> _children = (indexMap.containsKey(root.id))
-        ? indexMap[root.id]
-            .map((childFolder) => FolderTreeItem.create(childFolder, indexMap))
-            .toList()
-        : [];
-    return FolderTreeItem(
-      folder: root,
-      children: _children,
+      folder: Folder.root(owner),
       owner: owner,
     );
   }

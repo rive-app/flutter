@@ -134,12 +134,12 @@ void main() {
   group('Folder', () {
     test('get user folders', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.getFromPath('/api/my/files/folders'))
+      when(riveApi.getFromPath('/api/folders/2'))
           .thenAnswer((_) async => successFoldersResponse);
       final mockApi = FolderApi(riveApi);
       final me = getMe();
       final folders = await mockApi.folders(me);
-      expect(folders.length, 4);
+      expect(folders.length, 5);
       folders.forEach((folder) {
         expect(folder.ownerId, 2);
         expect(folder.order != null, true);
@@ -149,12 +149,12 @@ void main() {
 
     test('get team folders', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.getFromPath('/api/teams/3/folders'))
+      when(riveApi.getFromPath('/api/folders/3'))
           .thenAnswer((_) async => successTeamFoldersResponse);
       final mockApi = FolderApi(riveApi);
       final team = getTeam();
       final folders = await mockApi.folders(team);
-      expect(folders.length, 2);
+      expect(folders.length, 4);
       folders.forEach((folder) {
         expect(folder.ownerId, 3);
         expect(folder.order != null, true);
@@ -164,16 +164,16 @@ void main() {
 
     test('get create user folder', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.post('/api/my/files/folder',
+      when(riveApi.post('/api/folders/1',
               body: '{"name":"New Folder","order":0,"parent":1}'))
           .thenAnswer((_) async {
         return successFolderCreationResponse;
       });
       final mockApi = FolderApi(riveApi);
-      final newFolder = await mockApi.createPersonalFolder(1, 1);
+      final newFolder = await mockApi.createFolder(1, 1);
       expect(newFolder.name, 'New Folder');
       expect(newFolder.id, 10);
-      expect(newFolder.parent, 1);
+      expect(newFolder.parent, -1);
       expect(newFolder.order, 0);
       expect(newFolder.ownerId, 1);
     });
@@ -181,30 +181,31 @@ void main() {
     test('get create team folder', () async {
       final riveApi = MockRiveApi();
       final team = getTeam();
-      const folderId = 1;
-      when(riveApi.post('/api/projects/${team.ownerId}/folders/$folderId',
-              body: '{"data":{"folderName":"New Folder"}}'))
+      const folderId = 10;
+      when(riveApi.post('/api/folders/${team.ownerId}',
+              body: '{"name":"New Folder","order":0,"parent":10}'))
           .thenAnswer((_) async => successTeamFolderCreationResponse);
       final mockApi = FolderApi(riveApi);
 
-      final newFolder = await mockApi.createTeamFolder(folderId, team.ownerId);
+      final newFolder = await mockApi.createFolder(team.ownerId, folderId);
       expect(newFolder.name, 'New Folder');
       expect(newFolder.id, 10);
-      expect(newFolder.parent, 1);
+      expect(newFolder.parent, -1);
       expect(newFolder.order, 1);
-      expect(newFolder.ownerId, 1);
+      expect(newFolder.ownerId, 3);
     });
   });
 
   group('Files', () {
     test('get user files', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.get('/api/my/files/recent/rive/1'))
-          .thenAnswer((_) async => successFilesResponse);
-      final mockApi = FileApi(riveApi);
       final me = getMe();
       final folder = getFolder(me);
-      final files = await mockApi.myFiles(folder.ownerId, folder.id);
+      when(riveApi.get('/api/files/ids/${me.ownerId}/${folder.id}/recent'))
+          .thenAnswer((_) async => successFilesResponse);
+      final mockApi = FileApi(riveApi);
+
+      final files = await mockApi.files(me.ownerId, folder.id);
       expect(files.length, 16);
       files.forEach((file) {
         expect(file.id, isNotNull);
@@ -216,33 +217,31 @@ void main() {
 
     test('get user file details', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.post('/api/my/files', body: '[1,2,3]'))
+      when(riveApi.post('/api/files/details', body: '[1,2,3]'))
           .thenAnswer((_) async => successFileDetailsResponse);
       final mockApi = FileApi(riveApi);
-      // final me = getMe();
-      // final folder = getFolder(me);
-      final files = await mockApi.myFileDetails([1, 2, 3]);
+      final files = await mockApi.fileDetails([1, 2, 3]);
       expect(files.length, 3);
       files.forEach((file) {
-        // expect(file.id, isNotNull);
-        // expect(file.name, isNotNull);
-        // expect(file.ownerId, 1);
-        // expect(file.thumbnail, isNotNull);
+        expect(file.id, isNotNull);
+        expect(file.name, isNotNull);
+        expect(file.ownerId, 1);
+        expect(file.thumbnail, isNotNull);
       });
-      // expect(files.first.name, 'New File');
-      // expect(files.first.thumbnail, 'http://foofo.com/<thumbnail>?param');
-      // expect(files.last.name, 'New File 3');
-      // expect(files.last.thumbnail, 'http://foofo.com/<thumbnail3>?param');
+      expect(files.first.name, 'New File');
+      expect(files.first.thumbnail, 'http://foofo.com/<thumbnail>?param');
+      expect(files.last.name, 'New File 3');
+      expect(files.last.thumbnail, 'http://foofo.com/<thumbnail3>?param');
     });
 
     test('get team files', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.get('/api/teams/3/files/recent/rive/1'))
-          .thenAnswer((_) async => successFilesResponse);
-      final mockApi = FileApi(riveApi);
       final team = getTeam();
       final folder = getFolder(team);
-      final files = await mockApi.teamFiles(
+      when(riveApi.get('/api/files/ids/${team.ownerId}/${folder.id}/recent'))
+          .thenAnswer((_) async => successFilesResponse);
+      final mockApi = FileApi(riveApi);
+      final files = await mockApi.files(
         folder.ownerId,
         folder.id,
       );
@@ -257,12 +256,10 @@ void main() {
 
     test('get team file details', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.post('/api/teams/3/files', body: '[1,2,3]'))
+      when(riveApi.post('/api/files/details', body: '[1,2,3]'))
           .thenAnswer((_) async => successFileDetailsResponse);
       final mockApi = FileApi(riveApi);
-      final team = getTeam();
-      final folder = getFolder(team);
-      final files = await mockApi.teamFileDetails([1, 2, 3], folder.ownerId);
+      final files = await mockApi.fileDetails([1, 2, 3]);
       expect(files.length, 3);
       files.forEach((file) {
         expect(file.id != null, true);
@@ -278,10 +275,11 @@ void main() {
 
     test('get create user file', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.post('/api/my/files/rive/create/1'))
-          .thenAnswer((_) async => successFileCreationResponse);
+      when(riveApi.post('/api/files/1/create/1')).thenAnswer((_) async {
+        return successFileCreationResponse;
+      });
       final mockApi = FileApi(riveApi);
-      final newFile = await mockApi.createFile(1);
+      final newFile = await mockApi.createFile(1, 1);
       expect(newFile.name, 'New File');
       expect(newFile.id, 10);
       expect(newFile.thumbnail, null);
@@ -292,13 +290,11 @@ void main() {
       final riveApi = MockRiveApi();
       final team = getTeam();
       const folderId = 1;
-      when(riveApi.post(
-              '/api/projects/${team.ownerId}/folders/$folderId/new/rive/',
-              body: '{"data":{"fileName":"New File"}}'))
+      when(riveApi.post('/api/files/${team.ownerId}/create/$folderId'))
           .thenAnswer((_) async => successFileCreationResponse);
       final mockApi = FileApi(riveApi);
 
-      final newFile = await mockApi.createFile(folderId, team.ownerId);
+      final newFile = await mockApi.createFile(team.ownerId, folderId);
       expect(newFile.name, 'New File');
       expect(newFile.id, 10);
       expect(newFile.thumbnail, null);
@@ -307,29 +303,14 @@ void main() {
 
     test('get user recent file ids', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.get('/api/v2/my/recents/'))
+      when(riveApi.get('/api/files/ids/recent'))
           .thenAnswer((_) async => successRecentFilesResponse);
       final mockApi = FileApi(riveApi);
       final recentFiles = (await mockApi.recentFiles()).toList();
       expect(recentFiles.length, 3);
-      expect(recentFiles[0].id, 2);
-      expect(recentFiles[1].id, 1);
-      expect(recentFiles[2].id, 43);
-    });
-
-    test('get user recent file details', () async {
-      final riveApi = MockRiveApi();
-      when(riveApi.get('/api/v2/my/recents/files'))
-          .thenAnswer((_) async => successRecentFilesDetailsResponse);
-      final mockApi = FileApi(riveApi);
-      final recentFiles = (await mockApi.recentFilesDetails()).toList();
-      expect(recentFiles.length, 2);
-      expect(recentFiles.first.id, 43);
-      expect(recentFiles.first.ownerId, 40842);
-      expect(recentFiles.first.name, 'Bill');
-      expect(recentFiles.last.id, 40);
-      expect(recentFiles.last.ownerId, 40842);
-      expect(recentFiles.last.name, 'july');
+      expect(recentFiles[0].id, 1);
+      expect(recentFiles[1].id, 2);
+      expect(recentFiles[2].id, 4);
     });
   });
 

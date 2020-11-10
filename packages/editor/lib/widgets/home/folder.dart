@@ -42,7 +42,7 @@ class BrowserFolder extends StatelessWidget {
         child: Row(
           children: [
             TintedIcon(
-                icon: (folder.id == 0) ? PackedIcon.trash : PackedIcon.folder,
+                icon: folder.isTrash ? PackedIcon.trash : PackedIcon.folder,
                 color: colors.black30),
             const SizedBox(width: 8),
             Expanded(

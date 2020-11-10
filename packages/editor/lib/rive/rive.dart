@@ -142,34 +142,11 @@ class Rive {
       // name at all, but this allows it to work when deeplinked in.
 
       FileDM fileDetails;
-      // Poopy way to deal with #1427
-      try {
-        if (file.ownerId == _me.ownerId) {
-          var details = await _filesApi.myFileDetails([file.id]);
-          if (details.length == 1) {
-            fileDetails = details.first;
-          }
-        } else {
-          var details =
-              await _filesApi.teamFileDetails([file.id], file.ownerId);
-          if (details.length == 1) {
-            fileDetails = details.first;
-          }
-        }
-      } on Exception catch (_) {
-        // We got an error attempting to load file metadata, let's see if it's
-        // because the ownerId we have for the file is actually a project owner
-        // id. Because the teamFileDetails needs a team owner id, we can try to
-        // resolve that and retry to load the data with that id.
-        try {
-          var teamOwnerId = await _filesApi.teamIdFromProjectId(file.ownerId);
-          var details = await _filesApi.teamFileDetails([file.id], teamOwnerId);
-          if (details.length == 1) {
-            fileDetails = details.first;
-          }
-        } on Exception catch (error) {
-          _log.warning('error: $error when trying to load file details');
-        }
+
+      var details = await _filesApi.fileDetails([file.id]);
+
+      if (details.length == 1) {
+        fileDetails = details.first;
       }
 
       if (fileDetails != null) {

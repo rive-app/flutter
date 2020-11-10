@@ -25,7 +25,7 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
 
   @override
   Iterable<FolderTreeItem> childrenOf(FolderTreeItem treeItem) =>
-      treeItem.children.cast<FolderTreeItem>();
+      treeItem.children.toList(growable: false);
 
   @override
   void drop(TreeDragOperationTarget<FolderTreeItem> target,
@@ -33,7 +33,7 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
 
   @override
   dynamic dataKey(FolderTreeItem treeItem) {
-    return treeItem.folder.id;
+    return treeItem.folder?.id;
   }
 
   @override
@@ -68,7 +68,7 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
       if (currentDirectory == null) {
         element.selected = false;
       } else if (_data.first.owner == currentDirectory.owner &&
-          element.folder?.id == currentDirectory.folder.id) {
+          element.folder?.id == currentDirectory.folder?.id) {
         element.selected = true;
       } else {
         element.selected = false;

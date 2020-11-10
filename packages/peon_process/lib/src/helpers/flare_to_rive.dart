@@ -4,10 +4,13 @@ import 'package:local_data/local_data.dart';
 import 'package:peon_process/converters.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
@@ -67,6 +70,10 @@ class FlareToRive {
   void _getRiveComponents(Map<String, Object> artboards) {
     // Queue to perform BFS on the hierarchy tree.
     final queue = <Map<String, Object>>[artboards];
+    // Mapping for clips
+    //   Since there can be multiple clips per Component this mapping is:
+    //   < id -> list of ids >
+    final clips = <String, List<int>>{};
 
     while (queue.isNotEmpty) {
       var head = queue.removeAt(0);
@@ -78,10 +85,15 @@ class FlareToRive {
         parent = _fileComponents[parentId.toString()] as ContainerComponent;
       }
 
-      final component = _fromJSON(head, parent);
-      if (component != null) {
+      final converter = _fromJSON(head, parent);
+      if (converter?.component != null) {
         // Update the component mapping.
-        _fileComponents[headId] = component;
+        _fileComponents[headId] = converter.component;
+      }
+      // Register clips.
+      if (converter is TransformComponentConverter &&
+          converter.clips.isNotEmpty) {
+        clips[headId] = []..addAll(converter.clips);
       }
 
       // Proceed by looping on all the children, if any.
@@ -103,9 +115,23 @@ class FlareToRive {
         }
       }
     }
+
+    // Solve clips.
+    clips.forEach((id, clipIds) {
+      final clipped = _fileComponents[id] as Node;
+      riveFile.batchAdd(() {
+        for (final cId in clipIds) {
+          final clipSource = _fileComponents[cId.toString()] as Node;
+          final clipper = ClippingShape();
+          riveFile.addObject(clipper);
+          clipper.source = clipSource;
+          clipped.appendChild(clipper);
+        }
+      });
+    });
   }
 
-  Component _fromJSON(
+  ComponentConverter _fromJSON(
       Map<String, Object> object, ContainerComponent maybeParent) {
     final objectType = object['type'] as String;
 
@@ -167,6 +193,14 @@ class FlareToRive {
         converter = PathPointConverter(pointType, riveFile, maybeParent)
           ..deserialize(object);
         break;
+      case 'rootBone':
+        converter = BoneConverter(RootBone(), riveFile, maybeParent)
+          ..deserialize(object);
+        break;
+      case 'bone':
+        converter = BoneConverter(Bone(), riveFile, maybeParent)
+          ..deserialize(object);
+        break;
       default:
         print('===== UNKNOWN TYPE!? $objectType');
         // const encoder = JsonEncoder.withIndent(' ');
@@ -175,7 +209,7 @@ class FlareToRive {
         break;
     }
 
-    return converter?.component;
+    return converter;
   }
 
   // Propagate 'transformAffectsStroke' property from parent Shape

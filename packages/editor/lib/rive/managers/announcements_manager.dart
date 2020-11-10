@@ -39,6 +39,11 @@ class AnnouncementsManager with Subscriptions {
 
   /// Initiatize the state
   void _attach() {
+    // I don't think we actually need this, subscribe to Me below will
+    // immediately call if there's a Me ready (since Plumber uses
+    // BehaviorSubjects)
+    //_fetchAnnouncements();
+
     /// When the logged in user is changed, fetch announcements for the new user
     subscribe<model.Me>((me) {
       if (me == null || !me.signedIn) {

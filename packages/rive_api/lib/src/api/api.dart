@@ -52,7 +52,7 @@ final _webHost = getVariable(
   defaultValue: const String.fromEnvironment(
     'WEB_HOST',
     defaultValue: 'https://zuul.rive.app',
-  ),
+),
 );
 
 /// Now uses a singleton

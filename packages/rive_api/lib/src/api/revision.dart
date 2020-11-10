@@ -11,13 +11,12 @@ final _log = Logger('Revision Api');
 class RevisionApi {
   RevisionApi({
     RiveApi api,
-    this.ownerId,
     this.fileId,
   })  : api = api ?? RiveApi(),
-        urlBase = '/api/files/$ownerId/$fileId/';
+        urlBase = '/api/files/$fileId/';
 
   final RiveApi api;
-  final int ownerId, fileId;
+  final int fileId;
 
   final String urlBase;
 

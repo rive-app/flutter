@@ -11,7 +11,6 @@ import 'package:core/coop/protocol_version.dart';
 import 'entity.dart';
 
 class CoopFile {
-  int ownerId;
   int fileId;
   int nextClientId = 1;
 
@@ -22,11 +21,16 @@ class CoopFile {
   Map<Id, CoopFileObject> objects;
 
   bool deserialize(BinaryReader reader) {
-    if (reader.readVarUint() != coopFileVersion) {
+    var version = reader.readVarUint();
+    // Temporarily keep version 4 around as we auto-convert the ownerId.
+    if (version != coopFileVersion && version != 4) {
       return false;
     }
     nextClientId = reader.readVarUint();
-    ownerId = reader.readVarUint();
+    if(version == 4) {
+      // Read past the ownerId.
+      reader.readVarUint();
+    }
     fileId = reader.readVarUint();
     serverChangeId = reader.readVarUint();
 
@@ -42,7 +46,6 @@ class CoopFile {
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(coopFileVersion);
     writer.writeVarUint(nextClientId);
-    writer.writeVarUint(ownerId);
     writer.writeVarUint(fileId);
     writer.writeVarUint(serverChangeId);
 
@@ -60,7 +63,6 @@ class CoopFile {
     }
 
     return CoopFile()
-      ..ownerId = ownerId
       ..fileId = fileId
       ..nextClientId = nextClientId
       ..serverChangeId = serverChangeId

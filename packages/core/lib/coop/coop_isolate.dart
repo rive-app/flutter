@@ -28,9 +28,8 @@ class CoopIsolate {
 
   Completer<bool> _shutdownCompleter;
   final CoopServer server;
-  final int ownerId;
   final int fileId;
-  CoopIsolate(this.server, this.ownerId, this.fileId);
+  CoopIsolate(this.server, this.fileId);
   int get clientCount => _clients.length;
   String get privateApiHost => null;
 
@@ -123,7 +122,7 @@ class CoopIsolate {
       } else if (data is _CoopServerShutdown) {
         _isolate?.kill();
         _isolate = null;
-        print('Killed isolate for $ownerId-$fileId');
+        print('Killed isolate for $fileId');
 
         /// This was a requested shutdown
         if (_shutdownCompleter != null) {
@@ -139,7 +138,7 @@ class CoopIsolate {
     // Spawn it.
     _isolate = await Isolate.spawn(
         entryPoint,
-        CoopIsolateArgument(ownerId, fileId,
+        CoopIsolateArgument(fileId,
             privateApiHost: privateApiHost,
             sendPort: _receiveFromIsolatePort.sendPort,
             options: options));
@@ -148,13 +147,11 @@ class CoopIsolate {
 }
 
 class CoopIsolateArgument {
-  int ownerId;
   int fileId;
   final String privateApiHost;
   final SendPort sendPort;
   final Map<String, String> options;
   CoopIsolateArgument(
-    this.ownerId,
     this.fileId, {
     this.privateApiHost,
     this.sendPort,
@@ -179,7 +176,7 @@ abstract class CoopIsolateProcess {
 
   // bool remove(CoopServerClient client) => _clients.remove(client);
 
-  Future<bool> initialize(int ownerId, int fileId, Map<String, String> options);
+  Future<bool> initialize(int fileId, Map<String, String> options);
 
   void cursorChanged(CoopServerClient client) {
     _dirtyCursors.add(client);
@@ -201,18 +198,17 @@ abstract class CoopIsolateProcess {
     }
   }
 
-  Future<bool> initProcess(SendPort sendToMainPort, Map<String, String> options,
-      int ownerId, int fileId) async {
-    print('initializing process for $ownerId $fileId');
+  Future<bool> initProcess(
+      SendPort sendToMainPort, Map<String, String> options, int fileId) async {
+    print('initializing process for $fileId');
     configureLogger();
     _sendToMainPort = sendToMainPort;
-    if (await initialize(ownerId, fileId, options)) {
-      print(
-          'initialized ok, sending sendPort to main thread for $ownerId $fileId');
+    if (await initialize(fileId, options)) {
+      print('initialized ok, sending sendPort to main thread for $fileId');
       _sendToMainPort.send(_receiveFromMainPort.sendPort);
       return true;
     } else {
-      print('init failed, send shutdown for $ownerId $fileId');
+      print('init failed, send shutdown for $fileId');
       _sendToMainPort.send(_CoopServerShutdown());
     }
     return false;
