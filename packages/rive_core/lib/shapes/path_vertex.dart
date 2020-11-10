@@ -16,7 +16,7 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   T _weight;
   T get weight => _weight;
 
-  Path get path => parent as Path;
+  Path get path => parent is Path ? parent as Path : null;
   // -> editor-only
   BoundsDelegate _delegate;
   @override

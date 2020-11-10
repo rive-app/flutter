@@ -294,6 +294,8 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.context.captureJournalEntry();
   }
 
+  void captureJournalEntry() => animation.context.captureJournalEntry();
+
   /// Change the current time displayed (value is in seconds).
   Sink<double> get changeCurrentTime => _timeController;
 
