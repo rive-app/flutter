@@ -13,7 +13,7 @@ void _configureLogging() {
 }
 
 void main() {
-  final segments = ['v$protocolVersion', '2', '3', '4', '5'];
+  final segments = ['v$protocolVersion', '3', '4', '5'];
 
   setUp(_configureLogging);
   group('WebSocketData', () {
@@ -21,7 +21,6 @@ void main() {
       final testSegments = List<String>.from(segments);
       final data = WebSocketData.fromSegments(testSegments);
       expect(data.version, protocolVersion);
-      expect(data.ownerId, 2);
       expect(data.fileId, 3);
       expect(data.userOwnerId, 4);
       expect(data.clientId, 5);
@@ -29,7 +28,7 @@ void main() {
     test('WebSocketData throws format exception if "v" ommitted from version',
         () {
       final testSegments = List<String>.from(segments);
-      testSegments[0] = '3';
+      testSegments[0] = '5';
       expect(() => WebSocketData.fromSegments(testSegments),
           throwsA(const TypeMatcher<FormatException>()));
     });
@@ -42,7 +41,7 @@ void main() {
     test('WebSocketData does not throw an exception for an invalid client id',
         () {
       final testSegments = List<String>.from(segments);
-      testSegments[4] = 'bob';
+      testSegments[3] = 'bob';
       final data = WebSocketData.fromSegments(testSegments);
       expect(data.clientId, 0);
     });

@@ -1,7 +1,7 @@
 /// Tree of directories
 import 'package:meta/meta.dart';
 import 'package:rive_api/data_model.dart';
-import 'package:utilities/utilities.dart';
+import 'package:rive_api/model.dart';
 import 'named.dart';
 
 class Folder implements Named {
@@ -23,15 +23,11 @@ class Folder implements Named {
     return folders.map((folder) => Folder.fromDM(folder)).toList();
   }
 
+  factory Folder.root(Owner owner) =>
+      Folder.fromDM(FolderDM.root(owner.ownerId));
+
   factory Folder.fromDM(FolderDM folder) {
-    // NOTE:
-    // Lets just pretend 'deleted files' lives inside your files
-    // Your Files is id 1
-    // Deleted Files is id 0
     var _parent = folder.parent;
-    if (_parent == null && folder.id != 1) {
-      _parent = 1;
-    }
     return Folder(
       ownerId: folder.ownerId,
       name: folder.name,
@@ -41,12 +37,14 @@ class Folder implements Named {
     );
   }
 
-  @override
-  bool operator ==(Object o) =>
-      o is Folder && o.id == id && o.ownerId == ownerId;
+  bool get isTrash => id == FolderDM.trashId;
+  bool get isRoot => id == FolderDM.allId;
 
   @override
-  int get hashCode => szudzik(id, ownerId);
+  bool operator ==(Object o) => o is Folder && o.id == id;
+
+  @override
+  int get hashCode => id;
 
   FolderDM get asDM => FolderDM(
         ownerId: ownerId,

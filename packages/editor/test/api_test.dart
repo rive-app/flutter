@@ -73,28 +73,4 @@ void main() {
       expect(authResponse.message, "test");
     });
   });
-
-  group('Check RiveFilesApi', () {
-    // test('Auth login returns null', () async {
-    //   final files = EditorRiveFilesTestApi();
-
-    //   when(files.api.post(files.api.host + '/api/my/files/rive/create/'))
-    //       .thenAnswer((_) async => http.Response('{"result": ""}', 201));
-
-    //   expect(
-    //       files.api.post(files.api.host + '/api/my/files/rive/create/'), null);
-    // });
-    // test('Auth establishCoop returns null', () async {
-    //   final files = EditorRiveFilesTestApi();
-    //   final riveFile = files.makeFile(0);
-    //   when(files.api.post(files.api.host +
-    //           '/api/files/${riveFile.ownerId}/${riveFile.id}/coop'))
-    //       .thenAnswer((_) async => http.Response('{"result": ""}', 201));
-
-    //   expect(
-    //       files.api.post(files.api.host +
-    //           '/api/files/${riveFile.ownerId}/${riveFile.id}/coop'),
-    //       null);
-    // });
-  });
 }

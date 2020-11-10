@@ -45,7 +45,7 @@ void main() {
       _plumber.message<CurrentDirectory>(CurrentDirectory(me, folder));
 
       // 'Your Files' folder.
-      when(_mockedFileApi.myFiles(2, 1)).thenAnswer((_) async {
+      when(_mockedFileApi.files(2, 1)).thenAnswer((_) async {
         final data = json.decodeList<int>(myFilesResponse);
         // print("Mock file api $data");
         var res = FileDM.fromIdList(data, 40836);
@@ -54,23 +54,23 @@ void main() {
       });
 
       // Team file details for the files returned above.
-      when(_mockedFileApi.teamFileDetails(any, any)).thenAnswer((_) async {
+      when(_mockedFileApi.fileDetails(any)).thenAnswer((_) async {
         final data = json.decodeMap(myFilesDetailsResponse);
         final cdn = CdnDM.fromData(data.getMap<String, dynamic>('cdn'));
         // print("Mock file api2 $data");
-        return FileDM.fromDataList(data.getList('files'), cdn);
+        return FileDM.fromDataList(data.getList('files'), {'CDN': cdn});
       });
 
       // My file details for the files returned above.
-      when(_mockedFileApi.myFileDetails(any)).thenAnswer((_) async {
+      when(_mockedFileApi.fileDetails(any)).thenAnswer((_) async {
         final data = json.decodeMap(myFilesDetailsResponse);
         final cdn = CdnDM.fromData(data.getMap<String, dynamic>('cdn'));
         // print("Mock file api2 $data");
-        return FileDM.fromDataList(data.getList('files'), cdn);
+        return FileDM.fromDataList(data.getList('files'), {'CDN': cdn});
       });
 
       // Get all my folders.
-      when(_mockedFolderApi.myFolders(any)).thenAnswer((_) async {
+      when(_mockedFolderApi.folders(any)).thenAnswer((_) async {
         final data = json.decode(myFoldersResponse) as Map<String, Object>;
         return FolderDM.fromDataList(data.getList('folders'), 40836);
       });
@@ -106,9 +106,9 @@ void main() {
     test('Load File details', () async {
       final testComplete = Completer<void>();
       _plumber
-          .getStream<File>(File(id: 1, ownerId: 12345).hashCode)
+          .getStream<File>(File(id: 1, ownerId: 40836).hashCode)
           .listen((fileDetails) {
-        expect(fileDetails.ownerId, 12345);
+        expect(fileDetails.ownerId, 40836);
         expect(fileDetails.id, 1);
 
         testComplete.complete();

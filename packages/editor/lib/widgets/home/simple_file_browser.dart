@@ -587,16 +587,26 @@ class SimpleFileBrowser extends StatelessWidget {
     );
   }
 
+  // Recents...
   Widget _fileGrid(Iterable<File> files, Selection selection) {
     return _grid(
       cellHeight: fileCellHeight,
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var file = files.elementAt(index);
-          return BrowserFile(
-            file,
-            selection?.files?.contains(file) == true,
-            false,
+          return ValueStreamBuilder<File>(
+            stream: Plumber().getStream<File>(file.hashCode),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return BrowserFile(
+                  snapshot.data,
+                  selection?.files?.contains(snapshot.data) == true,
+                  false,
+                );
+              }
+            },
           );
         },
         childCount: files.length,
@@ -634,6 +644,11 @@ class SimpleFileBrowser extends StatelessWidget {
                     horizontal: horizontalPadding,
                   ),
                   child: CustomScrollView(
+                    // Mount only visible widgets (helps with loading details
+                    // too). Most users simply load recents view and click on
+                    // something in there, so loading extra data is wasteful.
+                    cacheExtent: 0,
+
                     primary: false,
                     controller: scrollController,
                     slivers: slivers,

@@ -25,13 +25,19 @@ class TopNav extends StatelessWidget {
     final styles = RiveTheme.of(context).textStyles;
     final children = <Widget>[];
     final currentFolder = folders.firstWhere(
-        (folder) => folder.id == currentDirectory.folder.id,
+        (folder) => folder.id == currentDirectory.folder?.id,
         orElse: () => null);
+
+    // Current folder could not be found if the folders list is from a
+    // previously selected owner and the currentDirectory is pointing to a
+    // folder in a new owner set.
     if (currentFolder == null) {
-      // TODO: fix #1426
+      // TODO: consider fixing this by moving the state of the top nav to some
+      // manager and having a synced viewmodel get sent down to it.
       return const SizedBox();
     }
-    if (owner != null && currentFolder?.id == 1) {
+
+    if (currentFolder.isRoot) {
       children.add(
         AvatarView(
           diameter: 30,
@@ -62,8 +68,8 @@ class TopNav extends StatelessWidget {
                     ),
                   ),
                 ),
-                // if the current folder has no parent, just take you back to the
-                // magic folder nbr 1. (this deals with the Deleted folder
+                // if the current folder has no parent, just take you back to
+                // the magic folder nbr 1. (this deals with the Deleted folder
                 // anomaly)
                 onTap: () {
                   FileManager().loadParentFolder(currentDirectory);

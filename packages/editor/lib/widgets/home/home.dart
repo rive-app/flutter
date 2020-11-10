@@ -95,7 +95,7 @@ class _HomeState extends State<Home> {
                     child: ColoredBox(
                       color: Colors.white,
                       child: SimpleFileBrowserWrapper(
-                        files: FileManager().loadRecentFilesDetails(),
+                        files: FileManager().loadRecentFiles(),
                       ),
                     ),
                   );

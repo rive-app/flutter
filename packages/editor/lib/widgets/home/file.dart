@@ -1,15 +1,47 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class BrowserFile extends StatelessWidget {
+class BrowserFile extends StatefulWidget {
   const BrowserFile(this.file, this.selected, this.suspended, {Key key})
       : super(key: key);
   final File file;
   final bool selected;
   final bool suspended;
+
+  @override
+  _BrowserFileState createState() => _BrowserFileState();
+}
+
+class _BrowserFileState extends State<BrowserFile> {
+  @override
+  void initState() {
+    super.initState();
+    FileManager().needDetails(widget.file);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    FileManager().dontNeedDetails(widget.file);
+  }
+
+  @override
+  void didUpdateWidget(BrowserFile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.file.id == widget.file.id) {
+      return;
+    }
+    if (oldWidget.file != null) {
+      FileManager().dontNeedDetails(oldWidget.file);
+    }
+    if (widget.file != null) {
+      FileManager().needDetails(widget.file);
+    }
+  }
 
   Widget _label(BuildContext context) {
     final theme = RiveTheme.of(context);
@@ -20,7 +52,7 @@ class BrowserFile extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              '${file.name ?? 'Loading...'}',
+              '${widget.file.name ?? 'Loading...'}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: styles.greyText,
@@ -44,12 +76,12 @@ class BrowserFile extends StatelessWidget {
         topLeft: Radius.circular(10),
         topRight: Radius.circular(10),
       ),
-      child: (file.thumbnail == null)
+      child: (widget.file.thumbnail == null)
           ? placeholder
           : CachedNetworkImage(
               width: double.infinity,
               placeholder: (context, url) => placeholder,
-              imageUrl: file.thumbnail,
+              imageUrl: widget.file.thumbnail,
               fit: BoxFit.cover,
               fadeInDuration: Duration.zero,
               fadeOutDuration: Duration.zero,
@@ -63,8 +95,8 @@ class BrowserFile extends StatelessWidget {
     final colors = theme.colors;
     return ClickListener(
       onDoubleClick: (_) {
-        if (!suspended) {
-          RiveContext.of(context).open(file);
+        if (!widget.suspended) {
+          RiveContext.of(context).open(widget.file);
         }
       },
       child: Container(
@@ -72,7 +104,7 @@ class BrowserFile extends StatelessWidget {
           color: colors.fileBackgroundLightGrey,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: selected
+            color: widget.selected
                 ? colors.fileSelectedBlue
                 : colors.fileBrowserBackground,
             width: 4,
@@ -80,7 +112,9 @@ class BrowserFile extends StatelessWidget {
         ),
         child: Container(
           foregroundDecoration: BoxDecoration(
-            color: suspended ? colors.getTransparent50 : colors.getTransparent,
+            color: widget.suspended
+                ? colors.getTransparent50
+                : colors.getTransparent,
             backgroundBlendMode: BlendMode.overlay,
             borderRadius: BorderRadius.circular(10),
           ),

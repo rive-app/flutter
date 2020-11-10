@@ -89,7 +89,7 @@ void main() {
     );
     expect(result, true);
 
-    const segments = 'v2/1/2/3/4';
+    const segments = 'v2/1/2/3';
     final client = HttpClient();
     final req = await client.get('localhost', 8234, segments);
     final res = await req.close();

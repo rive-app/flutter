@@ -425,7 +425,7 @@ packages:
       path: "../editor"
       relative: true
     source: path
-    version: "0.4.15"
+    version: "0.4.16"
   rive_widgets:
     dependency: transitive
     description:
