@@ -106,7 +106,7 @@ class FileApi {
 
   Future<FileDM> _createFile(int ownerId, int folderId) async {
     var response = await api.post(api.host +
-        (folderId == null
+        (folderId == null || folderId < 0
             ? '/api/files/$ownerId/create'
             : '/api/files/$ownerId/create/$folderId'));
     return _parseFileResponse(response);
