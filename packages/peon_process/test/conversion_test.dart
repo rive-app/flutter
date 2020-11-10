@@ -149,6 +149,7 @@ void main() {
   const flareRevisionFiles = [
     'bones',
     'circles_revision',
+    'clip_simple',
     'gradient',
     'interpolation',
     'keyframe_gradient',
