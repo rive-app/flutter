@@ -87,10 +87,12 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
-    var valid = _stageVertices = <StageVertex<PathVertex>>[];
     var vertices = items.whereType<StageVertex<PathVertex>>().toSet();
+    var valid = <StageVertex<PathVertex>>{};
+
     for (final stageVertex in vertices) {
       if (stageVertex is StageControlVertex) {
+        // We're dragging an in or an out, get the main backing vertex.
         var vertex = stageVertex.component;
         if (
             // Does the operation contain the vertex this control point belongs
@@ -101,16 +103,20 @@ class PathVertexTranslateTransformer extends StageTransformer {
                 ((vertex.coreType == CubicMirroredVertexBase.typeKey ||
                         vertex.coreType == CubicAsymmetricVertexBase.typeKey) &&
                     vertices.contains(stageVertex.sibling))) {
+          // We know the main vertex needs to be dragged, so just add it
+          // directly.
+          valid.add(vertex.stageItem as StageVertex);
           continue;
         }
       }
-
       if (stageVertex is StageControlVertex) {
         stageVertex.component.accumulateAngle = true;
         _startingAngles[stageVertex] = stageVertex.angle;
       }
       valid.add(stageVertex);
     }
+
+    _stageVertices = valid.toList();
 
     lockRotationShortcut?.addListener(_advanceWithRotationLock);
 
