@@ -13,6 +13,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
+import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
@@ -133,7 +134,10 @@ class PathVertexTranslateTransformer extends StageTransformer {
         // Filter out components that are not shapes or nodes, or not in the
         // active artboard
         final activeArtboard = details.artboard;
-        if (item is StageShape || item is StageNode || item is StageArtboard) {
+        if (item is StageShape ||
+            item is StageNode ||
+            item is StageArtboard ||
+            item is StagePathVertex) {
           final itemArtboard = (item.component as Component).artboard;
           return activeArtboard == itemArtboard;
         }
