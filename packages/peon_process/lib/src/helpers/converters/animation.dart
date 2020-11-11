@@ -19,10 +19,10 @@ class AnimationConverter {
     }
 
     final name = animationRevision['name'] as String;
-    final duration = animationRevision['duration'] as num;
-    final fps = animationRevision['fps'] as num;
-    final displayStart = animationRevision['displayStart'] as num;
-    final displayEnd = animationRevision['displayEnd'] as num;
+    final duration = (animationRevision['duration'] as num).toInt();
+    final fps = (animationRevision['fps'] as num).toInt();
+    final displayStart = (animationRevision['displayStart'] as num).toInt();
+    final displayEnd = (animationRevision['displayEnd'] as num).toInt();
     final isLooping = animationRevision['loop'] as bool;
     final isWorkAreaActive = animationRevision['isWorkAreaActive'] as bool;
     final order = animationRevision['order'];
@@ -33,10 +33,10 @@ class AnimationConverter {
 
       riveAnimation
         ..name = name
-        ..fps = fps.toInt()
-        ..duration = duration.toInt() * riveAnimation.fps
-        ..workStart = displayStart.toInt()
-        ..workEnd = displayEnd.toInt()
+        ..fps = fps
+        ..duration = duration * fps
+        ..workStart = displayStart * fps
+        ..workEnd = displayEnd * fps
         ..loop = _getLoopType(isLooping, isWorkAreaActive)
         ..enableWorkArea = isWorkAreaActive
         ..artboardId = parent.id;
@@ -48,9 +48,6 @@ class AnimationConverter {
   Loop _getLoopType(bool isLooping, bool isWorkAreaActive) {
     if (!isLooping) {
       return Loop.oneShot;
-    }
-    if (isWorkAreaActive) {
-      return Loop.pingPong;
     }
     return Loop.loop;
   }
