@@ -13,6 +13,7 @@ enum ResizeSide { start, end }
 class ResizePanel extends StatefulWidget {
   final double max;
   final double min;
+  final double defaultSize;
   final ResizeDirection direction;
   final ResizeSide side;
   final Widget child;
@@ -29,6 +30,7 @@ class ResizePanel extends StatefulWidget {
     Key key,
     this.max,
     this.min,
+    this.defaultSize,
     this.direction,
     this.side,
     this.child,
@@ -51,7 +53,6 @@ class _ResizePanelState extends State<ResizePanel> {
   bool _isDragging = false;
   bool _showDragEdge = false;
   Timer _lightTimer;
-  OverlayEntry _resizeOverlay;
 
   @override
   void dispose() {
@@ -61,7 +62,7 @@ class _ResizePanelState extends State<ResizePanel> {
 
   @override
   void initState() {
-    _size = widget.min;
+    _size = widget.defaultSize ?? widget.min;
     super.initState();
   }
 

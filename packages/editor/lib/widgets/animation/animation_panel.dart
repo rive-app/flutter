@@ -39,6 +39,7 @@ class _AnimationPanelState extends State<AnimationPanel>
                     side: ResizeSide.start,
                     min: 50,
                     max: 600,
+                    defaultSize: 300,
                     child: child,
                   )
                 : const SizedBox(),
