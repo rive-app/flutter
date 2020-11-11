@@ -157,6 +157,7 @@ class AutoTool extends TransformHandleTool {
       var item = hitItem.selectionTarget;
       if (item.isVisible &&
           item.isSelectable &&
+          !_preSelected.contains(item) &&
           (stage.soloItems == null || stage.isValidSoloSelection(item)) &&
           item.intersectsRect(marqueePoly)) {
         inMarquee.add(item);
@@ -195,7 +196,9 @@ class AutoTool extends TransformHandleTool {
   @override
   List<StageTransformer> get transformers => isTransforming
       ? super.transformers
-      : isMarqueeing ? [] : TranslateTool.instance.transformers;
+      : isMarqueeing
+          ? []
+          : TranslateTool.instance.transformers;
 
   /// Handle any shortcuts that affect the auto tool.
   /// In this case, if escape is pressed, deselect all
@@ -215,7 +218,6 @@ class AutoTool extends TransformHandleTool {
         return false;
     }
   }
-
 
   @override
   bool validateDrag() => validateClick();
