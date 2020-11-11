@@ -2,14 +2,20 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:rive_core/component.dart';
+import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
+import 'package:rive_editor/rive/stage/items/stage_node.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
@@ -31,38 +37,40 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
   @override
   void advance(DragTransformDetails details) {
-    // First attempt to handle rotation locking; only makes sense is one vertex
-    // is selected and it is an in or out control point. This is hideous, but it
-    // works ...
-    if (_stageVertices.length == 1 &&
-        _stageVertices.first is StageControlVertex) {
-      final controlVertex = _stageVertices.first as StageControlVertex;
-      final vertex = controlVertex.vertex;
-      final worldPosition =
-          details?.world?.current ?? controlVertex.stage.worldMouse;
-      // If rotation is locked, contrain to the locking axes
-      if (_rotationLocked) {
-        final lockAxis = LockAxis(vertex.worldTranslation,
-            _calculateLockAxis(worldPosition, vertex.worldTranslation));
+    // Only handle advancing here if there are only in/out handles selected
+    if (_onlyInsAndOuts(_stageVertices)) {
+      // First attempt to handle rotation locking; only makes sense is one
+      // vertex is selected and it is an in or out control point. This is
+      // hideous, but it works ...
+      if (_stageVertices.length == 1) {
+        final controlVertex = _stageVertices.first as StageControlVertex;
+        final vertex = controlVertex.vertex;
+        final worldPosition =
+            details?.world?.current ?? controlVertex.stage.worldMouse;
+        // If rotation is locked, contrain to the locking axes
+        if (_rotationLocked) {
+          final lockAxis = LockAxis(vertex.worldTranslation,
+              _calculateLockAxis(worldPosition, vertex.worldTranslation));
 
-        controlVertex.worldTranslation =
-            lockAxis.translateToAxis(worldPosition);
-      } else {
-        // Just peg to the world mouse; need to do this otherwise the point will
-        // not coincide with the mouse location after a lock has been started
-        // and then released
-        controlVertex.worldTranslation = worldPosition;
+          controlVertex.worldTranslation =
+              lockAxis.translateToAxis(worldPosition);
+        } else {
+          // Just peg to the world mouse; need to do this otherwise the point
+          // will not coincide with the mouse location after a lock has been
+          // started and then released
+          controlVertex.worldTranslation = worldPosition;
+        }
+        return;
       }
-      return;
-    }
 
-    if (details == null) {
-      return;
-    }
-    final delta = details.world.delta;
-    for (final stageVertex in _stageVertices) {
-      stageVertex.worldTranslation =
-          Vec2D.add(Vec2D(), stageVertex.worldTranslation, delta);
+      if (details == null) {
+        return;
+      }
+      final delta = details.world.delta;
+      for (final stageVertex in _stageVertices) {
+        stageVertex.worldTranslation =
+            Vec2D.add(Vec2D(), stageVertex.worldTranslation, delta);
+      }
     }
   }
 
@@ -79,10 +87,12 @@ class PathVertexTranslateTransformer extends StageTransformer {
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
-    var valid = _stageVertices = <StageVertex<PathVertex>>[];
     var vertices = items.whereType<StageVertex<PathVertex>>().toSet();
+    var valid = <StageVertex<PathVertex>>{};
+
     for (final stageVertex in vertices) {
       if (stageVertex is StageControlVertex) {
+        // We're dragging an in or an out, get the main backing vertex.
         var vertex = stageVertex.component;
         if (
             // Does the operation contain the vertex this control point belongs
@@ -93,10 +103,12 @@ class PathVertexTranslateTransformer extends StageTransformer {
                 ((vertex.coreType == CubicMirroredVertexBase.typeKey ||
                         vertex.coreType == CubicAsymmetricVertexBase.typeKey) &&
                     vertices.contains(stageVertex.sibling))) {
+          // We know the main vertex needs to be dragged, so just add it
+          // directly.
+          valid.add(vertex.stageItem as StageVertex);
           continue;
         }
       }
-
       if (stageVertex is StageControlVertex) {
         stageVertex.component.accumulateAngle = true;
         _startingAngles[stageVertex] = stageVertex.angle;
@@ -104,7 +116,30 @@ class PathVertexTranslateTransformer extends StageTransformer {
       valid.add(stageVertex);
     }
 
+    _stageVertices = valid.toList();
+
     lockRotationShortcut?.addListener(_advanceWithRotationLock);
+
+    // Snappy McSnapFace
+    if (_stageVertices != null &&
+        _stageVertices.isNotEmpty &&
+        _noInsAndOuts(_stageVertices)) {
+      _stageVertices.first.component.stageItem.stage.snapper
+          .add(_stageVertices.map((sv) => _VertexSnappingItem(sv)),
+              (item, exclusion) {
+        if (exclusion.contains(item)) {
+          return false;
+        }
+        // Filter out components that are not shapes or nodes, or not in the
+        // active artboard
+        final activeArtboard = details.artboard;
+        if (item is StageShape || item is StageNode || item is StageArtboard) {
+          final itemArtboard = (item.component as Component).artboard;
+          return activeArtboard == itemArtboard;
+        }
+        return false;
+      });
+    }
 
     return valid.isNotEmpty;
   }
@@ -188,3 +223,38 @@ Vec2D _calculateLockAxis(Vec2D position, Vec2D origin) {
   var lockAngle = (angle / lockInc).round() * lockInc;
   return Vec2D.fromValues(cos(lockAngle), sin(lockAngle));
 }
+
+class _VertexSnappingItem extends SnappingItem {
+  final StageVertex stageVertex;
+  final Vec2D worldTranslation;
+
+  _VertexSnappingItem(this.stageVertex)
+      : worldTranslation = Vec2D.clone(stageVertex.worldTranslation);
+
+  @override
+  void addSources(SnappingAxes snap, bool isSingleSelection) =>
+      snap.addVec(AABB.center(Vec2D(), stageItem.aabb));
+
+  @override
+  StageItem get stageItem => stageVertex;
+
+  @override
+  void translateWorld(Vec2D diff) =>
+      stageVertex.worldTranslation = Vec2D.add(Vec2D(), worldTranslation, diff);
+}
+
+/// Returns true if the iterable of vertices contains no ins or outs
+bool _noInsAndOuts(Iterable<StageVertex> vertices) {
+  for (final vertex in vertices) {
+    if (vertex is StageControlIn || vertex is StageControlOut) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// Returns true of the iterable of vertices contains only ins and outs
+bool _onlyInsAndOuts(Iterable<StageVertex> vertices) => vertices.fold(
+    true,
+    (prev, vertex) =>
+        (vertex is StageControlIn || vertex is StageControlOut) && prev);
