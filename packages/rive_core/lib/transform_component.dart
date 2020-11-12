@@ -296,11 +296,6 @@ abstract class TransformComponent extends TransformComponentBase {
   /// ParentWorldTransform to keep us in the same visual position after the
   /// update cycle completes.
   void compensate() {
-    // TODO: can't compensate if we have an overrideWorldTransform (this plays
-    // in when we get bones). Consider adding overrideWorldTransform to the Skin
-    // so we don't need to store it with every node and we can override
-    // compensate in Path and Image (skinnables) to do the logic necessary to
-    // patch up the world and bind transforms.
     assert(parent != null, 'can\'t compensate without parents');
 
     // Default the parentWorld to the identity, this works for the Artboard case

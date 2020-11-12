@@ -7,6 +7,16 @@ typedef bool BoneCallback(Bone bone);
 
 class Bone extends BoneBase {
   // -> editor-only
+  bool get canBoneCompensate => false;
+
+  @override
+  void compensate() {
+    if (!canBoneCompensate) {
+      return;
+    }
+    super.compensate();
+  }
+
   @override
   String get defaultName {
     int boneIndex = 0;
