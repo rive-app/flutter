@@ -16,6 +16,7 @@ import 'package:rive_editor/widgets/dialog/team_settings/billing_history.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/plan.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/profile_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_header.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/team_account.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_members.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/user_account.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -297,6 +298,10 @@ class SettingsScreen {
             owner,
             _getApi(ctx),
           ),
+        ),
+        SettingsScreen(
+          'Account',
+          (ctx) => TeamAccount(team: owner),
         ),
       ];
     } else {

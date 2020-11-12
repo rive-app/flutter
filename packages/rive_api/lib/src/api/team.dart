@@ -208,4 +208,19 @@ class TeamApi {
       return false;
     }
   }
+
+  Future<void> deleteApi(int teamId, String password) async {
+    var response = await api.delete(
+      '${api.host}/api/teams/$teamId',
+      body: jsonEncode(
+        {
+          'data': {'password': password}
+        },
+      ),
+    );
+    if (response.statusCode == 200 || response.statusCode == 302) {
+      return true;
+    }
+    return false;
+  }
 }
