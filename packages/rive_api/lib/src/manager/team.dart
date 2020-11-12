@@ -132,4 +132,24 @@ class TeamManager with Subscriptions {
 
     return true;
   }
+
+  Future<void> delete(Team team, String password) async {
+    await _teamApi.deleteApi(team.ownerId, password);
+    // ok, if we're currently got the team selected, lets select the user
+    var _currentDirectory = _plumber.peek<CurrentDirectory>();
+
+    if (_currentDirectory.owner.ownerId == team.ownerId) {
+      var _me = _plumber.peek<Me>();
+      _plumber.message(CurrentDirectory(
+          _me,
+          Folder(
+              id: -1,
+              ownerId: _me.ownerId,
+              name: null,
+              parent: null,
+              order: -1)));
+    }
+    // reload teams!
+    await loadTeams();
+  }
 }
