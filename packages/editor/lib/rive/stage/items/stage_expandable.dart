@@ -7,6 +7,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_core/shapes/path.dart' as core;
@@ -36,11 +37,16 @@ abstract class StageExpandable<T extends Node> {
     }
     _boundsValid = false;
 
-    stage.debounce(computeBounds,
-        duration: Duration(
-            milliseconds:
-                recomputeBoundsMin + Random().nextInt(recomputeBoundsJitter)),
-        reset: true);
+    if (ShortcutAction.freezeToggle.value) {
+      // if freeze is turned on, immediately compute bounds...
+      computeBounds();
+    } else {
+      stage.debounce(computeBounds,
+          duration: Duration(
+              milliseconds:
+                  recomputeBoundsMin + Random().nextInt(recomputeBoundsJitter)),
+          reset: true);
+    }
   }
 
   static const int recomputeBoundsMin = 50;

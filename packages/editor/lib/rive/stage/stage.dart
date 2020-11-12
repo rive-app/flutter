@@ -233,24 +233,6 @@ class Stage extends Debouncer {
     return true;
   }
 
-  // Joints freezed flag
-  final ValueNotifier<bool> freezeJointsNotifier = ValueNotifier<bool>(false);
-  bool get freezeJoints => freezeJointsNotifier.value;
-  set freezeJoints(bool value) {
-    if (freezeJointsNotifier.value != value) {
-      freezeJointsNotifier.value = value;
-    }
-  }
-
-  // Images freezed flag
-  final ValueNotifier<bool> freezeImagesNotifier = ValueNotifier<bool>(false);
-  bool get freezeImages => freezeImagesNotifier.value;
-  set freezeImages(bool value) {
-    if (freezeImagesNotifier.value != value) {
-      freezeImagesNotifier.value = value;
-    }
-  }
-
   // Axis check state
   final ValueNotifier<AxisCheckState> axisCheckNotifier =
       ValueNotifier<AxisCheckState>(AxisCheckState.local);

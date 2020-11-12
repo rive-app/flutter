@@ -287,7 +287,7 @@ class ListPopup<T extends PopupListItem> {
           list.focusRight();
           return true;
         default:
-          return true;
+          return false;
       }
     }
 

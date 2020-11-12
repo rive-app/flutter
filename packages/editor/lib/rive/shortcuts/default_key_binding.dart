@@ -240,22 +240,17 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.g,
       },
     ),
+    // Solo will need a key now that Y is for freeze...
+    // Shortcut(
+    //   ShortcutAction.soloTool,
+    //   {
+    //     ShortcutKey.y,
+    //   },
+    // ),
     Shortcut(
-      ShortcutAction.soloTool,
+      ShortcutAction.freezeToggle,
       {
         ShortcutKey.y,
-      },
-    ),
-    Shortcut(
-      ShortcutAction.freezeImagesToggle,
-      {
-        ShortcutKey.k,
-      },
-    ),
-    Shortcut(
-      ShortcutAction.freezeJointsToggle,
-      {
-        ShortcutKey.j,
       },
     ),
     Shortcut(

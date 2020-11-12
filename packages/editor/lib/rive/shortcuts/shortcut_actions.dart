@@ -152,10 +152,7 @@ class ShortcutAction {
   static const ShortcutAction pickParent = ShortcutAction('pick-parent');
   static const ShortcutAction toggleEditMode = ShortcutAction('edit-mode');
 
-  static const ShortcutAction freezeJointsToggle =
-      ShortcutAction('freeze-joints');
-  static const ShortcutAction freezeImagesToggle =
-      ShortcutAction('freeze-images');
+  static ToggleShortcutAction freezeToggle = ToggleShortcutAction('freeze');
 
   static HoldShortcutAction disableSnapping =
       HoldShortcutAction('disable-snapping');
@@ -231,10 +228,12 @@ class HoldShortcutAction extends StatefulShortcutAction<bool> {
 class ToggleShortcutAction extends StatefulShortcutAction<bool> {
   ToggleShortcutAction(String name) : super(name, false);
 
-  @override
-  void onPress() {
+  void toggle() {
     _changeValue(!_value);
   }
+
+  @override
+  void onPress() => toggle();
 
   @override
   void onRelease() {

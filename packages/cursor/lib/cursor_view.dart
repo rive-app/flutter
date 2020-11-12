@@ -262,6 +262,7 @@ class _CursorViewState extends State<CursorView> {
               setState(() {
                 _position = details.pointerEvent.position;
               });
+              widget.onMoved?.call();
             },
             onPointerDown: widget.onPointerDown,
             onPointerUp: widget.onPointerUp,
