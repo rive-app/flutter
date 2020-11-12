@@ -17,6 +17,9 @@ import 'package:rive_editor/widgets/theme.dart';
 import 'package:utilities/restorer.dart';
 import 'package:rive_editor/rive/stage/tools/transform_handle_tool.dart';
 
+/// Different ways of handling preselected items
+enum PreSelectType { none, toggle, all }
+
 class AutoTool extends TransformHandleTool {
   final Paint _stroke = Paint()
     ..strokeWidth = 1
@@ -76,7 +79,13 @@ class AutoTool extends TransformHandleTool {
 
   static final AutoTool instance = AutoTool();
 
+  /// Preselected items on the stage; will only be populated when an appropriate
+  /// shortcut is held
   HashSet<SelectableItem> _preSelected;
+
+  /// Type of preselect occurring: either toggle or all
+  PreSelectType _preSelectType;
+
   Restorer _restoreSelect;
 
   @override
@@ -106,9 +115,17 @@ class AutoTool extends TransformHandleTool {
     if (!isTransforming && stage.mouseDownHit == null) {
       _restoreSelect = stage.suppressSelection();
       _marqueeStart = Vec2D.clone(worldMouse);
-      _preSelected = ShortcutAction.multiSelect.value
-          ? HashSet<SelectableItem>.of(stage.file.selection.items)
-          : HashSet<SelectableItem>();
+
+      if (ShortcutAction.multiSelect.value) {
+        _preSelected = HashSet<SelectableItem>.of(stage.file.selection.items);
+        _preSelectType = PreSelectType.toggle;
+      } else if (ShortcutAction.deepClick.value) {
+        _preSelected = HashSet<SelectableItem>.of(stage.file.selection.items);
+        _preSelectType = PreSelectType.all;
+      } else {
+        _preSelectType = PreSelectType.none;
+        _preSelected = HashSet<SelectableItem>();
+      }
 
       // Immediately clear the selection so we can see an empty selected set in
       // the hierarchy (which doesn't update while marqueeing, so an empty
@@ -157,12 +174,12 @@ class AutoTool extends TransformHandleTool {
       var item = hitItem.selectionTarget;
       if (item.isVisible &&
           item.isSelectable &&
-          !_preSelected.contains(item) &&
+          (!(_preSelectType == PreSelectType.all) ||
+              !_preSelected.contains(item)) &&
           (stage.soloItems == null || stage.isValidSoloSelection(item)) &&
           item.intersectsRect(marqueePoly)) {
         inMarquee.add(item);
       }
-
       return true;
     });
 
