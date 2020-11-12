@@ -4,6 +4,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/transform_component.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
@@ -111,10 +112,25 @@ class TransformComponentSnappingItem extends SnappingItem {
     var local = Vec2D.transformMat2D(Vec2D(), world, toParent);
     transformComponent.x = local[0];
     transformComponent.y = local[1];
+    if (ShortcutAction.freezeToggle.value) {
+      for (final child in transformComponent.children) {
+        if (child is TransformComponent) {
+          child.compensate();
+        }
+      }
+    }
   }
 
   @override
   void addSources(SnappingAxes snap, bool isSingleSelection) {
+    // When freezing, just add the centroid/pivot of the component as the
+    // snapping source.
+    if (ShortcutAction.freezeToggle.value) {
+      snap.addVec(Vec2D.add(Vec2D(), transformComponent.artboard.originWorld,
+          transformComponent.worldTranslation));
+      return;
+    }
+
     var stageItem = transformComponent.stageItem;
     if (stageItem is StageNode) {
       snap.addVec(AABB.center(Vec2D(), stageItem.aabb));

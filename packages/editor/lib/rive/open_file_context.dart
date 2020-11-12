@@ -248,7 +248,23 @@ class OpenFileContext with RiveFileDelegate {
     this.rive,
     this.api,
     this.fileApi,
-  }) : _name = ValueNotifier<String>(file.name);
+  }) : _name = ValueNotifier<String>(file.name) {
+    ShortcutAction.freezeToggle.addListener(_changeFreeze);
+    _changeFreeze();
+  }
+
+  SimpleAlert _freezeAlert;
+  void _changeFreeze() {
+    if (ShortcutAction.freezeToggle.value) {
+      if (_freezeAlert == null) {
+        _freezeAlert = SimpleAlert('Freeze active', autoDismiss: false);
+        addAlert(_freezeAlert);
+      }
+    } else if (_freezeAlert != null) {
+      removeAlert(_freezeAlert);
+      _freezeAlert = null;
+    }
+  }
 
   DateTime get nextConnectionAttempt => _nextConnectionAttempt;
   OpenFileState get state => _state;
@@ -358,7 +374,7 @@ class OpenFileContext with RiveFileDelegate {
         stateChanged.notify();
 
         _sleepTimer?.cancel();
-        reconnect(now:false);
+        reconnect(now: false);
         break;
       case OpenFileState.open:
         _sleepTimer?.cancel();
@@ -717,14 +733,6 @@ class OpenFileContext with RiveFileDelegate {
         deleteSelection();
         return true;
 
-      case ShortcutAction.freezeImagesToggle:
-        stage?.freezeImages = !stage.freezeImages;
-        return true;
-
-      case ShortcutAction.freezeJointsToggle:
-        stage?.freezeJoints = !stage.freezeJoints;
-        return true;
-
       case ShortcutAction.resetRulers:
         // TODO: Reset rulers.
         return true;
@@ -786,8 +794,7 @@ class OpenFileContext with RiveFileDelegate {
     _previewListener?.cancel();
     _selectPreviewListener?.cancel();
 
-    var revisionManager =
-        RevisionManager(api: api, fileId: fileId);
+    var revisionManager = RevisionManager(api: api, fileId: fileId);
     _revisionManager.value = revisionManager;
 
     _selectPreviewListener =

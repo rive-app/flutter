@@ -6,6 +6,7 @@ import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
+import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
 
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
@@ -36,6 +37,15 @@ class TransformPopupButton extends StatelessWidget {
             isSelected: () => file.stage.tool == TranslateTool.instance,
             shortcut: ShortcutAction.translateTool,
             select: () => file.stage.tool = TranslateTool.instance,
+          ),
+          PopupContextItem.separator(),
+          CheckPopupItem(
+            'Freeze',
+            notifier: ShortcutAction.freezeToggle,
+            isChecked: () => ShortcutAction.freezeToggle.value,
+            select: ShortcutAction.freezeToggle.toggle,
+            dismissOnSelect: false,
+            shortcut: ShortcutAction.freezeToggle,
           ),
           /*
           PopupContextItem(

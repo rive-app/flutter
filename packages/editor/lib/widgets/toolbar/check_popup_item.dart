@@ -12,7 +12,7 @@ class CheckPopupItem extends PopupContextItem {
   CheckPopupItem(
     String name, {
     ShortcutAction shortcut,
-    ValueNotifier notifier,
+    ChangeNotifier notifier,
     Function() select,
     bool Function() isChecked,
     bool dismissOnSelect = true,

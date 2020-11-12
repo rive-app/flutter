@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
@@ -86,7 +87,8 @@ abstract class TransformHandleTool extends StageTool
     }
     _selectionContext = stage.file.selection;
     _selectionContext.addListener(_selectionChanged);
-    _selectionHandlerRestorer = stage.addSelectionHandler(_handleStageSelection);
+    _selectionHandlerRestorer =
+        stage.addSelectionHandler(_handleStageSelection);
     // Sync the selection whenver the show handles value changes.
     stage.isHidingHandlesChanged.addListener(_selectionChanged);
     _selectionChanged();
@@ -113,7 +115,7 @@ abstract class TransformHandleTool extends StageTool
               _transformingHandle, mutatedSelection);
         }
       }
-    } else {
+    } else if (!ShortcutAction.freezeToggle.value) {
       restoreHandles = stage.hideHandles();
     }
 

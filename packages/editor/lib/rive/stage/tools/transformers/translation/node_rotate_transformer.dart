@@ -112,6 +112,16 @@ class NodeRotateTransformer extends StageTransformer {
       if (threshold(node.rotation, rotation)) {
         node.rotation = rotation;
       }
+
+      // This works because these _nodes are topped, if they were not we should
+      // consider compensating only children that are not in _nodes.
+      if (ShortcutAction.freezeToggle.value) {
+        for (final child in node.children) {
+          if (child is TransformComponent) {
+            child.compensate();
+          }
+        }
+      }
     }
   }
 

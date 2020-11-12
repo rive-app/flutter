@@ -124,6 +124,7 @@ class Snapper {
 
   // final Map<Component, _SnappingItem> _items = {};
   final List<SnappingItem> items = [];
+  //
   final List<SnappingFilter> filters = [];
   final Vec2D startMouse;
 
@@ -145,14 +146,21 @@ class Snapper {
     for (final item in items) {
       var stageItem = item.stageItem;
 
-      exclusion.add(stageItem);
-      if (stageItem.component is ContainerComponent) {
-        (stageItem.component as ContainerComponent).forEachChild((c) {
-          if (c.stageItem != null) {
-            exclusion.add(c.stageItem);
-          }
-          return true;
-        });
+      if (!ShortcutAction.freezeToggle.value) {
+        // Only add self and children if freeze is disabled. When freezing, we
+        // still want to snap to our bounds. This may end up being overkill (we
+        // may want only immediately children in here although that's not quite
+        // right...we may need to build some abstraction into SnappingItem to
+        // build its exclusion list).
+        exclusion.add(stageItem);
+        if (stageItem.component is ContainerComponent) {
+          (stageItem.component as ContainerComponent).forEachChild((c) {
+            if (c.stageItem != null) {
+              exclusion.add(c.stageItem);
+            }
+            return true;
+          });
+        }
       }
     }
 
