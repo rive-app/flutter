@@ -169,12 +169,12 @@ describe("Register & Login Flow", () => {
         ml: 190
     });
 
-    const settingsPanelWidth = 664;
+    const settingsPanelWidth = 881;
 
     const logoutButton = new PageElement({
         w: 44,
-        h: 10,
-        mt: 30 + 40,
+        h: 14,
+        mt: 74,
         ml: (pageWidth / 2) + (settingsPanelWidth / 2) - 30 - 44
     });
 
