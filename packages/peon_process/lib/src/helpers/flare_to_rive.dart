@@ -100,6 +100,21 @@ class FlareToRive {
       final componentChildren = head.remove('children');
       if (componentChildren == null) continue;
 
+      // Try to reasonably translate the new DrawOrder system:
+      //  Since the hierarchy is getting resolved one level at a time, sort
+      //  children by their inverse draw order (in Flare, higher draw order
+      //  meant that an element was on top:
+      //  this in Rive 2 translates to an element needing to first in 
+      //  the hierarchy.
+      if (componentChildren is List) {
+        componentChildren.sort((dynamic a, dynamic b) {
+          int drawOrderA = a['drawOrder'] as int ?? 0;
+          int drawOrderB = b['drawOrder'] as int ?? 0;
+
+          return drawOrderB.compareTo(drawOrderA);
+        });
+      }
+
       // For each child, add a 'parent' property to the JSON object to be able
       // to reconcile the two afterwards.
       for (final component in componentChildren) {
