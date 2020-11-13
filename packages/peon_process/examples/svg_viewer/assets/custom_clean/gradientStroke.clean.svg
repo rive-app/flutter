@@ -1,0 +1,15 @@
+<svg height="360" width="120" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <linearGradient id="lg1">
+        <stop offset="0" stop-color="#f00"/>
+        <stop offset="1" stop-color="#00f"/>
+    </linearGradient>
+    <radialGradient id="RadialGradient1" xlink:href="#lg1"/>
+    <radialGradient id="RadialGradient2" cx=".25" cy=".25" r=".25" xlink:href="#lg1"/>
+    <linearGradient id="grad2" x1="0%" x2="0%" y1="0%" y2="100%">
+        <stop offset="0" stop-color="#f00"/>
+        <stop offset="1" stop-color="#ff0"/>
+    </linearGradient>
+    <rect height="100" rx="15" stroke="url(#RadialGradient1)" stroke-width="30" width="100" x="10" y="10"/>
+    <rect height="100" rx="15" stroke="url(#RadialGradient2)" stroke-width="20" width="100" x="10" y="120"/>
+    <ellipse cx="60" cy="280" rx="50" ry="50" stroke="url(#grad2)" stroke-width="10"/>
+</svg>
