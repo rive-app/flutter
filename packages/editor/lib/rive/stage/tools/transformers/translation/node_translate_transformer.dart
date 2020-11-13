@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -105,14 +109,57 @@ class TransformComponentSnappingItem extends SnappingItem {
 
   TransformComponentSnappingItem._(
       this.transformComponent, this.toParent, this.worldTranslation);
+
   @override
   void translateWorld(Vec2D diff) {
     var world = Vec2D.add(Vec2D(), worldTranslation, diff);
 
     var local = Vec2D.transformMat2D(Vec2D(), world, toParent);
+
     transformComponent.x = local[0];
     transformComponent.y = local[1];
+
     if (ShortcutAction.freezeToggle.value) {
+      // If our transform component is a RootBone, we need to compute a new
+      // rotation and length that keeps the base of each child bone in the same
+      // position. Furthermore, we need to offset the rotation of those child
+      // bones by our compensated rotation change in order to also keep their
+      // individual bone rotations the same. We do this to make sure sub-bones
+      // keep the same world position and orientation.
+      if (transformComponent is RootBone) {
+        var rootBone = transformComponent as RootBone;
+        var oldTipInWorld = rootBone.tipWorldTranslation;
+
+        var worldTransform = rootBone.computeWorldTransform();
+        var newRootTranslationInWorld =
+            Mat2D.getTranslation(worldTransform, Vec2D());
+
+        // N.B. toParent is inverting from universe/stage space (not artboard
+        // world). Seems to work ok right now but we may need to take that into
+        // consideration if we see oddities.
+        var tipInParent =
+            Vec2D.transformMat2D(Vec2D(), oldTipInWorld, toParent);
+        var rootInParent =
+            Vec2D.transformMat2D(Vec2D(), newRootTranslationInWorld, toParent);
+
+        var diff = Vec2D.subtract(Vec2D(), tipInParent, rootInParent);
+
+        var newRotation = atan2(diff[1], diff[0]);
+        var angleChange = atan2(sin(newRotation - rootBone.rotation),
+            cos(newRotation - rootBone.rotation));
+        rootBone.rotation += angleChange;
+
+        rootBone.length = Vec2D.length(diff);
+
+        for (final childBone in rootBone.children.whereType<Bone>()) {
+          if (childBone is RootBone) {
+            // Don't re-rotate root bones, they get compensated as nodes.
+            continue;
+          }
+          childBone.rotation -= angleChange;
+        }
+      }
+
       for (final child in transformComponent.children) {
         if (child is TransformComponent) {
           child.compensate();

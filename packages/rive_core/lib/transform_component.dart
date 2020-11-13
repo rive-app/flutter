@@ -143,7 +143,11 @@ abstract class TransformComponent extends TransformComponentBase {
   }
 
   // -> editor-only
-  Mat2D computeInvertableWorldTransform() {
+
+  /// Set [guaranteeInvertable] to true if you want a transform that
+  // can definitely be inverted. This forces the matrix to not contain 0 scale
+  // in either axis.
+  Mat2D computeWorldTransform({bool guaranteeInvertable = false}) {
     final chain = <TransformComponent>[this];
     var parent = this.parent;
     while (parent != null) {
@@ -165,11 +169,13 @@ abstract class TransformComponent extends TransformComponentBase {
 
       var sx = item.scaleX;
       var sy = item.scaleY;
-      if (sx == 0) {
-        sx = 0.01;
-      }
-      if (sy == 0) {
-        sy = 0.01;
+      if (guaranteeInvertable) {
+        if (sx == 0) {
+          sx = 0.01;
+        }
+        if (sy == 0) {
+          sy = 0.01;
+        }
       }
       Mat2D.scaleByValues(local, sx, sy);
 
@@ -296,11 +302,6 @@ abstract class TransformComponent extends TransformComponentBase {
   /// ParentWorldTransform to keep us in the same visual position after the
   /// update cycle completes.
   void compensate() {
-    // TODO: can't compensate if we have an overrideWorldTransform (this plays
-    // in when we get bones). Consider adding overrideWorldTransform to the Skin
-    // so we don't need to store it with every node and we can override
-    // compensate in Path and Image (skinnables) to do the logic necessary to
-    // patch up the world and bind transforms.
     assert(parent != null, 'can\'t compensate without parents');
 
     // Default the parentWorld to the identity, this works for the Artboard case
@@ -309,8 +310,7 @@ abstract class TransformComponent extends TransformComponentBase {
     var parentWorld = Mat2D();
     if (parent is TransformComponent) {
       var nodeParent = parent as TransformComponent;
-      nodeParent.calculateWorldTransform();
-      parentWorld = nodeParent.worldTransform;
+      parentWorld = nodeParent.computeWorldTransform();
     }
 
     var parentWorldInverse = Mat2D();

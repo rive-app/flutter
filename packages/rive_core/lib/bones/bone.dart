@@ -7,6 +7,16 @@ typedef bool BoneCallback(Bone bone);
 
 class Bone extends BoneBase {
   // -> editor-only
+  bool get canBoneCompensate => false;
+
+  @override
+  void compensate() {
+    if (!canBoneCompensate) {
+      return;
+    }
+    super.compensate();
+  }
+
   @override
   String get defaultName {
     int boneIndex = 0;
@@ -91,14 +101,18 @@ class Bone extends BoneBase {
   }
 
   // -> editor-only
-  Vec2D get tipWorldTranslation {
+  Vec2D get tipWorldTranslation => getTipWorldTranslation(worldTransform);
+
+  Vec2D getTipWorldTranslation(Mat2D worldTransform) {
     var tip = Vec2D();
     Vec2D.transformMat2D(tip, Vec2D.fromValues(length, 0), worldTransform);
     return tip;
   }
 
-  Mat2D get tipWorldTransform => Mat2D.multiply(Mat2D(), worldTransform,
-      Mat2D.fromTranslation(Vec2D.fromValues(length, 0)));
+  Mat2D get tipWorldTransform => getTipWorldTransform(worldTransform);
+
+  Mat2D getTipWorldTransform(Mat2D worldTransform) => Mat2D.multiply(Mat2D(),
+      worldTransform, Mat2D.fromTranslation(Vec2D.fromValues(length, 0)));
 
   // <- editor-only
 }

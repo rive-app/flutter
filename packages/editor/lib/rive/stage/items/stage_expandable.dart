@@ -73,7 +73,7 @@ abstract class StageExpandable<T extends Node> {
       // (somewhat) correctly.
       // component.calculateWorldTransform();
       var invertableWorldTransform =
-          component.computeInvertableWorldTransform();
+          component.computeWorldTransform(guaranteeInvertable: true);
       if (!Mat2D.invert(inverseWorld, invertableWorldTransform)) {
         Mat2D.identity(inverseWorld);
       }
