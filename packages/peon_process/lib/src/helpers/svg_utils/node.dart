@@ -110,13 +110,35 @@ void addChild(
         if (drawableShape.style.stroke != null &&
             drawableShape.style.stroke.color != null) {
           var stroke = node.createStroke(drawableShape.style.stroke.color);
-          stroke.thickness = drawableShape.style.stroke.strokeWidth;
-          stroke.strokeCap = drawableShape.style.stroke.strokeCap;
-          stroke.strokeJoin = drawableShape.style.stroke.strokeJoin;
+
+          if (drawableShape.style.stroke.strokeWidth != null) {
+            stroke.thickness = drawableShape.style.stroke.strokeWidth;
+          }
+          if (drawableShape.style.stroke.strokeCap != null) {
+            stroke.strokeCap = drawableShape.style.stroke.strokeCap;
+          }
+          if (drawableShape.style.stroke.strokeJoin != null) {
+            stroke.strokeJoin = drawableShape.style.stroke.strokeJoin;
+          }
 
           if (drawableShape.style.blendMode != null) {
             stroke.blendMode = drawableShape.style.blendMode;
             node.blendMode = drawableShape.style.blendMode;
+          }
+          if (drawableShape.style.stroke.shader != null) {
+            // we *should* have a gradient
+            var gradientRef = drawableShape.attributes
+                .firstWhere((element) => element.name == 'stroke')
+                .value;
+
+            addGradient(
+              root.definitions.getGradient(gradientRef),
+              file,
+              stroke,
+              drawableShape.bounds,
+              shapeOffset,
+            );
+            node.opacity = drawableShape.style.fill.color.opacity;
           }
         }
       }
