@@ -145,8 +145,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "35135e98cc2ec0497ae2072ca73f6f4e621a187b"
-      resolved-ref: "35135e98cc2ec0497ae2072ca73f6f4e621a187b"
+      ref: "5c765eec89aae7b166efdfc253cf583522100534"
+      resolved-ref: "5c765eec89aae7b166efdfc253cf583522100534"
       url: "https://github.com/rive-app/flutter_svg.git"
     source: git
     version: "0.18.0"
