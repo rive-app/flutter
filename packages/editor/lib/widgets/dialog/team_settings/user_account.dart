@@ -17,12 +17,13 @@ class UserAccount extends StatelessWidget {
       physics: const ClampingScrollPhysics(),
       children: [
         Text(
-          'Account',
+          'Delete User',
           style: styles.greyText.copyWith(fontSize: 16),
         ),
         const SizedBox(height: 30),
         Text(
-          'If you wish to delete your account, enter your password below and hit "Delete".',
+          'If you wish to delete your account, '
+          'enter your password below and hit "Delete".',
           style: styles.greyText,
         ),
         const SizedBox(height: 30),

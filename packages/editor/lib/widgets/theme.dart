@@ -6,6 +6,8 @@ import 'theme/theme_native.dart' if (dart.library.html) 'theme/theme_web.dart';
 
 // General colors
 const lightGrey = Color(0xFF8C8C8C);
+const grey = Color(0xFF666666);
+const darkGrey = Color(0xFF333333);
 const white = Color(0xFFFFFFFF);
 const black = Color(0xFF000000);
 const red = Color(0xFFFF5678);
@@ -25,6 +27,7 @@ class RiveColors {
 
   // Tabs
   Color get tabText => lightGrey;
+  Color get text => grey;
   Color get tabBackground => const Color(0xFF323232);
   Color get tabTextSelected => const Color(0xFFFDFDFD);
   Color get tabBackgroundSelected => const Color(0xFF3c3c3c);
@@ -471,6 +474,18 @@ class TextStyles {
         fontSize: 13,
         height: 1.15,
         fontWeight: FontWeight.normal,
+      );
+
+  TextStyle get paragraphText => const TextStyle(
+      fontFamily: 'Roboto-Light',
+      fontSize: 13,
+      height: 1.6,
+      fontWeight: FontWeight.w300,
+      color: grey);
+
+  TextStyle get paragraphTextHyperlink => paragraphText.copyWith(
+        color: darkGrey,
+        decoration: TextDecoration.underline,
       );
 
   TextStyle get errorText =>
