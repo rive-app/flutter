@@ -30,14 +30,20 @@ class FolderApi {
 
   Future<void> updateFolder(
       FolderDM folder, String newName, int newParentId) async {
-    String payload =
-        json.encode({'name': newName, 'parent': newParentId, 'order': 0});
+    String payload = json.encode({
+      'name': newName,
+      'parent': newParentId == null || newParentId < 0 ? null : newParentId,
+      'order': 0,
+    });
     return api.patch(api.host + '/api/folders/${folder.id}', body: payload);
   }
 
   Future<FolderDM> createFolder(int ownerId, [int folderId]) async {
-    String payload =
-        json.encode({'name': 'New Folder', 'order': 0, 'parent': folderId});
+    String payload = json.encode({
+      'name': 'New Folder',
+      'order': 0,
+      'parent': folderId == null || folderId < 0 ? null : folderId,
+    });
 
     var response =
         await api.post(api.host + '/api/folders/$ownerId', body: payload);
