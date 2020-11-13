@@ -10,16 +10,15 @@ environment:
   sdk: ">=2.8.4 <3.0.0"
 
 dependencies:
+  local_data:
+    path: ../local_data
   peon:
     path: ../peon
   rive_core:
     path: ../rive_core
-  local_data:
-    path: ../local_data
   flutter:
     sdk: flutter
   flutter_svg:
-    path: ../../../flutter_svg
     git: 
       url: https://github.com/rive-app/flutter_svg.git
       ref: 5c765eec89aae7b166efdfc253cf583522100534
@@ -32,9 +31,10 @@ dependencies:
   logging: ^0.11.4
 
 dev_dependencies:
-  pedantic: ^1.9.0
   flutter_test:
     sdk: flutter
+  
+  pedantic: ^1.9.0
 
 flutter:
 
