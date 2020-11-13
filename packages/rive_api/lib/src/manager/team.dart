@@ -74,7 +74,7 @@ class TeamManager with Subscriptions {
   Future<bool> onInviteChanged(
       Team team, TeamMember member, TeamRole role) async {
     bool success = false;
-    String email = member.ownerId <= 0 ? member.name : null;
+    String email = member.ownerId <= 0 ? member.username : null;
     if (role == TeamRole.delete) {
       success = await _teamApi.rescindInvite(team.ownerId,
           ownerId: member.ownerId, email: email);

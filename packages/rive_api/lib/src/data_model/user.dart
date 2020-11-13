@@ -55,8 +55,8 @@ class TeamMemberDM extends OwnerDM {
 
   factory TeamMemberDM.formData(Map<String, dynamic> data) => TeamMemberDM(
         ownerId: data.getInt('ownerId'),
-        name: data.getString('name') ?? data.getString('email'),
-        username: data.getString('username'),
+        name: data.getString('name'),
+        username: data.getString('username') ?? data.getString('email'),
         avatarUrl: data.getString('avatar'),
         permission: data.getString('permission'),
         free: data.getBool('free'),

@@ -177,7 +177,7 @@ class RiveTeamsApi<T extends RiveTeam> {
       return true;
     } on ApiException catch (apiException) {
       final response = apiException.response;
-      var message = 'Could not create new team ${response.body}';
+      var message = 'Could not send invite ${response.body}';
       log.severe(message);
       return false;
     }
