@@ -300,7 +300,7 @@ class SettingsScreen {
           ),
         ),
         SettingsScreen(
-          'Account',
+          'Delete Team',
           (ctx) => TeamAccount(team: owner),
         ),
       ];
@@ -310,7 +310,7 @@ class SettingsScreen {
           'Profile',
           (ctx) => ProfileSettings(owner),
         ),
-        SettingsScreen('Account', (ctx) => UserAccount()
+        SettingsScreen('Delete Account', (ctx) => UserAccount()
             //   owner,
             //   _getApi(ctx),
             // ),

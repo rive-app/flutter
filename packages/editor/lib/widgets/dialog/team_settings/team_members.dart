@@ -74,7 +74,9 @@ class _TeamMemberState extends State<TeamMembers> {
                   children: snapshot.data
                       .map(
                         (member) => _MemberRow(
-                          key: ValueKey<int>(member.ownerId),
+                          key: ValueKey<int>((member.ownerId != 0)
+                              ? member.ownerId
+                              : member.username.hashCode),
                           user: member,
                           onRoleChanged: (role) => _onRoleChanged(member, role),
                         ),
@@ -431,6 +433,7 @@ class _MemberRowState extends State<_MemberRow> {
     final colors = theme.colors;
     final styles = theme.textStyles;
     final user = widget.user;
+    print(widget.user);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),

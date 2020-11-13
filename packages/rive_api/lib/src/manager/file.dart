@@ -161,10 +161,16 @@ class FileManager with Subscriptions {
     if (_folderMap[owner] == null) {
       await loadFolders(owner);
     }
-    final targetFolder =
-        _folderMap[owner].firstWhere((folder) => folder.id == 1);
 
-    Plumber().message(CurrentDirectory(owner, targetFolder));
+    Plumber().message(CurrentDirectory(
+        owner,
+        Folder(
+          id: -1,
+          name: null,
+          parent: null,
+          order: -1,
+          ownerId: owner.ownerId,
+        )));
   }
 
   final _detailsBatch = HashSet<File>();

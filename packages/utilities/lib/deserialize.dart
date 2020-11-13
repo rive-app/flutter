@@ -65,6 +65,7 @@ double deserializeDouble(dynamic value) {
 int deserializeInt(dynamic value) {
   final output = _rawDeserializeInt(value);
   if (output == null) {
+    // TODO: this is probalby bad?
     return 0;
   }
   return output;
