@@ -71,18 +71,24 @@ class MiddlePanel extends StatelessWidget {
                   url: 'https://www.youtube.com/watch?v=j4LH4uq7JT4'),
               VideoSeriesEpisode(
                   episodeNumber: 4,
+                  title: 'Hierarchical relationships',
+                  thumbnail: 'hierarchical.png',
+                  type: ContentType.video,
+                  url: 'https://www.youtube.com/watch?v=uZGCbQ0ZK9M'),
+              VideoSeriesEpisode(
+                  episodeNumber: 5,
                   title: 'Artboards and shapes',
                   thumbnail: 's1-e3.png',
                   type: ContentType.helpCenter,
                   url: 'https://help.rive.app/editor/fundamentals/artboards'),
               VideoSeriesEpisode(
-                  episodeNumber: 5,
+                  episodeNumber: 6,
                   title: 'Animate mode',
                   thumbnail: 's1-e4.png',
                   type: ContentType.helpCenter,
                   url: 'https://help.rive.app/editor/animate-mode'),
               VideoSeriesEpisode(
-                  episodeNumber: 6,
+                  episodeNumber: 7,
                   title: 'Importing and exporting',
                   thumbnail: 's1-e5.png',
                   type: ContentType.helpCenter,
