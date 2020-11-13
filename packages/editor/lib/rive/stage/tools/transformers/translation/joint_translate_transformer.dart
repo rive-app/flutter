@@ -5,6 +5,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/transform_component.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_joint.dart';
@@ -36,7 +37,6 @@ class JointTranslateTransformer extends StageTransformer {
 
     Map<Bone, Vec2D> boneTips = {};
     Set<Bone> transformAsNode = {};
-
     for (final item in items) {
       if (item is StageRootJoint ||
           (item is StageBone && item.component is RootBone)) {
@@ -137,9 +137,17 @@ class _JointSnappingItem extends SnappingItem {
   );
 
   @override
-  void translateWorld(Vec2D diff) => _translateChain(stageBone.component, diff);
+  void translateWorld(Vec2D diff) {
+    var component = stageBone.component;
 
-  void _translateChain(Bone bone, Vec2D worldTranslation) {
+    // Since we're translating the bone's tip, we also need to compensate the
+    // children's children. We do this by propagating the depth (starting at 0
+    // here) to the chain translator.
+    _translateChain(component, diff, ShortcutAction.freezeToggle.value, 0);
+  }
+
+  void _translateChain(
+      Bone bone, Vec2D worldTranslation, bool freeze, int depth) {
     // Translate this bone's tip and figure out rotation and length for this
     // bone. Go down the chain.
     var start = boneTips[bone];
@@ -170,7 +178,15 @@ class _JointSnappingItem extends SnappingItem {
         var childBone = child as Bone;
         childBone.updateTransform();
         childBone.updateWorldTransform();
-        _translateChain(childBone, worldTranslation);
+        _translateChain(
+          childBone,
+          // If we're freezing, don't apply any offset to children
+          freeze ? Vec2D() : worldTranslation,
+          freeze,
+          depth + 1,
+        );
+      } else if (freeze && child is TransformComponent && depth < 2) {
+        child.compensate();
       }
     }
   }

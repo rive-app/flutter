@@ -143,7 +143,11 @@ abstract class TransformComponent extends TransformComponentBase {
   }
 
   // -> editor-only
-  Mat2D computeInvertableWorldTransform() {
+
+  /// Set [guaranteeInvertable] to true if you want a transform that
+  // can definitely be inverted. This forces the matrix to not contain 0 scale
+  // in either axis.
+  Mat2D computeWorldTransform({bool guaranteeInvertable = false}) {
     final chain = <TransformComponent>[this];
     var parent = this.parent;
     while (parent != null) {
@@ -165,11 +169,13 @@ abstract class TransformComponent extends TransformComponentBase {
 
       var sx = item.scaleX;
       var sy = item.scaleY;
-      if (sx == 0) {
-        sx = 0.01;
-      }
-      if (sy == 0) {
-        sy = 0.01;
+      if (guaranteeInvertable) {
+        if (sx == 0) {
+          sx = 0.01;
+        }
+        if (sy == 0) {
+          sy = 0.01;
+        }
       }
       Mat2D.scaleByValues(local, sx, sy);
 
@@ -304,8 +310,7 @@ abstract class TransformComponent extends TransformComponentBase {
     var parentWorld = Mat2D();
     if (parent is TransformComponent) {
       var nodeParent = parent as TransformComponent;
-      nodeParent.calculateWorldTransform();
-      parentWorld = nodeParent.worldTransform;
+      parentWorld = nodeParent.computeWorldTransform();
     }
 
     var parentWorldInverse = Mat2D();
