@@ -64,7 +64,7 @@ class ClippingShape extends ClippingShapeBase {
 
   @override
   void sourceIdChanged(Id from, Id to) {
-    _source = context?.resolve(to);
+    source = context?.resolve(to);
   }
 
   @override
