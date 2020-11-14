@@ -115,42 +115,68 @@ class InterpolationPanel extends StatelessWidget {
           ),
           const SizedBox(height: 13),
           if (hasEditableInterpolation)
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('Points', style: theme.textStyles.inspectorPropertyLabel),
-              const SizedBox(width: 6),
-              Expanded(
-                child: InspectorTextField(
-                    value: interpolation,
-                    converter: InterpolationValueConverter.instance,
-                    underlineColor: theme.colors.interpolationUnderline,
-                    change: (InterpolationViewModel _) {},
-                    completeChange: (InterpolationViewModel newInterpolation) {
-                      switch (newInterpolation.type) {
-                        case KeyFrameInterpolation.cubic:
-                          final interpolator = newInterpolation.interpolator;
-                          if (interpolator is CubicInterpolator) {
-                            final cubic = CubicInterpolationViewModel(
-                                interpolator.x1,
-                                interpolator.y1,
-                                interpolator.x2,
-                                interpolator.y2);
-                            if (interpolation.type !=
-                                KeyFrameInterpolation.cubic) {
-                              manager.changeInterpolation
-                                  .add(newInterpolation.type);
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Points', style: theme.textStyles.inspectorPropertyLabel),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _onInterpolationChange(
+                    context,
+                    (context) => InspectorTextField(
+                      value: interpolation,
+                      converter: InterpolationValueConverter.instance,
+                      underlineColor: theme.colors.interpolationUnderline,
+                      change: (InterpolationViewModel _) {},
+                      completeChange:
+                          (InterpolationViewModel newInterpolation) {
+                        switch (newInterpolation.type) {
+                          case KeyFrameInterpolation.cubic:
+                            final interpolator = newInterpolation.interpolator;
+                            if (interpolator is CubicInterpolator) {
+                              final cubic = CubicInterpolationViewModel(
+                                  interpolator.x1,
+                                  interpolator.y1,
+                                  interpolator.x2,
+                                  interpolator.y2);
+                              if (interpolation.type !=
+                                  KeyFrameInterpolation.cubic) {
+                                manager.changeInterpolation
+                                    .add(newInterpolation.type);
+                              }
+                              manager.changeCubic.add(cubic);
                             }
-                            manager.changeCubic.add(cubic);
-                          }
-                          break;
-                        default:
-                          manager.changeInterpolation
-                              .add(newInterpolation.type);
-                          break;
-                      }
-                    }),
-              )
-            ])
+                            break;
+                          default:
+                            manager.changeInterpolation
+                                .add(newInterpolation.type);
+                            break;
+                        }
+                      },
+                    ),
+                  ),
+                )
+              ],
+            )
         ],
+      ),
+    );
+  }
+
+  // Messy way to get rebuilt when the interpolation value changes, consider
+  // re-working the interpolation ViewModels such that they come through a
+  // stream whenever the interpolation value changes (may need a variety like
+  // CubicInterpolationViewModel, LinearInterpolationViewModel, and so on).
+  Widget _onInterpolationChange(BuildContext context, WidgetBuilder build) {
+    return ValueListenableBuilder(
+      valueListenable: ActiveFile.of(context).editingAnimationManager,
+      builder: (context, EditingAnimationManager timeManager, _) =>
+          ValueStreamBuilder<double>(
+        stream: timeManager.currentTime,
+        // ignore: missing_return
+        builder: (context, snapshot) => build(
+          context,
+        ),
       ),
     );
   }
