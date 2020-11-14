@@ -445,17 +445,34 @@ class _RiveHierarchyClipboard extends RiveClipboard {
   _RiveHierarchyClipboard(OpenFileContext file) : super._() {
     var topComponents = _topSelection(file);
 
+    Set<Component> unorderedCopiedComponents = {};
     for (final component in topComponents) {
       // This is a top level component, add it and any of its children to the
       // copy set.
-      copiedComponents.add(component);
+      unorderedCopiedComponents.add(component);
       if (component is ContainerComponent) {
         component.forEachChild((child) {
-          copiedComponents.add(child);
+          unorderedCopiedComponents.add(child);
           return true;
         });
       }
     }
+
+    var artboard = unorderedCopiedComponents.isEmpty
+        ? null
+        : unorderedCopiedComponents.first.artboard;
+    // Copied components must be in the same artboard.
+    assert(!unorderedCopiedComponents
+        .any((component) => component.artboard != artboard));
+
+    // Iterate the artboard comopnents in order to add the copied components
+    // into an ordered set. This ensures they get pasted in hierarchy order.
+    artboard?.forAll((component) {
+      if (unorderedCopiedComponents.contains(component)) {
+        copiedComponents.add(component);
+      }
+      return true;
+    });
 
     HashMap<Id, int> idToIndex = HashMap<Id, int>();
     int index = 0;

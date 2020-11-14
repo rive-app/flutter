@@ -117,6 +117,7 @@ class HierarchyTreeController extends ComponentTreeController {
   void drop(TreeDragOperationTarget<Component> target,
       List<FlatTreeItem<Component>> items) {
     var state = target.state;
+    var restoreAutoKey = file.core.suppressAutoKey();
     switch (state) {
       case DropState.above:
       case DropState.below:
@@ -187,6 +188,7 @@ class HierarchyTreeController extends ComponentTreeController {
       default:
         break;
     }
+    restoreAutoKey.restore();
     file.core.captureJournalEntry();
   }
 

@@ -590,31 +590,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       }
     });
 
-    // TODO: do want to remove duplicates?
-    /*
-    bool replaced;
-    do {
-      replaced = false;
-      vertices = path.vertices;
-      var length = vertices.length;
-      for (var i = 1, limit = path.isClosed ? length + 1 : length;
-          i < limit;
-          i++) {
-        var pointA = vertices[(i - 1) % length];
-        var pointB = vertices[i % length];
-
-        if (Vec2D.approximatelyEqual(pointA.translation, pointB.translation)) {
-          pointB.removeRecursive();
-          if (pointA is CubicVertex && pointB is CubicVertex) {
-            pointA.outPoint = pointB.outPoint;
-          }
-          replaced = true;
-          break;
-        }
-      }
-    } while (replaced);
-    */
-
     // capture undo/redo
     file.captureJournalEntry();
     autoKeySuppression.restore();
@@ -653,10 +628,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
       // Force a drag on the out with 0,0 delta to update the in.
       var controlOut = (cubicVertex.stageItem as StagePathVertex).controlOut;
-      var transformer = PathVertexTranslateTransformer();
-      var details = DragTransformDetails(vertex.artboard, Vec2D());
-      transformer.init({controlOut}, details);
-      transformer.advance(details);
       stage.file.select(controlOut);
     }
     super.startTransformers(selection, worldMouse);

@@ -53,7 +53,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   @override
   void onSelectedChanged(bool selected, bool notify) {
     if (selected) {
-      activate();
+      stage.debounce(activate);
     }
     stage?.markNeedsRedraw();
   }
@@ -62,6 +62,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     assert(
         component.context.backboard != null, 'backboard should already exist');
     component.context.backboard.activeArtboard = component;
+    stage?.markNeedsRedraw();
   }
 
   @override
@@ -86,6 +87,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
   @override
   void removedFromStage(Stage stage) {
+    stage.cancelDebounce(activate);
     super.removedFromStage(stage);
     if (_title != null) {
       stage.removeItem(_title);
