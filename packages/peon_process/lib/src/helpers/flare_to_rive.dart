@@ -6,6 +6,8 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
+import 'package:rive_core/bones/skeletal_component.dart';
+import 'package:rive_core/bones/skin.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
@@ -74,6 +76,8 @@ class FlareToRive {
     //   Since there can be multiple clips per Component this mapping is:
     //   < id -> list of ids >
     final clips = <String, List<int>>{};
+    final tendonConverters = <TendonConverter>[];
+    final pointWeights = <PointWeight>[];
 
     while (queue.isNotEmpty) {
       var head = queue.removeAt(0);
@@ -90,12 +94,18 @@ class FlareToRive {
         // Update the component mapping.
         _fileComponents[headId] = converter.component;
       }
-      // Register clips.
       if (converter is TransformComponentConverter &&
           converter.clips.isNotEmpty) {
+        // Register clips.
         clips[headId] = []..addAll(converter.clips);
+      } else if (converter is PathConverter && converter.tendons.isNotEmpty) {
+        // Register connected bones.
+        //   This'll be resolved only after all the components have been
+        //   translated.
+        tendonConverters.addAll(converter.tendons);
+      } else if (converter is PathPointConverter && converter.weight != null) {
+        pointWeights.add(converter.weight);
       }
-
       // Proceed by looping on all the children, if any.
       final componentChildren = head.remove('children');
       if (componentChildren == null) continue;
@@ -104,7 +114,7 @@ class FlareToRive {
       //  Since the hierarchy is getting resolved one level at a time, sort
       //  children by their inverse draw order (in Flare, higher draw order
       //  meant that an element was on top:
-      //  this in Rive 2 translates to an element needing to first in 
+      //  this in Rive 2 translates to an element needing to first in
       //  the hierarchy.
       if (componentChildren is List) {
         componentChildren.sort((dynamic a, dynamic b) {
@@ -144,6 +154,33 @@ class FlareToRive {
         }
       });
     });
+
+    /** Resolve tendons (aka skinnables to bone connections): 
+     *    - Set the tendon bone id
+     *    - Add the tendon to the file
+     *    - Add the tendon to the skinnable's Skin
+    */
+    tendonConverters.forEach((tc) {
+      riveFile.batchAdd(() {
+        final skinnable = tc.skinnable;
+        var skinComponent = skinnable.children.firstWhere(
+          (child) => child is Skin,
+          orElse: () => null,
+        );
+        assert(skinComponent is Skin);
+        if (skinComponent is Skin) {
+          // Bind tendons.
+          final bone =
+              _fileComponents[tc.boneId.toString()] as SkeletalComponent;
+          tc.tendon.boneId = bone.id;
+          riveFile.addObject(tc.tendon);
+          skinComponent.appendChild(tc.tendon);
+        }
+      });
+    });
+
+    // Set the newly created weight values to the values stored in the revision.
+    pointWeights.forEach((pw) => pw.finalizeWeightValues());
   }
 
   ComponentConverter _fromJSON(
@@ -215,6 +252,9 @@ class FlareToRive {
       case 'bone':
         converter = BoneConverter(Bone(), riveFile, maybeParent)
           ..deserialize(object);
+        break;
+      case 'skin':
+        converter = SkinConverter(Skin(), riveFile, maybeParent);
         break;
       default:
         print('===== UNKNOWN TYPE!? $objectType');

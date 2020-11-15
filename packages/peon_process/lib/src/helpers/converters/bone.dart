@@ -1,5 +1,7 @@
 import 'package:peon_process/converters.dart';
 import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/skin.dart';
+import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 
@@ -15,8 +17,7 @@ class BoneConverter extends TransformComponentConverter {
     super.deserialize(jsonData);
     final type = jsonData['type'];
     var length = jsonData['length'];
-    
-    print('This bone is a $type');
+
     if (type == 'rootBone') {
       length = 0;
     }
@@ -27,5 +28,17 @@ class BoneConverter extends TransformComponentConverter {
     if (length is num) {
       bone.length = length.toDouble();
     }
+  }
+}
+
+class SkinConverter extends ComponentConverter {
+  SkinConverter(
+      Skin component, RiveFile context, ContainerComponent maybeParent)
+      : assert(maybeParent is Skinnable),
+        super.init(component) {
+    context.batchAdd(() {
+      context.addObject(component);
+      maybeParent.appendChild(component);
+    });
   }
 }
