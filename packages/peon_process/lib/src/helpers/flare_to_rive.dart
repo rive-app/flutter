@@ -20,6 +20,7 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/triangle.dart';
+import 'package:rive_core/transform_component.dart';
 
 typedef bool DescentCallback(Object obj);
 
@@ -155,27 +156,16 @@ class FlareToRive {
       });
     });
 
-    /** Resolve tendons (aka skinnables to bone connections): 
-     *    - Set the tendon bone id
-     *    - Add the tendon to the file
-     *    - Add the tendon to the skinnable's Skin
-    */
     tendonConverters.forEach((tc) {
       riveFile.batchAdd(() {
         final skinnable = tc.skinnable;
-        var skinComponent = skinnable.children.firstWhere(
-          (child) => child is Skin,
-          orElse: () => null,
-        );
-        assert(skinComponent is Skin);
-        if (skinComponent is Skin) {
-          // Bind tendons.
-          final bone =
-              _fileComponents[tc.boneId.toString()] as SkeletalComponent;
-          tc.tendon.boneId = bone.id;
-          riveFile.addObject(tc.tendon);
-          skinComponent.appendChild(tc.tendon);
+        // Make sure the skinnable is up to date.
+        if (skinnable is TransformComponent) {
+          (skinnable as TransformComponent).calculateWorldTransform();
         }
+        // Bind tendons.
+        final bone = _fileComponents[tc.boneId.toString()] as SkeletalComponent;
+        Skin.bind(bone, skinnable);
       });
     });
 
@@ -254,7 +244,7 @@ class FlareToRive {
           ..deserialize(object);
         break;
       case 'skin':
-        converter = SkinConverter(Skin(), riveFile, maybeParent);
+        // Skins are added when binding bones/tendons.
         break;
       default:
         print('===== UNKNOWN TYPE!? $objectType');
