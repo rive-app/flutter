@@ -69,6 +69,11 @@ class AnimationConverter {
         component = _fileComponents[id];
       }
 
+      if (component == null) {
+        print('Component with $id not found');
+        continue;
+      }
+
       final keyFrameGroups = animationNodes[id] as Map<String, Object>;
       for (final keyGroupName in keyFrameGroups.keys) {
         final allKeys = keyFrameGroups[keyGroupName] as List;
@@ -130,7 +135,7 @@ class AnimationConverter {
         // Needs images.
         break;
       case 'frameStrength':
-        // Needs bones.
+        // Needs constraints.
         break;
       case 'frameTrigger':
         // Needs triggers.

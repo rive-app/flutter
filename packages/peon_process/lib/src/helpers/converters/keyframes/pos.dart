@@ -2,6 +2,7 @@ import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/node.dart';
 
@@ -15,6 +16,8 @@ class KeyFramePosX extends KeyFrameConverter {
       propertyKey = ArtboardBase.xPropertyKey;
     } else if (component is NodeBase) {
       propertyKey = NodeBase.xPropertyKey;
+    } else if (component is RootBoneBase) {
+      propertyKey = RootBoneBase.xPropertyKey;
     } else {
       throw UnsupportedError(
           'xPropertyKey not found for ${component.runtimeType}');
@@ -41,6 +44,8 @@ class KeyFramePosY extends KeyFrameConverter {
       propertyKey = ArtboardBase.yPropertyKey;
     } else if (component is NodeBase) {
       propertyKey = NodeBase.yPropertyKey;
+    } else if (component is RootBoneBase) {
+      propertyKey = RootBoneBase.yPropertyKey;
     } else {
       throw UnsupportedError(
           'yPropertyKey not found for ${component.runtimeType}');

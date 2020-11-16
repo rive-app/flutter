@@ -184,6 +184,8 @@ class FlareToRive {
         converter = ArtboardConverter(Artboard(), riveFile, null)
           ..deserialize(object);
         break;
+      case 'solo':
+      // TODO: just convert it as a node for now.
       case 'node':
         converter = NodeConverter(Node(), riveFile, maybeParent)
           ..deserialize(object);

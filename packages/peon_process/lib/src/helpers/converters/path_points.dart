@@ -119,7 +119,7 @@ class PathPointConverter extends ComponentConverter {
      * - The second 4 values are the corresponding weights for the bone 
      *    at that index
      */
-    if (weights is List) {
+    if (weights is List && weights.isNotEmpty) {
       assert(weights.length % 8 == 0);
 
       Weight riveWeight;
