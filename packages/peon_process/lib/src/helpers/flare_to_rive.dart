@@ -6,6 +6,8 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
+import 'package:rive_core/bones/skeletal_component.dart';
+import 'package:rive_core/bones/skin.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
@@ -18,6 +20,7 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/triangle.dart';
+import 'package:rive_core/transform_component.dart';
 
 typedef bool DescentCallback(Object obj);
 
@@ -74,6 +77,8 @@ class FlareToRive {
     //   Since there can be multiple clips per Component this mapping is:
     //   < id -> list of ids >
     final clips = <String, List<int>>{};
+    final tendonConverters = <TendonConverter>[];
+    final pointWeights = <PointWeight>[];
 
     while (queue.isNotEmpty) {
       var head = queue.removeAt(0);
@@ -90,15 +95,36 @@ class FlareToRive {
         // Update the component mapping.
         _fileComponents[headId] = converter.component;
       }
-      // Register clips.
       if (converter is TransformComponentConverter &&
           converter.clips.isNotEmpty) {
+        // Register clips.
         clips[headId] = []..addAll(converter.clips);
+      } else if (converter is PathConverter && converter.tendons.isNotEmpty) {
+        // Register connected bones.
+        //   This'll be resolved only after all the components have been
+        //   translated.
+        tendonConverters.addAll(converter.tendons);
+      } else if (converter is PathPointConverter && converter.weight != null) {
+        pointWeights.add(converter.weight);
       }
-
       // Proceed by looping on all the children, if any.
       final componentChildren = head.remove('children');
       if (componentChildren == null) continue;
+
+      // Try to reasonably translate the new DrawOrder system:
+      //  Since the hierarchy is getting resolved one level at a time, sort
+      //  children by their inverse draw order (in Flare, higher draw order
+      //  meant that an element was on top:
+      //  this in Rive 2 translates to an element needing to first in
+      //  the hierarchy.
+      if (componentChildren is List) {
+        componentChildren.sort((dynamic a, dynamic b) {
+          int drawOrderA = a['drawOrder'] as int ?? 0;
+          int drawOrderB = b['drawOrder'] as int ?? 0;
+
+          return drawOrderB.compareTo(drawOrderA);
+        });
+      }
 
       // For each child, add a 'parent' property to the JSON object to be able
       // to reconcile the two afterwards.
@@ -129,6 +155,22 @@ class FlareToRive {
         }
       });
     });
+
+    tendonConverters.forEach((tc) {
+      riveFile.batchAdd(() {
+        final skinnable = tc.skinnable;
+        // Make sure the skinnable is up to date.
+        if (skinnable is TransformComponent) {
+          (skinnable as TransformComponent).calculateWorldTransform();
+        }
+        // Bind tendons.
+        final bone = _fileComponents[tc.boneId.toString()] as SkeletalComponent;
+        Skin.bind(bone, skinnable);
+      });
+    });
+
+    // Set the newly created weight values to the values stored in the revision.
+    pointWeights.forEach((pw) => pw.finalizeWeightValues());
   }
 
   ComponentConverter _fromJSON(
@@ -142,6 +184,8 @@ class FlareToRive {
         converter = ArtboardConverter(Artboard(), riveFile, null)
           ..deserialize(object);
         break;
+      case 'solo':
+      // TODO: just convert it as a node for now.
       case 'node':
         converter = NodeConverter(Node(), riveFile, maybeParent)
           ..deserialize(object);
@@ -200,6 +244,9 @@ class FlareToRive {
       case 'bone':
         converter = BoneConverter(Bone(), riveFile, maybeParent)
           ..deserialize(object);
+        break;
+      case 'skin':
+        // Skins are added when binding bones/tendons.
         break;
       default:
         print('===== UNKNOWN TYPE!? $objectType');

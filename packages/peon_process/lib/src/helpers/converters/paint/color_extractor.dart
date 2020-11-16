@@ -90,6 +90,8 @@ abstract class ColorExtractor {
     final context = paint.context;
 
     context.batchAdd(() {
+      // Remove Solid Color that was added to properly initialize this Fill/Stroke.
+      paint.children.removeWhere((element) => element is SolidColor);
       context.addObject(gradient);
       stops.forEach((stop) {
         context.addObject(stop);

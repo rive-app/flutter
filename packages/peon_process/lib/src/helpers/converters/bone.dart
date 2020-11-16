@@ -15,8 +15,7 @@ class BoneConverter extends TransformComponentConverter {
     super.deserialize(jsonData);
     final type = jsonData['type'];
     var length = jsonData['length'];
-    
-    print('This bone is a $type');
+
     if (type == 'rootBone') {
       length = 0;
     }
