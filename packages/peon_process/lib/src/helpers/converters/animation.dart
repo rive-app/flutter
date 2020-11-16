@@ -122,7 +122,9 @@ class AnimationConverter {
         ).convertKey(component, animation, frame);
         return;
       case 'frameLength':
-        // Needs bones.
+        KeyFrameBoneLengthConverter(
+                value as num, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
         break;
       case 'frameImageVertices':
         // Needs images.

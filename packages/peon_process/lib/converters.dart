@@ -3,6 +3,7 @@ export 'src/helpers/converters/artboard.dart';
 export 'src/helpers/converters/bone.dart';
 export 'src/helpers/converters/component.dart';
 export 'src/helpers/converters/drawable.dart';
+export 'src/helpers/converters/keyframes/bones.dart';
 export 'src/helpers/converters/keyframes/draw_order.dart';
 export 'src/helpers/converters/keyframes/fill_color.dart';
 export 'src/helpers/converters/keyframes/fill_gradient.dart';
