@@ -744,32 +744,35 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       var dehydrateKey = useFrom ? addKey : removeKey;
 
       var objectInflightChanges = inflight[objectId] ??= HashMap<int, int>();
-      changes.forEach((key, entry) {
-        if (!isCoopProperty(key)) {
-          return;
+
+      // See if we just deleting this object. If so, there's no need to send all
+      // the other property changes. Just send the delete change.
+      if (changes.keys.any((key) => key == dehydrateKey)) {
+        var change = makeCoopChange(removeKey, objectId);
+        if (change != null) {
+          objectChanges.changes.add(change);
         }
-        objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;
-        if (key == hydrateKey) {
-          //changeProperty(object, addKey, removeKey, object.coreType);
-          //changeProperty(object, removeKey, addKey, object.coreType);
-          _log.finest("GOT HYDRATION! $objectId ${entry.from} ${entry.to}");
-          var change = makeCoopChange(addKey, entry.to);
-          if (change != null) {
-            objectChanges.changes.add(change);
+      } else {
+        changes.forEach((key, entry) {
+          if (!isCoopProperty(key)) {
+            return;
           }
-        } else if (key == dehydrateKey) {
-          _log.finest("DEHYDRATE THIS THING.");
-          var change = makeCoopChange(removeKey, objectId);
-          if (change != null) {
-            objectChanges.changes.add(change);
+          objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;
+          if (key == hydrateKey) {
+            var change = makeCoopChange(addKey, entry.to);
+            if (change != null) {
+              objectChanges.changes.add(change);
+            }
+          } else if (key == dehydrateKey) {
+            assert(false, 'this should\'ve fallen into the delete path above');
+          } else {
+            var change = makeCoopChange(key, useFrom ? entry.from : entry.to);
+            if (change != null) {
+              objectChanges.changes.add(change);
+            }
           }
-        } else {
-          var change = makeCoopChange(key, useFrom ? entry.from : entry.to);
-          if (change != null) {
-            objectChanges.changes.add(change);
-          }
-        }
-      });
+        });
+      }
 
       // Some change sets have only editor properties and result in an empty
       // changes list, no need to send it...
