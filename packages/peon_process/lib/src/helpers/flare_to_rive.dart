@@ -20,7 +20,6 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/triangle.dart';
-import 'package:rive_core/transform_component.dart';
 
 typedef bool DescentCallback(Object obj);
 
@@ -79,6 +78,7 @@ class FlareToRive {
     final clips = <String, List<int>>{};
     final tendonConverters = <TendonConverter>[];
     final pointWeights = <PointWeight>[];
+    final skinConverters = <SkinConverter>[];
 
     while (queue.isNotEmpty) {
       var head = queue.removeAt(0);
@@ -99,11 +99,13 @@ class FlareToRive {
           converter.clips.isNotEmpty) {
         // Register clips.
         clips[headId] = []..addAll(converter.clips);
-      } else if (converter is PathConverter && converter.tendons.isNotEmpty) {
-        // Register connected bones.
-        //   This'll be resolved only after all the components have been
-        //   translated.
-        tendonConverters.addAll(converter.tendons);
+      } else if (converter is PathConverter) {
+        if (converter.skinConverter != null) {
+          skinConverters.add(converter.skinConverter);
+        }
+        if (converter.tendons.isNotEmpty) {
+          tendonConverters.addAll(converter.tendons);
+        }
       } else if (converter is PathPointConverter && converter.weight != null) {
         pointWeights.add(converter.weight);
       }
@@ -159,14 +161,36 @@ class FlareToRive {
     tendonConverters.forEach((tc) {
       riveFile.batchAdd(() {
         final skinnable = tc.skinnable;
-        // Make sure the skinnable is up to date.
-        if (skinnable is TransformComponent) {
-          (skinnable as TransformComponent).calculateWorldTransform();
-        }
+
         // Bind tendons.
         final bone = _fileComponents[tc.boneId.toString()] as SkeletalComponent;
-        Skin.bind(bone, skinnable);
+        final tendon = Skin.bind(bone, skinnable);
+        if (tc.tendonBind != null) {
+          final bind = tc.tendonBind;
+          tendon
+            ..xx = bind[0]
+            ..xy = bind[1]
+            ..yx = bind[2]
+            ..yy = bind[3]
+            ..tx = bind[4]
+            ..ty = bind[5];
+        }
       });
+    });
+
+    skinConverters.forEach((sc) {
+      final skin = sc.skinnable.children
+          .firstWhere((element) => element is Skin, orElse: () => null);
+      if (skin is Skin) {
+        final owt = sc.overrideWorldTransform;
+        skin
+          ..xx = owt[0]
+          ..xy = owt[1]
+          ..yx = owt[2]
+          ..yy = owt[3]
+          ..tx = owt[4]
+          ..ty = owt[5];
+      }
     });
 
     // Set the newly created weight values to the values stored in the revision.
