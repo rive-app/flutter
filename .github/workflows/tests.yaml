@@ -17,12 +17,14 @@ jobs:
       - name: Checkout and install flutter and dart
         run: |
           git clone https://github.com/flutter/flutter.git
-
+          
       - name: Add the flutter commmand path
-        run: echo "::add-path::$GITHUB_WORKSPACE/flutter/bin"
+        #run: echo "::add-path::$GITHUB_WORKSPACE/flutter/bin"
+        run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
 
       - name: Add the dart command path
-        run: echo "::add-path::$GITHUB_WORKSPACE/flutter/bin/cache/dart-sdk/bin"
+        #run: echo "::add-path::$GITHUB_WORKSPACE/flutter/bin/cache/dart-sdk/bin"
+        run: echo "$GITHUB_WORKSPACE/flutter/bin/cache/dart-sdk/bin" >> $GITHUB_PATH
 
       - name: Setup flutter
         run: |

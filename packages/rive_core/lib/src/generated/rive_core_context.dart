@@ -456,6 +456,10 @@ abstract class RiveCoreContext extends CoreContext {
         return 'width';
       case ParametricPathBase.heightPropertyKey:
         return 'height';
+      case ParametricPathBase.originXPropertyKey:
+        return 'originx';
+      case ParametricPathBase.originYPropertyKey:
+        return 'originy';
       case RectangleBase.cornerRadiusPropertyKey:
         return 'cornerRadius';
       case CubicMirroredVertexBase.rotationPropertyKey:
@@ -671,6 +675,8 @@ abstract class RiveCoreContext extends CoreContext {
         case CubicAsymmetricVertexBase.outDistancePropertyKey:
         case ParametricPathBase.widthPropertyKey:
         case ParametricPathBase.heightPropertyKey:
+        case ParametricPathBase.originXPropertyKey:
+        case ParametricPathBase.originYPropertyKey:
         case RectangleBase.cornerRadiusPropertyKey:
         case CubicMirroredVertexBase.rotationPropertyKey:
         case CubicMirroredVertexBase.distancePropertyKey:
@@ -840,6 +846,8 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicAsymmetricVertexBase.outDistancePropertyKey:
       case ParametricPathBase.widthPropertyKey:
       case ParametricPathBase.heightPropertyKey:
+      case ParametricPathBase.originXPropertyKey:
+      case ParametricPathBase.originYPropertyKey:
       case RectangleBase.cornerRadiusPropertyKey:
       case CubicMirroredVertexBase.rotationPropertyKey:
       case CubicMirroredVertexBase.distancePropertyKey:
@@ -1270,6 +1278,16 @@ abstract class RiveCoreContext extends CoreContext {
       case ParametricPathBase.heightPropertyKey:
         if (object is ParametricPathBase && value is double) {
           object.height = value;
+        }
+        break;
+      case ParametricPathBase.originXPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.originX = value;
+        }
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.originY = value;
         }
         break;
       case RectangleBase.cornerRadiusPropertyKey:
@@ -1823,12 +1841,22 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case ParametricPathBase.widthPropertyKey:
         if (object is ParametricPathBase && value is double) {
-          object.width = value;
+          object.widthCore = value;
         }
         break;
       case ParametricPathBase.heightPropertyKey:
         if (object is ParametricPathBase && value is double) {
-          object.height = value;
+          object.heightCore = value;
+        }
+        break;
+      case ParametricPathBase.originXPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.originXCore = value;
+        }
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.originYCore = value;
         }
         break;
       case RectangleBase.cornerRadiusPropertyKey:
@@ -2045,6 +2073,10 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicAsymmetricVertexBase.rotationPropertyKey:
       case CubicAsymmetricVertexBase.inDistancePropertyKey:
       case CubicAsymmetricVertexBase.outDistancePropertyKey:
+      case ParametricPathBase.widthPropertyKey:
+      case ParametricPathBase.heightPropertyKey:
+      case ParametricPathBase.originXPropertyKey:
+      case ParametricPathBase.originYPropertyKey:
       case CubicMirroredVertexBase.rotationPropertyKey:
       case CubicMirroredVertexBase.distancePropertyKey:
       case CubicDetachedVertexBase.inRotationPropertyKey:
@@ -2134,6 +2166,18 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case CubicAsymmetricVertexBase.outDistancePropertyKey:
         return (object as CubicAsymmetricVertexBase).outDistanceKeyState;
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        return (object as ParametricPathBase).widthKeyState;
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        return (object as ParametricPathBase).heightKeyState;
+        break;
+      case ParametricPathBase.originXPropertyKey:
+        return (object as ParametricPathBase).originXKeyState;
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        return (object as ParametricPathBase).originYKeyState;
         break;
       case CubicMirroredVertexBase.rotationPropertyKey:
         return (object as CubicMirroredVertexBase).rotationKeyState;
@@ -2290,6 +2334,26 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicAsymmetricVertexBase.outDistancePropertyKey:
         if (object is CubicAsymmetricVertexBase) {
           object.outDistanceKeyState = value;
+        }
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        if (object is ParametricPathBase) {
+          object.widthKeyState = value;
+        }
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        if (object is ParametricPathBase) {
+          object.heightKeyState = value;
+        }
+        break;
+      case ParametricPathBase.originXPropertyKey:
+        if (object is ParametricPathBase) {
+          object.originXKeyState = value;
+        }
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        if (object is ParametricPathBase) {
+          object.originYKeyState = value;
         }
         break;
       case CubicMirroredVertexBase.rotationPropertyKey:
@@ -2490,6 +2554,30 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is CubicAsymmetricVertexBase) {
           object.outDistanceAnimated = null;
           object.outDistanceKeyState = KeyState.none;
+        }
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        if (object is ParametricPathBase) {
+          object.widthAnimated = null;
+          object.widthKeyState = KeyState.none;
+        }
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        if (object is ParametricPathBase) {
+          object.heightAnimated = null;
+          object.heightKeyState = KeyState.none;
+        }
+        break;
+      case ParametricPathBase.originXPropertyKey:
+        if (object is ParametricPathBase) {
+          object.originXAnimated = null;
+          object.originXKeyState = KeyState.none;
+        }
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        if (object is ParametricPathBase) {
+          object.originYAnimated = null;
+          object.originYKeyState = KeyState.none;
         }
         break;
       case CubicMirroredVertexBase.rotationPropertyKey:
@@ -2918,6 +3006,16 @@ abstract class RiveCoreContext extends CoreContext {
           return object.height;
         }
         break;
+      case ParametricPathBase.originXPropertyKey:
+        if (object is ParametricPathBase) {
+          return object.originX;
+        }
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        if (object is ParametricPathBase) {
+          return object.originY;
+        }
+        break;
       case RectangleBase.cornerRadiusPropertyKey:
         if (object is RectangleBase) {
           return object.cornerRadius;
@@ -3219,6 +3317,8 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicAsymmetricVertexBase.outDistancePropertyKey:
       case ParametricPathBase.widthPropertyKey:
       case ParametricPathBase.heightPropertyKey:
+      case ParametricPathBase.originXPropertyKey:
+      case ParametricPathBase.originYPropertyKey:
       case RectangleBase.cornerRadiusPropertyKey:
       case CubicMirroredVertexBase.rotationPropertyKey:
       case CubicMirroredVertexBase.distancePropertyKey:
@@ -3440,6 +3540,10 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as ParametricPathBase).width;
       case ParametricPathBase.heightPropertyKey:
         return (object as ParametricPathBase).height;
+      case ParametricPathBase.originXPropertyKey:
+        return (object as ParametricPathBase).originX;
+      case ParametricPathBase.originYPropertyKey:
+        return (object as ParametricPathBase).originY;
       case RectangleBase.cornerRadiusPropertyKey:
         return (object as RectangleBase).cornerRadius;
       case CubicMirroredVertexBase.rotationPropertyKey:
@@ -3777,10 +3881,16 @@ abstract class RiveCoreContext extends CoreContext {
         (object as CubicAsymmetricVertexBase).outDistanceCore = value;
         break;
       case ParametricPathBase.widthPropertyKey:
-        (object as ParametricPathBase).width = value;
+        (object as ParametricPathBase).widthCore = value;
         break;
       case ParametricPathBase.heightPropertyKey:
-        (object as ParametricPathBase).height = value;
+        (object as ParametricPathBase).heightCore = value;
+        break;
+      case ParametricPathBase.originXPropertyKey:
+        (object as ParametricPathBase).originXCore = value;
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        (object as ParametricPathBase).originYCore = value;
         break;
       case RectangleBase.cornerRadiusPropertyKey:
         (object as RectangleBase).cornerRadius = value;
@@ -3936,6 +4046,18 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case CubicAsymmetricVertexBase.outDistancePropertyKey:
         (object as CubicAsymmetricVertexBase).outDistanceAnimated = value;
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        (object as ParametricPathBase).widthAnimated = value;
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        (object as ParametricPathBase).heightAnimated = value;
+        break;
+      case ParametricPathBase.originXPropertyKey:
+        (object as ParametricPathBase).originXAnimated = value;
+        break;
+      case ParametricPathBase.originYPropertyKey:
+        (object as ParametricPathBase).originYAnimated = value;
         break;
       case CubicMirroredVertexBase.rotationPropertyKey:
         (object as CubicMirroredVertexBase).rotationAnimated = value;

@@ -13,6 +13,7 @@ import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
 class TransformInspectorBuilder extends ListenableInspectorBuilder {
   bool _isScaleLinked = false;
   bool _isSizeLinked = false;
+  bool _isOriginLinked = false;
 
   @override
   bool validate(InspectionSet inspecting) =>
@@ -89,11 +90,23 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ParametricPathBase.heightPropertyKey,
               labelA: 'Width',
               labelB: 'Height',
-            )
+            ),
 
-      // TODO: this is the spot to add the EditVertices button if the
-      // intersectingCoreTypes contains a
-      // CustomPath/PointsPath/WhateverWeCallItPath.
+      if (inspecting.intersectingCoreTypes.contains(ParametricPathBase.typeKey))
+        (context) => PropertyDual<double>(
+              name: 'Origin',
+              linkable: true,
+              isLinked: _isSizeLinked,
+              toggleLink: (value) {
+                _isOriginLinked = value;
+                notifyListeners();
+              },
+              objects: inspecting.components,
+              propertyKeyA: ParametricPathBase.originXPropertyKey,
+              propertyKeyB: ParametricPathBase.originYPropertyKey,
+              labelA: 'X',
+              labelB: 'Y',
+            )
     ];
   }
 }
