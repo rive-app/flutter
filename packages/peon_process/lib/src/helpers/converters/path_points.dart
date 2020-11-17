@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:peon_process/converters.dart';
 import 'package:rive_core/bones/cubic_weight.dart';
 import 'package:rive_core/bones/weight.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
@@ -12,13 +13,15 @@ import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 
-class PointWeight {
-  final PathVertexBase vertex;
+class PointWeightFinalizer extends ConversionFinalizer {
   final Weight weight;
 
-  const PointWeight(this.vertex, this.weight);
+  const PointWeightFinalizer(PathVertexBase vertex, this.weight)
+      : super(vertex);
 
-  void finalizeWeightValues() {
+  @override
+  void finalize(Map<String, Component> fileComponents) {
+    final vertex = component as PathVertexBase;
     final currentWeight =
         vertex.children.firstWhere((element) => element is Weight);
     assert(currentWeight != null);
@@ -44,9 +47,6 @@ class PathPointConverter extends ComponentConverter {
   PathPointConverter(
       String pointType, RiveFile context, ContainerComponent maybeParent)
       : super(_getVertexFrom(pointType), context, maybeParent);
-
-  PointWeight _weight;
-  PointWeight get weight => _weight;
 
   static PathVertex _getVertexFrom(String pointType) {
     switch (pointType) {
@@ -176,7 +176,7 @@ class PathPointConverter extends ComponentConverter {
           ..outIndices = outBoneIdx;
       }
 
-      _weight = PointWeight(pathVertex, riveWeight);
+      super.addFinalizer(PointWeightFinalizer(pathVertex, riveWeight));
     }
   }
 

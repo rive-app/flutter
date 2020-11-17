@@ -6,13 +6,10 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
-import 'package:rive_core/bones/skeletal_component.dart';
-import 'package:rive_core/bones/skin.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
@@ -72,13 +69,7 @@ class FlareToRive {
   void _getRiveComponents(Map<String, Object> artboards) {
     // Queue to perform BFS on the hierarchy tree.
     final queue = <Map<String, Object>>[artboards];
-    // Mapping for clips
-    //   Since there can be multiple clips per Component this mapping is:
-    //   < id -> list of ids >
-    final clips = <String, List<int>>{};
-    final tendonConverters = <TendonConverter>[];
-    final pointWeights = <PointWeight>[];
-    final skinConverters = <SkinConverter>[];
+    final conversionFinalizers = <ConversionFinalizer>[];
 
     while (queue.isNotEmpty) {
       var head = queue.removeAt(0);
@@ -95,20 +86,11 @@ class FlareToRive {
         // Update the component mapping.
         _fileComponents[headId] = converter.component;
       }
-      if (converter is TransformComponentConverter &&
-          converter.clips.isNotEmpty) {
-        // Register clips.
-        clips[headId] = []..addAll(converter.clips);
-      } else if (converter is PathConverter) {
-        if (converter.skinConverter != null) {
-          skinConverters.add(converter.skinConverter);
-        }
-        if (converter.tendons.isNotEmpty) {
-          tendonConverters.addAll(converter.tendons);
-        }
-      } else if (converter is PathPointConverter && converter.weight != null) {
-        pointWeights.add(converter.weight);
+
+      if (converter?.finalizers != null) {
+        conversionFinalizers.addAll(converter.finalizers);
       }
+
       // Proceed by looping on all the children, if any.
       final componentChildren = head.remove('children');
       if (componentChildren == null) continue;
@@ -144,57 +126,9 @@ class FlareToRive {
       }
     }
 
-    // Solve clips.
-    clips.forEach((id, clipIds) {
-      final clipped = _fileComponents[id] as Node;
-      riveFile.batchAdd(() {
-        for (final cId in clipIds) {
-          final clipSource = _fileComponents[cId.toString()] as Node;
-          final clipper = ClippingShape();
-          riveFile.addObject(clipper);
-          clipper.source = clipSource;
-          clipped.appendChild(clipper);
-        }
-      });
+    conversionFinalizers.forEach((element) {
+      element.finalize(_fileComponents);
     });
-
-    tendonConverters.forEach((tc) {
-      riveFile.batchAdd(() {
-        final skinnable = tc.skinnable;
-
-        // Bind tendons.
-        final bone = _fileComponents[tc.boneId.toString()] as SkeletalComponent;
-        final tendon = Skin.bind(bone, skinnable);
-        if (tc.tendonBind != null) {
-          final bind = tc.tendonBind;
-          tendon
-            ..xx = bind[0]
-            ..xy = bind[1]
-            ..yx = bind[2]
-            ..yy = bind[3]
-            ..tx = bind[4]
-            ..ty = bind[5];
-        }
-      });
-    });
-
-    skinConverters.forEach((sc) {
-      final skin = sc.skinnable.children
-          .firstWhere((element) => element is Skin, orElse: () => null);
-      if (skin is Skin) {
-        final owt = sc.overrideWorldTransform;
-        skin
-          ..xx = owt[0]
-          ..xy = owt[1]
-          ..yx = owt[2]
-          ..yy = owt[3]
-          ..tx = owt[4]
-          ..ty = owt[5];
-      }
-    });
-
-    // Set the newly created weight values to the values stored in the revision.
-    pointWeights.forEach((pw) => pw.finalizeWeightValues());
   }
 
   ComponentConverter _fromJSON(

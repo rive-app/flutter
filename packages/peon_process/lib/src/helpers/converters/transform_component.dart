@@ -7,9 +7,8 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/transform_component.dart';
 
-abstract class TransformComponentConverter extends ComponentConverter {
-  final List<int> clips = [];
 
+abstract class TransformComponentConverter extends ComponentConverter {
   TransformComponentConverter(
     TransformComponent component,
     RiveFile context,
@@ -23,10 +22,8 @@ abstract class TransformComponentConverter extends ComponentConverter {
     final rotation = jsonData['rotation'];
     final scale = jsonData['scale'];
     final opacity = jsonData['opacity'];
-    // TODO:
+    // TODO: when implemented in Rive.
     final displayType = jsonData['displayType'];
-    final clipIds = jsonData['clips'];
-    final clipsOptions = jsonData['clipsOptions'];
     // TODO: render opacity?
 
     // print('Node');
@@ -57,17 +54,6 @@ abstract class TransformComponentConverter extends ComponentConverter {
 
     if (opacity is num) {
       transformComponent.opacity = opacity.toDouble();
-    }
-
-    if (clipIds is List) {
-      for (final c in clipIds) {
-        if (c is Map) {
-          final clipId = c['id'] as int;
-          clips.add(clipId);
-        } else if (c is int) {
-          clips.add(c);
-        }
-      }
     }
   }
 }
