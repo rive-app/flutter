@@ -150,6 +150,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     var newPosition = min(
         max(position.pixels + delta.dy, position.minScrollExtent),
         position.maxScrollExtent);
+
     widget.verticalScroll.jumpTo(newPosition);
 
     // Compute horizontal scroll
@@ -282,6 +283,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           _dragOperation = _DragOperation.move;
         } else {
           _dragOperation = _DragOperation.marquee;
+          widget.keyFrameManager.isSelecting.add(true);
           var seconds =
               helper.dxToSeconds(details.pointerEvent.localPosition.dx);
           _marqueeStart = Offset(
@@ -346,7 +348,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           // selection to what was hit on down.
           widget.keyFrameManager.changeSelection.add(_downHit);
         }
-        widget.keyFrameManager.completeSelection();
+        widget.keyFrameManager.isSelecting.add(false);
         _edgeScrollTimer?.cancel();
         _edgeScrollTimer = null;
         _dragOperation = null;

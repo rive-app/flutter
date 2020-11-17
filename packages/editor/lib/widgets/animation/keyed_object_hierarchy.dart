@@ -55,6 +55,22 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
   }
 
   @override
+  void didUpdateWidget(covariant KeyedObjectHierarchy oldWidget) {
+    // The treecontroller can change while the widget is mounted (swapping
+    // active animation in the animations list does this). We need to cancel and
+    // resubscribe.
+    if (oldWidget.treeController != widget.treeController) {
+      _visListenerRestorer.restore();
+      _visListenerRestorer = widget.treeController.requestVisibility
+          .listen(_ensureKeyedComponentVisible);
+      _highlightListenerRestorer.restore();
+      _highlightListenerRestorer =
+          widget.treeController.highlight.listen(_highlightKeyedComponents);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     _visListenerRestorer.restore();
     _highlightListenerRestorer.restore();
@@ -161,6 +177,12 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
 
   /// Autoscrolls the hierarchy if necessary to ensure that the model's visible
   void _ensureKeyedComponentVisible(KeyHierarchyViewModel model) {
+    // Don't scroll to the keyed component if the KeyFrameManager is currently
+    // manipulating the selection.
+    if (ActiveFile.find(context).keyFrameManager.value.isChangingSelection) {
+      return;
+    }
+    
     final key = ValueKey(model);
     final index = widget.treeController.indexLookup[key];
 
@@ -173,6 +195,7 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
                   itemHeight) /
               itemHeight)
           .floor();
+
       if (index < firstVisible || index > lastVisible) {
         widget.scrollController.jumpTo((index * itemHeight)
             .clamp(widget.scrollController.position.minScrollExtent,
