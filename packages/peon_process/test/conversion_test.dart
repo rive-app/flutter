@@ -8,15 +8,21 @@ import 'package:peon_process/src/helpers/svg_utils/paths.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
+import 'package:rive_core/bones/skin.dart';
+import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
+import 'package:rive_core/shapes/cubic_detached_vertex.dart';
+import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/paint/radial_gradient.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
 
@@ -271,6 +277,49 @@ void main() {
     assert(strokeColor.red == (0.800000011920929 * 255).toInt());
     assert(strokeColor.blue == (0.800000011920929 * 255).toInt());
     assert(strokeColor.green == (0.800000011920929 * 255).toInt());
+  });
+
+  test('Convert skin', () {
+    final riveFile = flareToRive('skin');
+    final skins = riveFile.objects.whereType<Skin>();
+    assert(skins.length == 1);
+
+    final skin = skins.first;
+    final skinnable = skin.parent;
+    assert(skinnable is PointsPath);
+    assert(skin.worldTransform[4] == 803);
+    assert(skin.worldTransform[5] == 184.49998474121094);
+
+    final tendons = skin.children.whereType<Tendon>();
+    assert(tendons.length == 5);
+
+    final tendon = tendons.first;
+    // Make sure bind matrix is correct.
+    assert(tendon.xx == 0.997778594493866);
+    assert(tendon.xy == 0.06661725789308548);
+    assert(tendon.yx == -0.06661725789308548);
+    assert(tendon.yy == 0.997778594493866);
+    assert(tendon.tx == 254);
+    assert(tendon.ty == 227.5);
+
+    final firstConnectedBone = tendons.first.bone as Bone;
+    // Make sure tendon is bound to the right bone.
+    assert(firstConnectedBone != null);
+    assert(firstConnectedBone.parent is RootBone);
+    assert(firstConnectedBone.length == 271.26555254952666);
+
+    // Check weights.
+    final vertices = skinnable.children.whereType<PathVertex>();
+    assert(vertices.length == 4);
+    final cubicVertices = skinnable.children.whereType<CubicVertex>();
+    assert(cubicVertices.length == 2);
+
+    final cubicDetachedVertex =
+        cubicVertices.whereType<CubicDetachedVertex>().first;
+    
+    // Make sure weights & indices are byte-to-byte correct.
+    assert(cubicDetachedVertex.weight.values == 0x2d541c5f);
+    assert(cubicDetachedVertex.weight.indices == 0x05030201);
   });
 }
 
