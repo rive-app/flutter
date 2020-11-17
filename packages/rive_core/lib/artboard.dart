@@ -335,7 +335,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   AABB get localBounds => AABB.fromValues(0, 0, width, height);
 
   @override
-  AABB get worldBounds => localBounds;
+  AABB get worldBounds => AABB.fromValues(x, y, x + width, y + height);
   // <- editor-only
 
   /// Our world transform is always the identity. Artboard defines world space.
