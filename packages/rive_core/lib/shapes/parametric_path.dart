@@ -8,7 +8,7 @@ abstract class ParametricPath extends ParametricPathBase {
 
   @override
   Mat2D get pathTransform => worldTransform;
-  
+
   @override
   Mat2D get inversePathTransform => inverseWorldTransform;
 
@@ -47,4 +47,10 @@ abstract class ParametricPath extends ParametricPathBase {
     super.scaleYChanged(from, to);
     shape?.pathChanged(this);
   }
+
+  @override
+  void originXChanged(double from, double to) => markPathDirty();
+
+  @override
+  void originYChanged(double from, double to) => markPathDirty();
 }
