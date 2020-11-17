@@ -19,20 +19,36 @@ abstract class ComponentConverter {
 
   final Component _component;
   Component get component => _component;
-  // RiveCoreContext context;
+
+  List<ConversionFinalizer> _finalizers;
+  List<ConversionFinalizer> get finalizers => _finalizers;
+
+  void addFinalizer(ConversionFinalizer cf) {
+    _finalizers ??= <ConversionFinalizer>[];
+    _finalizers.add(cf);
+  }
 
   @mustCallSuper
   void deserialize(Map<String, Object> jsonData) {
     final name = jsonData['name'];
-    // final parentId = jsonData['parent'];
 
-    print('Component ${_component.runtimeType} "$name"');
+    // print('Component ${_component.runtimeType} "$name"');
     if (name is String) {
       _component.name = name;
     }
-
-    // if (parentId is int) {
-    //   component.parentId = parentId;
-    // }
   }
+}
+
+abstract class ConversionFinalizer {
+  const ConversionFinalizer(this.component);
+
+  final Component component;
+
+  RiveFile get riveFile {
+    final riveFile = component.context;
+    assert(riveFile != null);
+    return riveFile;
+  }
+
+  void finalize(Map<String, Component> fileComponents);
 }

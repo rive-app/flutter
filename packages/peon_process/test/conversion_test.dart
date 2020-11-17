@@ -1,18 +1,30 @@
 import 'dart:io';
 
+import 'package:flutter_svg/src/svg/parser_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
 import 'package:peon_process/src/helpers/flare_to_rive.dart';
 import 'package:peon_process/src/helpers/svg_utils/paths.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
+import 'package:rive_core/bones/skin.dart';
+import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
+import 'package:rive_core/shapes/clipping_shape.dart';
+import 'package:rive_core/shapes/cubic_detached_vertex.dart';
+import 'package:rive_core/shapes/cubic_vertex.dart';
+import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/paint/radial_gradient.dart';
+import 'package:rive_core/shapes/paint/stroke.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/points_path.dart';
+import 'package:rive_core/shapes/shape.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
-import 'package:flutter_svg/src/svg/parser_state.dart';
 
 import 'fixtures/svg_fixtures.dart';
 
@@ -162,20 +174,28 @@ void main() {
     'vertex_path_revision'
   ];
 
-  void convertFlareRevision(String filename) {
+  String getPrefix() => Directory.current.path.endsWith('/test') ? '..' : '.';
+
+  RiveFile flareToRive(String revisionFile) {
     // Make sure that resources are properly fetched when running tests
     // with VSCode or with /dev/test_all.sh
-    final prefix = Directory.current.path.endsWith('/test') ? '..' : '.';
+    final prefix = getPrefix();
     final fileString =
-        File('$prefix/test_resources/$filename.json').readAsStringSync();
+        File('$prefix/test_resources/$revisionFile.json').readAsStringSync();
     expect(fileString.isNotEmpty, true);
-    int ownerId = 0; // TODO: should be a real one
-    final converter = FlareToRive(filename)..toFile(fileString);
+    final converter = FlareToRive(revisionFile)..toFile(fileString);
+    return converter.riveFile;
+  }
+
+  void convertFlareRevision(String filename) {
+    final riveFile = flareToRive(filename);
     final exporter = RuntimeExporter(
-      core: converter.riveFile,
-      info: RuntimeHeader(ownerId: ownerId, fileId: 0, version: riveVersion),
+      core: riveFile,
+      info: RuntimeHeader(ownerId: 0, fileId: 0, version: riveVersion),
     );
+
     final bytes = exporter.export();
+    final prefix = getPrefix();
     File('$prefix/out/$filename.riv')
       ..createSync(recursive: true)
       ..writeAsBytesSync(bytes, flush: true);
@@ -183,6 +203,123 @@ void main() {
 
   test('Converts all test files', () {
     flareRevisionFiles.forEach(convertFlareRevision);
+  });
+
+  test('Convert bones', () {
+    // This is a file with a simple bone chain.
+    final riveFile = flareToRive('bones');
+    final bones = riveFile.objects.whereType<Bone>();
+
+    bones.forEach((element) {
+      element.calculateWorldTransform();
+    });
+
+    assert(bones.length == 2);
+    assert(bones.first is RootBone);
+
+    final boneIterator = bones.iterator..moveNext();
+    final rootBone = boneIterator.current as RootBone;
+
+    assert(rootBone.length == 0);
+    assert(rootBone.x == 254.0);
+    assert(rootBone.y == 227.5);
+    print(rootBone.rotation);
+
+    boneIterator.moveNext();
+    final bone = boneIterator.current;
+    print(bone.rotation);
+
+    assert(bone.length > 271 && bones.length < 272);
+  });
+
+  test('Convert clipping', () {
+    // This file contains two shapes, an ellipse and a rectangle,
+    //  with the ellipse clipping the rectangle.
+    final riveFile = flareToRive('clipping');
+    final cs = riveFile.objects.firstWhere((o) => o is ClippingShape);
+
+    assert(cs != null);
+    final clipping = cs as ClippingShape;
+    final clipped = clipping.parent;
+    final clipSource = clipping.source;
+
+    assert(clipped is Shape);
+    assert(clipSource is Shape);
+    assert(clipped.name == 'Ellipse');
+    assert(clipSource.name == 'Rectangle');
+  });
+
+  test('Convert fill', () {
+    // This file contains two shapes, an ellipse and a rectangle,
+    //  with the ellipse clipping the rectangle.
+    final riveFile = flareToRive('fill');
+    final s = riveFile.objects.firstWhere((o) => o is Shape);
+
+    assert(s != null);
+    final shape = s as Shape;
+    assert(shape.children.length == 4);
+
+    final fills = shape.children.whereType<Fill>();
+    assert(fills.length == 1);
+
+    final fill = fills.first;
+    final fillColor = fill.paint.color;
+    assert(fillColor.red == (0.9833333492279053 * 255).toInt());
+    assert(fillColor.blue == (0.12291666865348816 * 255).toInt());
+    assert(fillColor.green == (0.12291666865348816 * 255).toInt());
+    assert(fillColor.alpha == 255);
+
+    final strokes = shape.children.whereType<Stroke>();
+    assert(strokes.length == 1);
+
+    final stroke = strokes.first;
+    final strokeColor = stroke.paint.color;
+    assert(strokeColor.red == (0.800000011920929 * 255).toInt());
+    assert(strokeColor.blue == (0.800000011920929 * 255).toInt());
+    assert(strokeColor.green == (0.800000011920929 * 255).toInt());
+  });
+
+  test('Convert skin', () {
+    final riveFile = flareToRive('skin');
+    final skins = riveFile.objects.whereType<Skin>();
+    assert(skins.length == 1);
+
+    final skin = skins.first;
+    final skinnable = skin.parent;
+    assert(skinnable is PointsPath);
+    assert(skin.worldTransform[4] == 803);
+    assert(skin.worldTransform[5] == 184.49998474121094);
+
+    final tendons = skin.children.whereType<Tendon>();
+    assert(tendons.length == 5);
+
+    final tendon = tendons.first;
+    // Make sure bind matrix is correct.
+    assert(tendon.xx == 0.997778594493866);
+    assert(tendon.xy == 0.06661725789308548);
+    assert(tendon.yx == -0.06661725789308548);
+    assert(tendon.yy == 0.997778594493866);
+    assert(tendon.tx == 254);
+    assert(tendon.ty == 227.5);
+
+    final firstConnectedBone = tendons.first.bone as Bone;
+    // Make sure tendon is bound to the right bone.
+    assert(firstConnectedBone != null);
+    assert(firstConnectedBone.parent is RootBone);
+    assert(firstConnectedBone.length == 271.26555254952666);
+
+    // Check weights.
+    final vertices = skinnable.children.whereType<PathVertex>();
+    assert(vertices.length == 4);
+    final cubicVertices = skinnable.children.whereType<CubicVertex>();
+    assert(cubicVertices.length == 2);
+
+    final cubicDetachedVertex =
+        cubicVertices.whereType<CubicDetachedVertex>().first;
+    
+    // Make sure weights & indices are byte-to-byte correct.
+    assert(cubicDetachedVertex.weight.values == 0x2d541c5f);
+    assert(cubicDetachedVertex.weight.indices == 0x05030201);
   });
 }
 

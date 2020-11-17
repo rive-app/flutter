@@ -6,13 +6,10 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
-import 'package:rive_core/bones/skeletal_component.dart';
-import 'package:rive_core/bones/skin.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
@@ -20,7 +17,6 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/triangle.dart';
-import 'package:rive_core/transform_component.dart';
 
 typedef bool DescentCallback(Object obj);
 
@@ -73,12 +69,7 @@ class FlareToRive {
   void _getRiveComponents(Map<String, Object> artboards) {
     // Queue to perform BFS on the hierarchy tree.
     final queue = <Map<String, Object>>[artboards];
-    // Mapping for clips
-    //   Since there can be multiple clips per Component this mapping is:
-    //   < id -> list of ids >
-    final clips = <String, List<int>>{};
-    final tendonConverters = <TendonConverter>[];
-    final pointWeights = <PointWeight>[];
+    final conversionFinalizers = <ConversionFinalizer>[];
 
     while (queue.isNotEmpty) {
       var head = queue.removeAt(0);
@@ -95,18 +86,11 @@ class FlareToRive {
         // Update the component mapping.
         _fileComponents[headId] = converter.component;
       }
-      if (converter is TransformComponentConverter &&
-          converter.clips.isNotEmpty) {
-        // Register clips.
-        clips[headId] = []..addAll(converter.clips);
-      } else if (converter is PathConverter && converter.tendons.isNotEmpty) {
-        // Register connected bones.
-        //   This'll be resolved only after all the components have been
-        //   translated.
-        tendonConverters.addAll(converter.tendons);
-      } else if (converter is PathPointConverter && converter.weight != null) {
-        pointWeights.add(converter.weight);
+
+      if (converter?.finalizers != null) {
+        conversionFinalizers.addAll(converter.finalizers);
       }
+
       // Proceed by looping on all the children, if any.
       final componentChildren = head.remove('children');
       if (componentChildren == null) continue;
@@ -142,35 +126,9 @@ class FlareToRive {
       }
     }
 
-    // Solve clips.
-    clips.forEach((id, clipIds) {
-      final clipped = _fileComponents[id] as Node;
-      riveFile.batchAdd(() {
-        for (final cId in clipIds) {
-          final clipSource = _fileComponents[cId.toString()] as Node;
-          final clipper = ClippingShape();
-          riveFile.addObject(clipper);
-          clipper.source = clipSource;
-          clipped.appendChild(clipper);
-        }
-      });
+    conversionFinalizers.forEach((element) {
+      element.finalize(_fileComponents);
     });
-
-    tendonConverters.forEach((tc) {
-      riveFile.batchAdd(() {
-        final skinnable = tc.skinnable;
-        // Make sure the skinnable is up to date.
-        if (skinnable is TransformComponent) {
-          (skinnable as TransformComponent).calculateWorldTransform();
-        }
-        // Bind tendons.
-        final bone = _fileComponents[tc.boneId.toString()] as SkeletalComponent;
-        Skin.bind(bone, skinnable);
-      });
-    });
-
-    // Set the newly created weight values to the values stored in the revision.
-    pointWeights.forEach((pw) => pw.finalizeWeightValues());
   }
 
   ComponentConverter _fromJSON(
