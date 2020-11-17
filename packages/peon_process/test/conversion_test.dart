@@ -13,8 +13,10 @@ import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
+import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/paint/radial_gradient.dart';
+import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
 
@@ -239,6 +241,36 @@ void main() {
     assert(clipSource is Shape);
     assert(clipped.name == 'Ellipse');
     assert(clipSource.name == 'Rectangle');
+  });
+
+  test('Convert fill', () {
+    // This file contains two shapes, an ellipse and a rectangle,
+    //  with the ellipse clipping the rectangle.
+    final riveFile = flareToRive('fill');
+    final s = riveFile.objects.firstWhere((o) => o is Shape);
+
+    assert(s != null);
+    final shape = s as Shape;
+    assert(shape.children.length == 4);
+
+    final fills = shape.children.whereType<Fill>();
+    assert(fills.length == 1);
+
+    final fill = fills.first;
+    final fillColor = fill.paint.color;
+    assert(fillColor.red == (0.9833333492279053 * 255).toInt());
+    assert(fillColor.blue == (0.12291666865348816 * 255).toInt());
+    assert(fillColor.green == (0.12291666865348816 * 255).toInt());
+    assert(fillColor.alpha == 255);
+
+    final strokes = shape.children.whereType<Stroke>();
+    assert(strokes.length == 1);
+
+    final stroke = strokes.first;
+    final strokeColor = stroke.paint.color;
+    assert(strokeColor.red == (0.800000011920929 * 255).toInt());
+    assert(strokeColor.blue == (0.800000011920929 * 255).toInt());
+    assert(strokeColor.green == (0.800000011920929 * 255).toInt());
   });
 }
 
