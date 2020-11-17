@@ -1,6 +1,5 @@
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
@@ -53,25 +52,19 @@ class ArtboardTranslateTransformer extends StageTransformer {
 
 class _ArtboardSnappingItem extends SnappingItem {
   final Artboard artboard;
-  final Mat2D toParent;
   final Vec2D worldTranslation;
 
   factory _ArtboardSnappingItem(Artboard artboard) {
     return _ArtboardSnappingItem._(
       artboard,
-      Mat2D(),
-      Mat2D.getTranslation(
-        artboard.transform(artboard.worldTransform),
-        Vec2D(),
-      ),
+      Vec2D.fromValues(artboard.x, artboard.y),
     );
   }
 
-  _ArtboardSnappingItem._(this.artboard, this.toParent, this.worldTranslation);
+  _ArtboardSnappingItem._(this.artboard, this.worldTranslation);
   @override
-  void addSources(SnappingAxes snap, bool isSingleSelection) {
-    snap.addAABB(artboard.transformBounds(artboard.worldBounds));
-  }
+  void addSources(SnappingAxes snap, bool isSingleSelection) =>
+      snap.addAABB(artboard.worldBounds);
 
   @override
   StageItem get stageItem => artboard.stageItem;
@@ -79,9 +72,7 @@ class _ArtboardSnappingItem extends SnappingItem {
   @override
   void translateWorld(Vec2D diff) {
     var world = Vec2D.add(Vec2D(), worldTranslation, diff);
-
-    var local = Vec2D.transformMat2D(Vec2D(), world, toParent);
-    artboard.x = local[0];
-    artboard.y = local[1];
+    artboard.x = world[0];
+    artboard.y = world[1];
   }
 }

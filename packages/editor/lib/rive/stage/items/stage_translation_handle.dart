@@ -8,6 +8,7 @@ import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/artboard_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/joint_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_translate_transformer.dart';
 import 'package:rive_editor/selectable_item.dart';
@@ -131,6 +132,7 @@ class StageTranslationHandle extends StageHandle {
     return [
       NodeTranslateTransformer(),
       JointTranslateTransformer(),
+      ArtboardTranslateTransformer(),
     ];
   }
 }
