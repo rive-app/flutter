@@ -279,6 +279,7 @@ class KeyFrameManager extends AnimationManager with RiveFileDelegate {
     }
     _cubicController.close();
     _selectionController.close();
+    _isSelectingController.close();
     activeFile.core.removeDelegate(this);
     activeFile.removeActionHandler(_onAction);
     activeFile.selection.removeListener(_stageSelectionChanged);
