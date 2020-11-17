@@ -32,8 +32,9 @@ class TendonFinalizer extends ConversionFinalizer {
   @override
   void finalize(Map<String, Component> fileComponents) {
     final pointsPath = component as PointsPath;
+    final rf = riveFile;
 
-    riveFile.batchAdd(() {
+    rf.batchAdd(() {
       final bone = fileComponents[boneId] as SkeletalComponent;
       final tendon = Skin.bind(bone, pointsPath);
 

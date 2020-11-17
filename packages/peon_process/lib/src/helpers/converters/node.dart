@@ -13,11 +13,12 @@ class ClipFinalizer extends ConversionFinalizer {
   @override
   void finalize(Map<String, Component> fileComponents) {
     final clipped = component as Node;
+    final rf = riveFile;
 
-    riveFile.batchAdd(() {
+    rf.batchAdd(() {
       final clipSource = fileComponents[clipId] as Node;
       final clipper = ClippingShape();
-      riveFile.addObject(clipper);
+      rf.addObject(clipper);
       clipper.source = clipSource;
       clipped.appendChild(clipper);
     });
