@@ -81,7 +81,7 @@ class _ArtboardSnappingItem extends SnappingItem {
     var world = Vec2D.add(Vec2D(), worldTranslation, diff);
 
     var local = Vec2D.transformMat2D(Vec2D(), world, toParent);
-    artboard.x = local[0];
-    artboard.y = local[1];
+    artboard.x = local[0].roundToDouble();
+    artboard.y = local[1].roundToDouble();
   }
 }
