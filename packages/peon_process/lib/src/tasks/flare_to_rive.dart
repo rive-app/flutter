@@ -50,6 +50,9 @@ class FlareToRiveTask extends PeonTask {
   Future<bool> peonExecute() async {
     final data = await getS3Key(sourceLocation);
     final bytes = generateRive(data);
+    if (bytes == null) {
+      return false;
+    }
     await putS3Key(targetLocation, bytes);
 
     return true;
