@@ -30,7 +30,7 @@ class ScalePercentageValueConverter extends InputValueConverter<double> {
 
   @override
   double fromEditingValue(String value) {
-    final regex = RegExp(r'^(\-?[0-9]+([\.]?[0-9]+))%?$');
+    final regex = RegExp(r'^(\-?[0-9]+([\.]?[0-9]*))%?$');
     var groups = regex.firstMatch(value);
     if (groups != null && groups.groupCount > 1) {
       var dv = double.parse(groups.group(1));
