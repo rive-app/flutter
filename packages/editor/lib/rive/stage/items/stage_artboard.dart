@@ -1,19 +1,25 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:rive_core/bounds_delegate.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_editor/rive/image_cache.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard_title.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
+class StageArtboard extends StageItem<Artboard>
+    implements ArtboardDelegate, StageTransformable {
   StageArtboardTitle _title;
   DpiImage _gridImage;
+
+  final _boundsChangedEvent = Event();
 
   @override
   bool initialize(Artboard object) {
@@ -35,7 +41,10 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
       [StageDrawPass(draw, order: 0, inWorldSpace: true)];
 
   @override
-  void boundsChanged() => _updateBounds();
+  void boundsChanged() {
+    _boundsChangedEvent.notify();
+    _updateBounds();
+  }
 
   void _updateBounds() {
     aabb = AABB.fromValues(component.x, component.y,
@@ -139,4 +148,16 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
   @override
   void markNameDirty() => _title?.markNameDirty();
+
+  @override
+  Mat2D get renderTransform => component.transform(component.worldTransform);
+
+  @override
+  Mat2D get worldTransform => component.worldTransform;
+
+  @override
+  Listenable get worldTransformChanged => _boundsChangedEvent;
+
+  @override
+  int get transformFlags => TransformFlags.x | TransformFlags.y;
 }
