@@ -55,7 +55,7 @@ class MiddlePanel extends StatelessWidget {
                   thumbnail: 's1-e1.png',
                   type: ContentType.video,
                   url:
-                      'https://www.youtube.com/watch?v=RsSaYW1wG-0'),
+                      'https://www.youtube.com/watch?v=5eEXkV0_zuU'),
               VideoSeriesEpisode(
                   episodeNumber: 2,
                   title: 'Interface overview',
