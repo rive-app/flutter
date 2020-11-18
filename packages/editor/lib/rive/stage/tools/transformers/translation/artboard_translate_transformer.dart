@@ -72,7 +72,7 @@ class _ArtboardSnappingItem extends SnappingItem {
   @override
   void translateWorld(Vec2D diff) {
     var world = Vec2D.add(Vec2D(), worldTranslation, diff);
-    artboard.x = world[0];
-    artboard.y = world[1];
+    artboard.x = world[0].roundToDouble();
+    artboard.y = world[1].roundToDouble();
   }
 }

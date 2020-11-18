@@ -59,14 +59,16 @@ class ArtboardTool extends CreateTool {
     super.startDrag(selection, activeArtboard, worldMouse);
     // Create an artboard and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
+    _startWorldMouse[0] = _startWorldMouse[0].roundToDouble();
+    _startWorldMouse[1] = _startWorldMouse[1].roundToDouble();
     var file = stage.file;
     var core = file.core;
     core.batchAdd(() {
       var solidColor = SolidColor()..colorValue = 0xFF313131;
       var fill = Fill();
       _artboard = Artboard()
-        ..x = worldMouse[0]
-        ..y = worldMouse[1]
+        ..x = worldMouse[0].roundToDouble()
+        ..y = worldMouse[1].roundToDouble()
         ..originX = 0
         ..originY = 0
         ..width = 1
@@ -92,15 +94,17 @@ class ArtboardTool extends CreateTool {
       var y1 = (_startWorldMouse[1] < worldMouse[1])
           ? _startWorldMouse[1]
           : _startWorldMouse[1] - maxChange;
-      _artboard.x = x1;
-      _artboard.y = y1;
-      _artboard.width = maxChange;
-      _artboard.height = maxChange;
+      _artboard.x = x1.roundToDouble();
+      _artboard.y = y1.roundToDouble();
+      _artboard.width = maxChange.roundToDouble();
+      _artboard.height = maxChange.roundToDouble();
     } else {
-      _artboard.x = min(_startWorldMouse[0], worldMouse[0]);
-      _artboard.y = min(_startWorldMouse[1], worldMouse[1]);
-      _artboard.width = (_startWorldMouse[0] - worldMouse[0]).abs();
-      _artboard.height = (_startWorldMouse[1] - worldMouse[1]).abs();
+      _artboard.x = min(_startWorldMouse[0], worldMouse[0]).roundToDouble();
+      _artboard.y = min(_startWorldMouse[1], worldMouse[1]).roundToDouble();
+      _artboard.width =
+          (_startWorldMouse[0] - worldMouse[0]).abs().roundToDouble();
+      _artboard.height =
+          (_startWorldMouse[1] - worldMouse[1]).abs().roundToDouble();
     }
 
     _cursor = Vec2D.clone(worldMouse);

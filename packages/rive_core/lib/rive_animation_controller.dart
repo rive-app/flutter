@@ -20,14 +20,14 @@ abstract class RiveAnimationController<T> {
   }
 
   @protected
-  void onActivate();
+  void onActivate() {}
   @protected
-  void onDeactivate();
+  void onDeactivate() {}
 
   /// Apply animation to objects registered in [core]. Note that a [core]
   /// context is specified as animations can be applied to instances.
   void apply(T core, double elapsedSeconds);
 
   bool init(T core) => true;
-  void dispose();
+  void dispose() {}
 }
