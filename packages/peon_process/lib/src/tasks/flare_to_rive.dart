@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+import 'package:archive/archive.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
 import 'package:peon_process/src/helpers/flare_to_rive.dart';
@@ -45,18 +48,39 @@ class FlareToRiveTask extends PeonTask {
 
   @override
   Future<bool> peonExecute() async {
-    var data = await getS3Key(sourceLocation);
-
-    final converter = FlareToRive(taskId)..toFile(String.fromCharCodes(data));
-
-    var exporter = RuntimeExporter(
-        core: converter.riveFile,
-        info: RuntimeHeader(ownerId: notifyUserId, fileId: 1));
-
-    var bytes = exporter.export();
-
+    final data = await getS3Key(sourceLocation);
+    final bytes = generateRive(data);
+    if (bytes == null) {
+      return false;
+    }
     await putS3Key(targetLocation, bytes);
 
     return true;
+  }
+
+  @visibleForTesting
+  Uint8List generateRive(Uint8List flr2dBytes) {
+    final archive = ZipDecoder().decodeBytes(flr2dBytes);
+
+    if (archive.isEmpty) {
+      return null;
+    }
+
+    final flrBytes = archive.first.content as List<int>;
+    String revisionString = String.fromCharCodes(flrBytes);
+
+    final converter = FlareToRive(taskId)..toFile(revisionString);
+
+    var exporter = RuntimeExporter(
+      core: converter.riveFile,
+      info: RuntimeHeader(
+        ownerId: notifyUserId,
+        fileId: 1,
+        version: riveVersion,
+      ),
+    );
+
+    var bytes = exporter.export();
+    return bytes;
   }
 }

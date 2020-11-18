@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
 import 'package:peon_process/src/helpers/flare_to_rive.dart';
 import 'package:peon_process/src/helpers/svg_utils/paths.dart';
+import 'package:peon_process/src/tasks/flare_to_rive.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
@@ -214,22 +215,22 @@ void main() {
       element.calculateWorldTransform();
     });
 
-    assert(bones.length == 2);
-    assert(bones.first is RootBone);
+    expect(bones, hasLength(2));
+    expect(bones.first, isInstanceOf<RootBone>());
 
     final boneIterator = bones.iterator..moveNext();
     final rootBone = boneIterator.current as RootBone;
 
-    assert(rootBone.length == 0);
-    assert(rootBone.x == 254.0);
-    assert(rootBone.y == 227.5);
+    expect(rootBone.length, equals(0));
+    expect(rootBone.x, equals(254.0));
+    expect(rootBone.y, equals(227.5));
     print(rootBone.rotation);
 
     boneIterator.moveNext();
     final bone = boneIterator.current;
     print(bone.rotation);
 
-    assert(bone.length > 271 && bones.length < 272);
+    expect(bone.length, equals(271.26555254952666));
   });
 
   test('Convert clipping', () {
@@ -238,15 +239,15 @@ void main() {
     final riveFile = flareToRive('clipping');
     final cs = riveFile.objects.firstWhere((o) => o is ClippingShape);
 
-    assert(cs != null);
+    expect(cs, isNotNull);
     final clipping = cs as ClippingShape;
     final clipped = clipping.parent;
     final clipSource = clipping.source;
 
-    assert(clipped is Shape);
-    assert(clipSource is Shape);
-    assert(clipped.name == 'Ellipse');
-    assert(clipSource.name == 'Rectangle');
+    expect(clipped, isInstanceOf<Shape>());
+    expect(clipSource, isInstanceOf<Shape>());
+    expect(clipped.name, equals('Ellipse'));
+    expect(clipSource.name, equals('Rectangle'));
   });
 
   test('Convert fill', () {
@@ -255,71 +256,84 @@ void main() {
     final riveFile = flareToRive('fill');
     final s = riveFile.objects.firstWhere((o) => o is Shape);
 
-    assert(s != null);
+    expect(s, isNotNull);
     final shape = s as Shape;
-    assert(shape.children.length == 4);
+    expect(shape.children, hasLength(4));
 
     final fills = shape.children.whereType<Fill>();
-    assert(fills.length == 1);
+    expect(fills, hasLength(1));
 
     final fill = fills.first;
     final fillColor = fill.paint.color;
-    assert(fillColor.red == (0.9833333492279053 * 255).toInt());
-    assert(fillColor.blue == (0.12291666865348816 * 255).toInt());
-    assert(fillColor.green == (0.12291666865348816 * 255).toInt());
-    assert(fillColor.alpha == 255);
+
+    expect(fillColor.red, equals((0.9833333492279053 * 255).toInt()));
+    expect(fillColor.blue, equals((0.12291666865348816 * 255).toInt()));
+    expect(fillColor.green, equals((0.12291666865348816 * 255).toInt()));
+    expect(fillColor.alpha, equals(255));
 
     final strokes = shape.children.whereType<Stroke>();
-    assert(strokes.length == 1);
+    expect(strokes, hasLength(1));
 
     final stroke = strokes.first;
     final strokeColor = stroke.paint.color;
-    assert(strokeColor.red == (0.800000011920929 * 255).toInt());
-    assert(strokeColor.blue == (0.800000011920929 * 255).toInt());
-    assert(strokeColor.green == (0.800000011920929 * 255).toInt());
+    expect(strokeColor.red, equals((0.800000011920929 * 255).toInt()));
+    expect(strokeColor.blue, equals((0.800000011920929 * 255).toInt()));
+    expect(strokeColor.green, equals((0.800000011920929 * 255).toInt()));
   });
 
   test('Convert skin', () {
     final riveFile = flareToRive('skin');
     final skins = riveFile.objects.whereType<Skin>();
-    assert(skins.length == 1);
+    expect(skins, hasLength(1));
 
     final skin = skins.first;
     final skinnable = skin.parent;
-    assert(skinnable is PointsPath);
-    assert(skin.worldTransform[4] == 803);
-    assert(skin.worldTransform[5] == 184.49998474121094);
+    expect(skinnable, isInstanceOf<PointsPath>());
+    expect(skin.worldTransform[4], equals(803));
+    expect(skin.worldTransform[5], equals(184.49998474121094));
 
     final tendons = skin.children.whereType<Tendon>();
-    assert(tendons.length == 5);
+    expect(tendons, hasLength(5));
 
     final tendon = tendons.first;
     // Make sure bind matrix is correct.
-    assert(tendon.xx == 0.997778594493866);
-    assert(tendon.xy == 0.06661725789308548);
-    assert(tendon.yx == -0.06661725789308548);
-    assert(tendon.yy == 0.997778594493866);
-    assert(tendon.tx == 254);
-    assert(tendon.ty == 227.5);
+    expect(tendon.xx, equals(0.997778594493866));
+    expect(tendon.xy, equals(0.06661725789308548));
+    expect(tendon.yx, equals(-0.06661725789308548));
+    expect(tendon.yy, equals(0.997778594493866));
+    expect(tendon.tx, equals(254));
+    expect(tendon.ty, equals(227.5));
 
     final firstConnectedBone = tendons.first.bone as Bone;
     // Make sure tendon is bound to the right bone.
-    assert(firstConnectedBone != null);
-    assert(firstConnectedBone.parent is RootBone);
-    assert(firstConnectedBone.length == 271.26555254952666);
+    expect(firstConnectedBone, isNotNull);
+    expect(firstConnectedBone.parent, isInstanceOf<RootBone>());
+    expect(firstConnectedBone.length, equals(271.26555254952666));
 
     // Check weights.
     final vertices = skinnable.children.whereType<PathVertex>();
-    assert(vertices.length == 4);
+    expect(vertices, hasLength(4));
     final cubicVertices = skinnable.children.whereType<CubicVertex>();
-    assert(cubicVertices.length == 2);
+    expect(cubicVertices, hasLength(2));
 
     final cubicDetachedVertex =
         cubicVertices.whereType<CubicDetachedVertex>().first;
-    
+
     // Make sure weights & indices are byte-to-byte correct.
-    assert(cubicDetachedVertex.weight.values == 0x2d541c5f);
-    assert(cubicDetachedVertex.weight.indices == 0x05030201);
+    expect(cubicDetachedVertex.weight.values, equals(0x2d541c5f));
+    expect(cubicDetachedVertex.weight.indices, equals(0x05030201));
+  });
+
+  test('Convert flr2d file', () async {
+    final prefix = getPrefix();
+    final data = {
+      'params': {'notifyUserId': 0}
+    };
+    final task = FlareToRiveTask.fromData(data);
+    final flareBytes =
+        File('$prefix/test_resources/flr2d/Bones.flr2d').readAsBytesSync();
+    final riveBytes = task.generateRive(flareBytes);
+    expect(riveBytes, isNotNull);
   });
 }
 
