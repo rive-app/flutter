@@ -9,6 +9,9 @@ import 'package:coop_server_library/server.dart';
 import 'package:system_info/system_info.dart';
 import 'package:utilities/logger.dart';
 
+const heartbeatFrequency = Duration(seconds: 5);
+const megabyte = 1024 * 1024;
+const gigabyte = megabyte * 1024;
 const dataFolder = 'data-folder';
 
 final _log = Logger('coop_server');
@@ -53,7 +56,7 @@ Future<void> server(List<String> arguments) async {
 
   // Start a heartbeat check with the 2D service
   // Sends a heartbeat ping every 30 seconds
-  final heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+  final heartbeatTimer = Timer.periodic(heartbeatFrequency, (_) async {
     // Fetch free memory if possible
     final memData = await _meminfo();
     server.heartbeat(memData);
@@ -100,15 +103,18 @@ Future<void> server(List<String> arguments) async {
 /// Attempt to get memory info from the underlying OS
 /// If it fails, it returns null.
 Future<Map<String, String>> _meminfo() async {
-  const kilobyte = 1024;
-
   try {
+    final virtual = SysInfo.getTotalVirtualMemory();
     final total = SysInfo.getTotalPhysicalMemory();
     final free = SysInfo.getFreePhysicalMemory();
     final percentUsed = 1 - (free / total);
-    print('memory info for heartbeat $free/$total = $percentUsed');
+    print('memory info for heartbeat'
+        ' free: ${free / gigabyte}'
+        ', total: ${total / gigabyte}'
+        ', virtual: ${virtual / gigabyte}'
+        ', % used: $percentUsed');
     return {
-      'memtotal': '${total ~/ kilobyte}',
+      'memtotal': '${total ~/ gigabyte}',
       'memuse': percentUsed.toStringAsFixed(2),
     };
     // ignore:avoid_catching_errors
