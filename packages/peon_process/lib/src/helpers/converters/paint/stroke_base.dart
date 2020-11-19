@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:peon_process/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
@@ -34,7 +35,7 @@ class StrokeBaseConverter extends ShapePaintConverter {
     }
 
     if (join is String) {
-      stroke.cap = _joinFromString(join);
+      stroke.join = _joinFromString(join);
     }
 
     if (transformAffectsStroke is bool) {
@@ -45,28 +46,26 @@ class StrokeBaseConverter extends ShapePaintConverter {
   // Same index as the StrokeCap values in dart:ui
   int _capFromString(String capName) {
     switch (capName) {
-      case 'butt':
-        return 0;
       case 'round':
-        return 1;
+        return StrokeCap.round.index;
       case 'square':
-        return 2;
+        return StrokeCap.square.index;
+      case 'butt':
       default:
-        return 0;
+        return StrokeCap.butt.index;
     }
   }
 
   // Same index as the StrokeJoin values in dart:ui
   int _joinFromString(String joinName) {
     switch (joinName) {
-      case 'miter':
-        return 0;
       case 'round':
-        return 1;
+        return StrokeJoin.round.index;
       case 'bevel':
-        return 2;
+        return StrokeJoin.bevel.index;
+      case 'miter':
       default:
-        return 0;
+        return StrokeJoin.miter.index;
     }
   }
 }
