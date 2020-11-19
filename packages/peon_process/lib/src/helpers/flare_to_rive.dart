@@ -206,6 +206,9 @@ class FlareToRive {
       case 'skin':
         // Skins are added when binding bones/tendons.
         break;
+      case 'artboards':
+        // Backboard has already been added in the previous step.
+        break;
       default:
         print('===== UNKNOWN TYPE!? $objectType');
         // const encoder = JsonEncoder.withIndent(' ');
