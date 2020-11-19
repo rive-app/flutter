@@ -21,11 +21,18 @@ class AnimationConverter {
     final name = animationRevision['name'] as String;
     final duration = (animationRevision['duration'] as num).toInt();
     final fps = (animationRevision['fps'] as num).toInt();
-    final displayStart = (animationRevision['displayStart'] as num).toInt();
-    final displayEnd = (animationRevision['displayEnd'] as num).toInt();
+    final workAreaStart = (animationRevision['workAreaStart'] as num).toInt();
+    final workAreaEnd = (animationRevision['workAreaEnd'] as num).toInt();
     final isLooping = animationRevision['loop'] as bool;
     final isWorkAreaActive = animationRevision['isWorkAreaActive'] as bool;
+
     final order = animationRevision['order'];
+    // Timeline zoom level.
+    final displayStart = (animationRevision['displayStart'] as num).toInt();
+    final displayEnd = (animationRevision['displayEnd'] as num).toInt();
+    // Playhead position.
+    final position = (animationRevision['displayEnd'] as num).toDouble();
+
 
     riveFile.batchAdd(() {
       final riveAnimation = LinearAnimation();
@@ -35,8 +42,8 @@ class AnimationConverter {
         ..name = name
         ..fps = fps
         ..duration = duration * fps
-        ..workStart = displayStart * fps
-        ..workEnd = displayEnd * fps
+        ..workStart = workAreaStart * fps
+        ..workEnd = workAreaEnd * fps
         ..loop = _getLoopType(isLooping, isWorkAreaActive)
         ..enableWorkArea = isWorkAreaActive
         ..artboardId = parent.id;
