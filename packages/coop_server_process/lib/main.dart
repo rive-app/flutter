@@ -109,10 +109,10 @@ Future<Map<String, String>> _meminfo() async {
     final free = SysInfo.getFreePhysicalMemory();
     final percentUsed = 1 - (free / total);
     print('memory info for heartbeat'
-        ' free: ${free / gigabyte}'
-        ', total: ${total / gigabyte}'
-        ', virtual: ${virtual / gigabyte}'
-        ', % used: $percentUsed');
+        ' % used: ${percentUsed.toStringAsFixed(2)}'
+        ', free: ${free / gigabyte}GB'
+        ', total: ${total / gigabyte}GB'
+        ', virtual: ${virtual / gigabyte}GB');
     return {
       'memtotal': '${total ~/ gigabyte}',
       'memuse': percentUsed.toStringAsFixed(2),
