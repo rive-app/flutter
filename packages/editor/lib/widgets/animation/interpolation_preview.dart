@@ -45,7 +45,7 @@ class InterpolationPreview extends StatelessWidget {
         var frame = snapshot.data;
         double normalizedTime = equalValue<KeyFrame, double>(selection, (key) {
               var keyedProperty = key.keyedProperty;
-              var next = keyedProperty.after(key);
+              var next = keyedProperty?.after(key);
               return next == null
                   ? -1
                   : (frame - key.frame) / (next.frame - key.frame);
