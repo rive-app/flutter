@@ -217,6 +217,12 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void handlePrimaryPointer(PointerEvent event) {
+    // If there's a point move with no button pressed, early out. Changes in Big
+    // Sur can cause a pointer move and up to happen simulatenously with no
+    // button pressed, and this will filter out the spurios move
+    if (event is PointerMoveEvent && event.buttons == 0) {
+      return;
+    }
     if (event is PointerUpEvent) {
       _up = event;
       _checkUp();
